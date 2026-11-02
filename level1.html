@@ -44,6 +44,19 @@
 <b>前四个阶段 = 分析</b>（拆解源程序），<b>后两个阶段 = 综合</b>（拼装目标程序）。全程有两根"电线"陪伴：<span class="ka">表格管理</span>（登记名字属性）与<span class="ka">出错处理</span>（语法错误在词法/语法阶段查，语义错误在语义分析阶段查）。</div>
 </div>
 
+<div class="card">
+<h3>🎬 编译流水线动画：看一条语句"过六关"</h3>
+<p>示例语句 <code>Z := X + 0.618*Y</code> 从源程序到目标代码的完整变身（点任一阶段，或 ▶ 自动播放；每阶段内容会逐行出现）：</p>
+<div class="flow" id="pipeStages"></div>
+<div class="stepbox"><pre id="pipePre" style="min-height:170px"></pre></div>
+<div id="pipeNote" class="notice" style="margin:10px 0">👆 点一个阶段试试</div>
+<div class="stepper">
+<button class="btn small" id="pipePrev">◀ 上一阶段</button>
+<button class="btn small" id="pipeNext">下一阶段 ▶</button>
+<button class="btn small ghost" id="pipeAuto">▶ 自动播放</button>
+</div>
+</div>
+
 <div class="card def">
 <h3>前端 / 后端 与"遍"</h3>
 <ul>
@@ -420,6 +433,55 @@ BYUI.bigQuestions('bigq1',{
     hint:'最左推导：每步只替换句型中最左边那个 E，注意 i*i+i 应先让 E*E 出现在外层。最右推导：每步替换最右边的 E，先展开不影响后续的右侧部分。各自 5 步完成。做完可用上方"推导模拟器"对照验证。'}
   ]
 });
+
+/* ---- 编译流水线动画：Z := X + 0.618*Y 过六关 ---- */
+(function(){
+  const stages=[
+   {n:'📄 源程序',note:'这是我们要加工的原料：一行赋值语句（字符流）。Z、X、Y 是整型变量，0.618 是实型常数。',
+    art:['Z := X + 0.618*Y']},
+   {n:'① 词法分析',note:'字符流切成 5 个单词，每个输出二元式（种别码，属性值）。注意：这一步只认词，不管结构。',
+    art:['Z        →（标识符码, 指向Z）',':=       →（算符码,  :=）','X        →（标识符码, 指向X）','0.618    →（常数码, 0.618）','*  Y     →（算符码,*）（标识符码, 指向Y）']},
+   {n:'② 语法分析',note:'按文法规则把这串单词组成语法树，判断结构合法（赋值语句 = 变量 := 表达式）。',
+    art:['        :=','       /  \\','      Z    +','          / \\','         X   *','            / \\','        0.618   Y']},
+   {n:'③ 语义分析',note:'查类型：0.618 是实型，Y 是整型，类型不匹配 ⇒ 在 Y 前插入 inttoreal 转换节点（第5关细讲）。',
+    art:['        :=','       /  \\','      Z    +','          / \\','         X   *','            / \\','       0.618  inttoreal','                 |','                 Y   ← Y 先转实型']},
+   {n:'④ 中间代码',note:'翻译成与机器无关的四元式（算符,左,右,结果）；T1、T2 是临时变量接力棒。',
+    art:['(1) ( inttoreal, Y,     -,  T1 )   先把 Y 转实型','(2) ( *,         0.618, T1, T2 )   0.618 × T1','(3) ( +,         X,     T2, Z  )   存回 Z']},
+   {n:'⑤ 优化',note:'与机器无关的改造。本例三条已最简；若源程序是 x:=2*3.14*r，这里会合并常量为 x:=6.28*r（第6关细讲）。',
+    art:['检查 (1)(2)(3)：无常量可并、无多余运算','（对照例子）x:=2*3.14*r  ⇒  x:=6.28*r','本例维持三条四元式不变']},
+   {n:'🎯 目标代码',note:'最终翻成机器/汇编指令（示意；涉及具体机器，第10章）。Z:=X+0.618*Y 的使命完成！',
+    art:['MOV  R1, Y        ; 取 Y','ITOF R1, R1        ; 整转实','MULF R2, 0.618, R1 ; 0.618×R1→R2','ADDF R2, X, R2     ; X+R2→R2','MOV  Z, R2         ; 存 Z']}
+  ];
+  const sWrap=document.getElementById('pipeStages'),pre=document.getElementById('pipePre'),note=document.getElementById('pipeNote');
+  sWrap.innerHTML=stages.map((s,i)=>`<div class="fnode" data-p="${i}" style="min-width:96px;cursor:pointer"><b>${s.n}</b></div>`).join('<span class="arrow">→</span>');
+  let cur=-1,lineTimer=null,autoTimer=null;
+  function clearT(){ if(lineTimer){clearInterval(lineTimer);lineTimer=null;} if(autoTimer){clearInterval(autoTimer);autoTimer=null;document.getElementById('pipeAuto').textContent='▶ 自动播放';} }
+  function show(i){
+    clearT(); cur=i;
+    sWrap.querySelectorAll('.fnode').forEach(n=>n.classList.toggle('pipe-cur',+n.dataset.p===i));
+    note.innerHTML=i<0?'👆 点一个阶段试试':'💡 <b>'+stages[i].n.slice(2)+'</b>：'+stages[i].note;
+    const lines=i<0?['（流水线待命）']:stages[i].art;
+    pre.textContent=''; let k=0;
+    lineTimer=setInterval(()=>{
+      if(k>=lines.length){clearInterval(lineTimer);lineTimer=null;return;}
+      pre.textContent+=(k?'\n':'')+lines[k]; k++;
+    },i<0?60:260);
+  }
+  sWrap.addEventListener('click',e=>{const n=e.target.closest('[data-p]');if(n)show(+n.dataset.p);});
+  document.getElementById('pipePrev').addEventListener('click',()=>show(Math.max(0,cur-1)));
+  document.getElementById('pipeNext').addEventListener('click',()=>show(Math.min(stages.length-1,cur+1)));
+  document.getElementById('pipeAuto').addEventListener('click',function(){
+    if(autoTimer){clearT();return;}
+    this.textContent='⏸ 暂停';
+    let i=Math.max(0,cur);
+    show(i);
+    autoTimer=setInterval(()=>{
+      i++;
+      if(i>=stages.length){clearT();return;}
+      show(i);
+    },3400);
+  });
+})();
 </script>
 </body>
 </html>

@@ -185,10 +185,10 @@ BYUI.nav('level6.html');
     const o=opts[i];
     out.innerHTML=`<h3 style="margin-top:8px">${o.name}</h3>
     <div style="display:flex;gap:12px;flex-wrap:wrap">
-      <div style="flex:1;min-width:260px"><b>优化前</b><div class="stepbox"><pre>${o.before}</pre></div></div>
-      <div style="align-self:center;font-size:26px">➜</div>
-      <div style="flex:1;min-width:260px"><b style="color:var(--good)">优化后</b><div class="stepbox" style="border-color:var(--good)"><pre>${o.after}</pre></div></div>
-    </div><div class="notice good">💡 ${o.why}</div>`;
+      <div class="opt-anim" style="flex:1;min-width:260px"><b>优化前</b><div class="stepbox"><pre>${o.before}</pre></div></div>
+      <div class="opt-arrow">➜</div>
+      <div class="opt-anim" style="flex:1;min-width:260px;animation-delay:.18s"><b style="color:var(--good)">优化后</b><div class="stepbox" style="border-color:var(--good)"><pre>${o.after}</pre></div></div>
+    </div><div class="notice good opt-anim" style="animation-delay:.36s">💡 ${o.why}</div>`;
   }
   show(0);
 })();

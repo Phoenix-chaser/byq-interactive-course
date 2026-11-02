@@ -294,6 +294,7 @@ function runRx(){  const custom=document.getElementById('rxCustom').value.trim()
       'Move='+s.move+' → 闭包='+s.closure,s.sym,s.to+' = {'+dfa.states.find(x=>x.name===s.to).set.join(',')+'}']));
     html+='<h3>③ 确定化后的 DFA（双圈=终态，子集内容标在状态下方）</h3><div id="rxDFA"></div>';
     html+='<div>🔍 试一试这个 DFA：识别测试 <input type="text" id="rxTest" value="'+(rx.includes('A')?'AB01':'abb')+'" style="max-width:200px;display:inline-block"> <button class="btn small" id="rxTestBtn">测试</button> <span id="rxTestR"></span></div>';
+    html+='<div style="margin-top:8px">🎬 <b>走串动画</b>（机器人逐字符走，金色=当前状态）：输入 <input type="text" id="rxWalk" value="abb" style="max-width:160px;display:inline-block"> <button class="btn small" id="rxWalkBtn">▶ 开走</button> <span id="rxWalkMsg" class="mono" style="margin-left:6px"></span></div>';
     out.innerHTML=html;
     BYUI.drawFA('rxNFA',{states:nfa.states.map((s,i)=>({name:String(i)})),start:0,finals:nfa.finals,
       edges:Object.entries(nfa.trans).flatMap(([f,m])=>Object.entries(m).flatMap(([sym,ts])=>ts.map(t=>({from:+f,sym,to:+t}))))});
@@ -303,6 +304,29 @@ function runRx(){  const custom=document.getElementById('rxCustom').value.trim()
       const w=document.getElementById('rxTest').value;
       const r=BYQ.dfaRun(dfa,w);
       document.getElementById('rxTestR').innerHTML=r.accept?'<b style="color:var(--good)">✅ 接受</b>':'<b style="color:var(--bad)">❌ 拒绝</b>'+(r.err?'（'+r.err+'）':'');
+    });
+    /* ---- 走串动画：DFA 状态逐格高亮 ---- */
+    document.getElementById('rxWalkBtn').addEventListener('click',()=>{
+      const msg=document.getElementById('rxWalkMsg');
+      const svgRoot=document.getElementById('rxDFA');
+      const w=document.getElementById('rxWalk').value.split('').filter(c=>c!==' ');
+      const hl=i=>{svgRoot.querySelectorAll('.nodehl').forEach(n=>n.classList.remove('nodehl'));svgRoot.querySelectorAll('[data-node="'+i+'"]').forEach(n=>n.classList.add('nodehl'));};
+      if(!w.length){msg.innerHTML='<span style="color:var(--bad)">请输入串</span>';return;}
+      const r=BYQ.dfaRun(dfa,w.join(''));
+      let k=0; msg.textContent='';
+      hl(r.trace[0].state);
+      const step=()=>{
+        msg.innerHTML='已走 <b style="color:var(--good)">'+w.slice(0,k).join('')+'</b>｜剩余 <b style="color:var(--warn)">'+w.slice(k).join('')+'</b> '+
+                      '（当前状态 '+dfa.states[r.trace[Math.min(k,r.trace.length-1)].state].name+'）';
+        if(k>=w.length){
+          if(r.accept)msg.innerHTML+='　✅ <b style="color:var(--good)">接受！</b>';
+          else msg.innerHTML+='　❌ <b style="color:var(--bad)">拒绝'+(r.err?'（'+r.err+'）':'')+'</b>';
+          return;
+        }
+        if(k+1<r.trace.length)hl(r.trace[k+1].state);
+        k++; setTimeout(step,750);
+      };
+      step();
     });
   }catch(e){out.innerHTML='<div class="notice">⚠️ 正规式有误：'+e.message+'</div>';}
 }
