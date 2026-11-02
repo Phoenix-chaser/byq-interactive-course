@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第8章 · 静态语义分析和中间代码生成 精讲 | 编译原理闯关</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="topnav"><span class="brand">⚙️ 编译原理闯关</span>
+<a class="chip" href="textbook.html">📖 精讲目录</a>
+<a class="chip" href="level5.html">🎮 第5关互动</a>
+<a class="chip" href="cheatsheet.html">📜 考前速查</a></div>
+<div class="container">
+<div class="hero"><h1>📖 第 8 章 · 静态语义分析和中间代码生成（全书精讲）</h1>
+<div class="sub">课件逐页精讲 ｜ 每个定义、例子、练习都在 ｜ 预计 45 分钟</div></div>
+
+<div class="card tip"><span class="emoji">🎯</span><b>这一章讲什么</b>：三件事——<b>8.1 符号表</b>（编译器的"户口本"）、<b>8.2 静态语义分析</b>（编译期能查的语义错误都查掉）、<b>8.3 中间代码生成</b>（先翻译成与机器无关的"世界语"四元式）。本章是第 7 章"语义分析"的落地：查错靠符号表，翻译落成中间代码。</div>
+
+<div class="card def">
+<h3>🗺️ 本章课件逐页地图（13 页，一页不落）</h3>
+<table class="gt">
+<tr><th>课件页</th><th>内容</th><th>对应本页小节</th></tr>
+<tr><td>第1页</td><td>章引言：8.1 / 8.2 / 8.3</td><td>开头导语</td></tr>
+<tr><td>第2页</td><td>符号表的作用 + 总体结构设计两因素</td><td>1</td></tr>
+<tr><td>第3页</td><td>符号表在各阶段的使用 + 三大功能</td><td>1</td></tr>
+<tr><td>第4页</td><td>符号表的组成（名字栏/信息栏/关键字）</td><td>1</td></tr>
+<tr><td>第5页</td><td>符号的常见属性（6 条）</td><td>1</td></tr>
+<tr><td>第6页</td><td>符号表的五类操作</td><td>1</td></tr>
+<tr><td>第7页</td><td>实现符号表的数据结构（4 种）+ PL/0 举例</td><td>1</td></tr>
+<tr><td>第8页</td><td>与语义分析相关的工作（静态/动态检查、收集信息）</td><td>2</td></tr>
+<tr><td>第9页</td><td>语义分析和中间代码生成的逻辑位置图</td><td>2</td></tr>
+<tr><td>第10页</td><td>四种静态检查</td><td>2</td></tr>
+<tr><td>第11页</td><td>常见语义错误与检查方法</td><td>2</td></tr>
+<tr><td>第12页</td><td>中间代码的优缺点 + PL/0 注记</td><td>3</td></tr>
+<tr><td>第13页</td><td>中间代码的五种形式</td><td>3</td></tr>
+<tr><td>补充</td><td>四元式精讲 + 课件 inttoreal 例子（第1章 P23 原例）</td><td>4</td></tr>
+</table>
+</div>
+
+<h2 class="section">1. 8.1 符号表：编译器的"户口本" <span class="badge hot">🔥 考点</span></h2>
+
+<div class="card tip"><span class="emoji">🗂️</span><b>人话版</b>：源程序里每个名字（变量、常量、过程、函数……）都是一位"住户"。符号表就是编译器的<b>户口登记簿</b>：谁家住哪（地址）、什么身份（类型/类别）、管多大片区（作用域），全记在上面。<b>查户口</b>=查类型错误，<b>分房</b>=按户口分地址——后面两大功能都靠它。</div>
+
+<div class="card def">
+<h3>1.1 符号表的作用与设计因素（课件第 2 页）</h3>
+<ul>
+<li>符号表作为<b>编译系统的重要组成部分</b>，<span class="ka">贯穿于文法分析、检查和语义处理的编译全过程</span>。</li>
+<li>在编译程序中，符号表用来<b>存放源程序中出现的有关名字的属性信息</b>，这些信息<b>集中反映了名字的语义特征属性</b>。</li>
+<li><b>符号表总体结构的设计和实现与下列因素有关</b>（两条，简答常考）：
+  <ul>
+  <li>① <b>源语言的复杂性</b>（包括<b>词法结构、语法结构</b>的复杂性）；</li>
+  <li>② 对于编译系统在<b>时间效率和空间效率</b>方面的要求。</li>
+  </ul>
+  （人话：语言越复杂、对编译速度/内存要求越高，符号表结构就得越讲究——所以有后面 4 种实现结构之分。）</li>
+</ul>
+</div>
+
+<div class="card def">
+<h3>1.2 各阶段怎么用符号表（课件第 3 页上半）</h3>
+<p><b>符号表中所登记的信息在编译不同阶段都要用到</b>：</p>
+<ul>
+<li>在<b>词法分析及语法分析</b>过程中<b>不断更新</b>表中的信息；</li>
+<li>在<b>语义分析之前已经创建</b>符号表，<b>语义分析阶段写入</b>名字属性信息；</li>
+<li>从<b>词法分析到代码生成的各阶段</b>，都会从表中<b>获取不同的属性信息</b>。</li>
+</ul>
+<p>（人话：户口本不是一次性建好的——认名字时先登记，语义分析时补全档案，后面每个阶段都来翻档案。）</p>
+<h3>1.3 符号表的三大功能（课件第 3 页下半，简答必背）</h3>
+<table class="gt">
+<tr><th>#</th><th>功能</th><th>课件原文要点</th></tr>
+<tr><td>①</td><td><b>收集符号属性</b></td><td>标示符、常量、变量、过程、函数等的属性都往里登记</td></tr>
+<tr><td>②</td><td><b>作为上下文语义的合法性检查的依据</b></td><td>课件例：<code>a := b + c</code>——a、b、c 的类型查表才知道能不能这样算、要不要转换</td></tr>
+<tr><td>③</td><td><b>作为目标代码生成阶段地址分配的依据</b></td><td>课件注：<b>看类型</b>——类型决定占几个存储单元，地址才分得下去</td></tr>
+</table>
+</div>
+
+<div class="card def">
+<h3>1.4 符号表的组成（课件第 4 页）</h3>
+<p>符号表包括<b>名字栏</b>和<b>信息栏</b>（<b>可有多列</b>）：</p>
+<ul>
+<li><b>名字栏</b>：也称<span class="ka">主栏</span>。主栏的内容称为<b>关键字（key word）</b>——按它来查这一行（所以符号名不能重名）。</li>
+<li><b>信息栏</b>：包含<b>许多子栏和标志位</b>，用来记录相应名字的各种属性。</li>
+</ul>
+<div class="formula">符号表一行 = 名字栏（主栏/关键字） ｜ 信息栏（多列：类型栏、作用域栏、…… ）</div>
+</div>
+
+<div class="card def">
+<h3>1.5 符号的常见属性（课件第 5 页，6 条）</h3>
+<p>课件原话：虽然不同的语言定义的标识符属性不尽相同，<b>下列几种属性通常都是需要的</b>：</p>
+<table class="gt">
+<tr><th>#</th><th>属性</th><th>要点</th></tr>
+<tr><td>①</td><td><b>符号名</b></td><td>必不可少，<b>按名存取，不能重名</b></td></tr>
+<tr><td>②</td><td><b>符号的类别</b></td><td>常量、变量、过程、函数等</td></tr>
+<tr><td>③</td><td><b>符号的类型</b></td><td><b>依据类型检查</b>使用是否合理</td></tr>
+<tr><td>④</td><td><b>符号的存储信息</b></td><td>如地址信息</td></tr>
+<tr><td>⑤</td><td><b>符号的作用域</b></td><td>公有、私有；全局、局部</td></tr>
+<tr><td>⑥</td><td><b>其它属性</b></td><td>数组内情向量（维数、上下界等）、记录结构型的成员信息、函数及过程的形参</td></tr>
+</table>
+<div class="notice">📌 课件落点一句：<b>宗旨——便于编译各阶段的工作！</b>（属性不是为记而记，每个属性都对应某个阶段的某项工作：类型给语义检查用、地址给代码生成用、内情向量给数组元素地址计算用。）</div>
+</div>
+
+<div class="card def">
+<h3>1.6 符号表的五类操作（课件第 6 页）</h3>
+<p>在整个编译期间，对于符号表的操作大致可归纳为<b>五类</b>：</p>
+<ol>
+<li><b>查</b>：对给定名字，<b>查询名字是否已在表中</b>；</li>
+<li><b>插</b>：<b>往表中插入一个新的名字</b>；</li>
+<li><b>取</b>：对给定名字，<b>访问它的某些信息</b>；</li>
+<li><b>写</b>：对给定名字，<b>填写或更新它的某些信息</b>；</li>
+<li><b>删</b>：<b>删除一个或一组无用的项</b>（如出了作用域的名字）。</li>
+</ol>
+<p>（人话口诀：<b>查、插、取、写、删</b>——登记户口的全流程。）</p>
+</div>
+
+<div class="card def">
+<h3>1.7 实现符号表常用的数据结构（课件第 7 页，4 种）</h3>
+<table class="gt">
+<tr><th>结构</th><th>特点</th><th>【旁注】</th></tr>
+<tr><td><b>线性表</b>（无序）</td><td>新名字顺次往后放，查找从头顺次扫</td><td class="ok">PL/0 采用（简单，程序小够用）</td></tr>
+<tr><td><b>有序表</b></td><td>按名字有序存放</td><td class="ok">可<b>折半查找</b>，查找快、插入要挪位</td></tr>
+<tr><td><b>栈符号表</b></td><td>按作用域进栈/退栈方式组织</td><td>适合分程序结构、嵌套作用域</td></tr>
+<tr><td><b>Hash 表</b></td><td>散列函数定位</td><td class="ok">实用编译器主流，快</td></tr>
+</table>
+<p>课件举例：P200 给出 <b>PL/0 程序段</b>及其符号表的登记过程——PL/0 用无序线性表：遇到新声明就顺次填一行，查名字就从表头线性往下找（程序短，扛得住；这也是 PL/0 "简单"哲学的一部分）。</p>
+</div>
+
+<h2 class="section">2. 8.2 静态语义分析：编译期把能查的都查掉 <span class="badge hot">🔥 考点</span></h2>
+
+<div class="card def">
+<h3>2.1 与语义分析相关的工作（课件第 8 页）</h3>
+<table class="gt">
+<tr><th>工作</th><th>时机</th><th>内容/例子</th></tr>
+<tr><td><b>静态语义检查</b></td><td><b>编译期间</b>所进行的语义检查</td><td>类型、控制流、唯一性等（见 2.3）</td></tr>
+<tr><td><b>动态语义检查</b></td><td><b>所生成的代码在运行期间</b>进行的语义检查</td><td>课件例：<b>除零溢出错误</b>（编译时无法知道除数运行时是不是 0）</td></tr>
+<tr><td rowspan="2"><b>收集语义信息</b></td><td colspan="2">为<b>语义检查</b>收集程序的语义信息</td></tr>
+<tr><td colspan="2">为<b>代码生成等后续阶段</b>收集程序的语义信息；<b>有些内容合并到"中间代码生成"部分讨论</b>（如<b>过程、数组声明</b>的语义处理）</td></tr>
+</table>
+<p>（人话：<b>静态</b>=开卷考试时就能批出来的错；<b>动态</b>=只有跑起来才暴露的错（÷0）。收集信息则是"为查错和后端备料"。）</p>
+</div>
+
+<div class="card def">
+<h3>2.2 语义分析和中间代码生成在编译程序中的逻辑位置（课件第 9 页图，文字化）</h3>
+<div class="stepbox"><pre>词法分析 ──→ 语法分析 ──→ 中间代码生成 ──→ 中间代码优化 ──→ 目标代码优化 ──→ 目标代码生成
+                 │              ↑
+                 ↓              │
+            ┌──────────────────────┐
+            │ 静态语义分析 → 语义处理 │   （静态语义分析在语法分析之后把关，
+            └──────────────────────┘    语义处理一路送入中间代码生成）</pre></div>
+<p>读图要点：六个编译步骤从左到右排开；<b>静态语义分析</b>紧跟在语法分析之后、<b>中间代码生成</b>之前——只有过了静态语义检查的程序才被送去做语义处理（翻译成中间代码）。这正是第 7 章"先检查、后翻译"的图形版。</p>
+</div>
+
+<div class="card def">
+<h3>2.3 静态语义检查的四种检查（课件第 10 页）</h3>
+<p>课件定位句（爱考填空）：<b>静态语义检查是代码生成前程序合法性检查的最后阶段</b>。</p>
+<table class="gt">
+<tr><th>检查</th><th>课件原意</th><th>例子</th></tr>
+<tr><td><b>控制流检查</b><br>(flow-of-control checks)</td><td>控制流语句必须使<b>控制转移到合法的地方</b></td><td><b>break 语句必须有合法的语句包围它</b>（裸写 break、不在循环/switch 里就是非法转移）</td></tr>
+<tr><td><b>唯一性检查</b><br>(uniqueness checks)</td><td>很多场合要求<b>对象只能被定义一次</b></td><td><b>枚举类型的元素不能重复出现</b>（enum {a, a} 非法）</td></tr>
+<tr><td><b>名字的上下文相关性检查</b><br>(name-related checks)</td><td>某些名字的<b>多次出现之间</b>应该满足一定的上下文相关性</td><td>如同一作用域中同名声明冲突、形参实参对应关系</td></tr>
+<tr><td><b>类型检查</b><br>(type checks)</td><td>检查<b>每个操作是否遵守语言类型系统的定义</b></td><td>int 与 real 相加要不要转换（见第 4 节 inttoreal）</td></tr>
+</table>
+<p>课件表末尾带"……"——以上四种是重点代表，不是穷举。</p>
+</div>
+
+<div class="card def">
+<h3>2.4 常见的语义错误与检查方法（课件第 11 页，流程必背）</h3>
+<p><b>声明和使用相关的语义错误</b>就两种：<b>① 标识符没有声明</b>（用了一个没登记的名字）；<b>② 重复声明</b>（同一有效范围内又登记一遍）。<b>如何检查？——全靠查符号表</b>：</p>
+<table class="gt">
+<tr><th>场景</th><th>动作</th><th>判定</th></tr>
+<tr class="me"><td>遇到<b>新声明的</b>标识符</td><td><b>查符号表</b></td><td>当前有效的所有标识符中有相同名字的 → <b class="no">重复声明错误</b>；否则 → 生成它的属性信息，<b class="ok">保存到符号表中</b></td></tr>
+<tr class="me"><td>遇到<b>标识符的使用</b></td><td><b>查符号表</b></td><td>没有找到 → <b class="no">该标识符没有声明</b>；否则 → 得到该标识符的属性，<b class="ok">进行进一步分析</b>（类型检查等）</td></tr>
+</table>
+<div class="card tip" style="margin:8px 0"><span class="emoji">💡</span><b>记忆钩子</b>：<b>声明时查重、使用时查有</b>。两种错误、两个方向，都只靠"查符号表"这一个动作——这也回应了 1.3 的功能②"合法性检查的依据"。</div>
+</div>
+
+<h2 class="section">3. 8.3 中间代码生成：先译成"世界语" <span class="badge hot">🔥 考点</span></h2>
+
+<div class="card tip"><span class="emoji">🌍</span><b>人话版</b>：直接把中文译成 100 种方言太累——先译成一门中立的世界语，再从世界语转各方言就省事了。<b>中间代码</b>就是编译器的世界语：先把它从"某语言、某写法"翻译过来，优化也方便，再交给后端生成各机器的目标代码。</div>
+
+<div class="card def">
+<h3>3.1 引入中间代码的优缺点（课件第 12 页，简答必背）</h3>
+<table class="gt">
+<tr><th>优点（两条）</th><th>缺点</th></tr>
+<tr><td>① 中间代码<b>与机器无关，便于移植</b>（换个目标机只需换后端）<br>② 对中间代码的<b>优化比源、目标代码优化容易</b></td><td><b>多了一级翻译</b>（多一道工序，多花编译时间）</td></tr>
+</table>
+<div class="notice good">✅ 课件结论：<b>总体而言，优大于缺</b>。课件注：<b>PL/0 无中间代码生成阶段</b>（PL/0 直接从语法分析/语义处理跳到目标代码——教学语言一切从简）。</div>
+</div>
+
+<div class="card def">
+<h3>3.2 中间代码的五种形式（课件第 13 页）</h3>
+<p>课件原话：中间代码<b>有不同层次不同目的之分</b>。常见的五种：</p>
+<table class="gt">
+<tr><th>形式</th><th>全称/出处</th><th>【旁注】</th></tr>
+<tr><td><b>AST</b></td><td>Abstract Syntax Tree，抽象语法树</td><td>去掉括号等冗余、保留结构的树形中间代码</td></tr>
+<tr><td><b>TAC</b></td><td>Three-address code，<b>三地址码（四元式）</b></td><td class="ok">本课程主角，见第 4 节精讲</td></tr>
+<tr><td><b>P-code</b></td><td>—</td><td><b>特别用于 Pascal 语言实现</b>（虚拟栈机指令）</td></tr>
+<tr><td><b>Bytecode</b></td><td>—</td><td><b>Java 编译器的输出、Java 虚拟机的输入</b>（"一次编译、到处运行"的底气）</td></tr>
+<tr><td><b>SSA</b></td><td>Static Single Assignment form，静态单赋值形式</td><td>每个名字只赋值一次，现代优化器（LLVM 等）的基础</td></tr>
+</table>
+</div>
+
+<h2 class="section">4. 四元式精讲（含课件 inttoreal 例子）<span class="badge hot">🔥 考点</span></h2>
+
+<div class="card def">
+<h3>4.1 四元式的一般形式</h3>
+<p>四元式是三地址码（TAC）的经典书写格式，每条形如：</p>
+<div class="formula">( <b>算符 op</b> ，<b>左操作数 ARG1</b> ，<b>右操作数 ARG2</b> ，<b>结果 RESULT</b> )</div>
+<ul>
+<li>操作数可以是<b>变量名、常数</b>，也可以是编译器<b>临时变量</b> T1、T2…（每需要"存一步中间结果"就借一个）；</li>
+<li>一元运算（如取负、类型转换）只用一个操作数栏，另一栏留空；</li>
+<li>赋值 <code>x := e</code> 写作 <code>(:=, e, -, x)</code> 这类形式。</li>
+</ul>
+</div>
+
+<div class="card def">
+<h3>4.2 课件经典例：Z := X + 0.618 * Y（含语义分析的 inttoreal）</h3>
+<p>这是课件（第 1 章 P23 引入、第 8 章沿用）的招牌例子：源语句 <code>Z := X + 0.618 * Y</code>，其中 <b>0.618 是实型、Y 是整型</b>。语义分析（类型检查）发现 mixed 运算，<b>先插入一条类型转换指令 inttoreal 把 Y 转成实型</b>，再翻译成四元式：</p>
+<table class="gt">
+<tr><th>序号</th><th>算符</th><th>左操作数</th><th>右操作数</th><th>结果</th><th>【旁注】</th></tr>
+<tr><td>(1)</td><td>inttoreal</td><td>Y</td><td>—</td><td>T1</td><td>语义分析插入的类型转换：整型 Y → 实型 T1</td></tr>
+<tr><td>(2)</td><td>*</td><td>0.618</td><td>T1</td><td>T2</td><td>先乘：0.618 × T1 → T2（临时变量登场）</td></tr>
+<tr><td>(3)</td><td>+</td><td>X</td><td>T2</td><td>Z</td><td>后加：X + T2 → 直接送 Z</td></tr>
+</table>
+<div class="notice">📌 <b>看点两个</b>：① <b>inttoreal</b> 这条不是程序员写的，是<b>语义分析（类型检查）替你加的</b>——这是"语义分析发现类型不匹配→自动转换"的标准示范；② 四元式顺序体现<b>先乘除后加减</b>的优先级，中间结果交给临时变量 T1、T2 暂存。这个例子的语义树/语法树上标注的正是 inttoreal 插入的位置。</div>
+<p>🎮 <a href="level5.html">到第 5 关玩四元式生成器演示器</a>：输入任意表达式，看它一步步翻成四元式（还有 Z := X + 0.618*Y 的逐条旁注手算版）。</p>
+</div>
+
+<div class="card def">
+<h3>4.3 补充小练：a + b * c 的四元式（先自己写再看）</h3>
+<div class="formula">(*) b c T1<br>(+) a T1 T2</div>
+<p>两条：先算 b*c 借 T1，再 a+T1 得 T2。规律：<b>运算每"分层"一次，就借一个临时变量</b>；四元式条数 = 表达式的运算次数。</p>
+</div>
+
+<div class="card def">
+<h3>📖 本章一句话小结</h3>
+<p><b>符号表</b>贯穿全程：收集属性 / 合法性检查依据 / 地址分配依据；组成=名字栏(主栏=关键字)+信息栏；6 类常见属性、5 类操作（查插取写删）、4 种实现（线性-PL/0、有序-折半、栈、Hash）。<b>静态语义分析</b>=编译期检查（控制流/唯一性/名字相关/类型，是代码生成前最后一道合法性关口）+收集语义信息；未声明/重复声明全靠查符号表。<b>中间代码</b>：优（机器无关、易优化）大于缺（多一级翻译），五种形式（AST/TAC/P-code/Bytecode/SSA），主角是<b>四元式</b>（op, ARG1, ARG2, RESULT，inttoreal 例）。</p>
+</div>
+
+<div class="notice">🎮 学完本章，<a href="level5.html">到第 5 关玩四元式生成器演示器</a>，并用关末测验检验符号表与中间代码掌握度。</div>
+
+<div class="footer">📖 全书精讲 ｜ <a href="chapter7.html">← 上一章</a> ｜ <a href="textbook.html">目录</a> ｜ <a href="chapter9.html">下一章 →</a> ｜ <a href="level5.html">🎮 配套第5关</a></div>
+</div>
+</body>
+</html>

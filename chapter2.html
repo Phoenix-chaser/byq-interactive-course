@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第2章 · 高级语言及其描述 精讲 | 编译原理闯关</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="topnav"><span class="brand">⚙️ 编译原理闯关</span>
+<a class="chip" href="textbook.html">📖 精讲目录</a>
+<a class="chip" href="level1.html">🎮 第1关互动</a>
+<a class="chip" href="cheatsheet.html">📜 考前速查</a></div>
+<div class="container">
+<div class="hero"><h1>📖 第 2 章 · 高级语言及其描述（全书精讲）</h1>
+<div class="sub">课件逐页精讲 ｜ 每个定义、例子、练习都在 ｜ 预计 50 分钟</div></div>
+
+<!-- ================= 开篇导读（课件第1~2页） ================= -->
+<h2 class="section">🧭 开篇：这一章为什么必须学明白</h2>
+
+<div class="card def">
+<p><b>课件第 1 页 · 导入</b>：程序设计语言实质是一个<span class="ka">记号系统</span>。它同自然语言一样，应有<span class="hl">完整的语法规则</span>——没有规矩，编译程序也无法编写。</p>
+<ul>
+<li><b>语言的分类</b>：<span class="hl">自然语言 VS 程序设计语言（计算机语言）</span>。两者都是"符号 + 规则"的系统，区别在于：自然语言的规则模糊、有例外；程序设计语言的规则必须严格、无歧义，否则编译器没法干活。</li>
+<li><b>本章定位</b>：课件原话——"本章是一些基础知识，定义了一些基本概念、术语等，为<b>文法（语法）</b>、<b>语法分析</b>做准备，<span class="ka">一定要学习明白</span>。"第 3 章词法分析、第 4~6 章语法分析的每一个算法，脚下踩的都是这一章。</li>
+<li>⭐【了解】课件内页标题写的是"第 2 章 文法和语言"，与教材章名"高级语言及其描述"是<b>同一章</b>，本页两种叫法都会出现。</li>
+</ul>
+</div>
+
+<div class="card tip">
+<p>🎯 <b>全书精讲页怎么用</b>：下面按课件 2.1 → 2.7 的节序、页序逐页过。课件里每个<span class="hl">定义</span>、每个<span class="hl">例子文法</span>、每条<span class="hl">推导</span>、每棵<span class="hl">语法树</span>、每道<span class="hl">练习和思考题</span>都在这里，标了 🔥【考点】的要能默写，标了 ⭐【了解】的看懂即可。</p>
+<p>🎮 看完"推导"一节，记得<b>到第 1 关玩推导模拟器（<a href="level1.html">level1.html</a>）</b>，亲手把 E 推成 i+i*i 才算真会。</p>
+</div>
+
+<div class="card">
+<p><b>课件第 2 页 · 本章目录</b>（本页七个按钮就是下面的七个大节）：</p>
+<table class="gt">
+<tr><th>节</th><th>标题</th><th>一句话人话</th></tr>
+<tr><td>2.1</td><td>文法的直观概念</td><td>文法 = 若干条规则的组合</td></tr>
+<tr><td>2.2</td><td>符号和符号串</td><td>先认识"字母"和"单词"这类原材料</td></tr>
+<tr><td>2.3</td><td>文法和语言的形式定义</td><td>给文法立正式定义（四元组），定义句型、句子、语言</td></tr>
+<tr><td>2.4</td><td>文法的类型</td><td>乔姆斯基把文法分成 0/1/2/3 四型</td></tr>
+<tr><td>2.5</td><td>上下文无关文法及其语法树</td><td>把推导画成一棵树；顺手引出二义性</td></tr>
+<tr><td>2.6</td><td>句型的分析</td><td>怎么判断一个串是不是某文法的句型？短语 / 直接短语 / 句柄</td></tr>
+<tr><td>2.7</td><td>有关文法在实际应用中的一些说明</td><td>有害规则、多余规则等工程上的"卫生要求"</td></tr>
+</table>
+</div>
+
+<!-- ================= 2.1（课件第3~4页） ================= -->
+<h2 class="section">📐 2.1 文法的直观概念（课件第 3~4 页）</h2>
+
+<div class="card def">
+<h3>什么是文法？</h3>
+<p>课件给出的直观回答就一句：<span class="ka">若干规则的组合就是文法</span>。那"何为规则？如何描述规则？"——课件紧接着回答：用 <span class="hl">BNF 范式</span>来描述规则（教材 P13）。</p>
+</div>
+
+<div class="card def" id="ex-bnf">
+<h3>🔥【考点】BNF 范式描述规则的 5 个记号（课件第 4 页，原样背）</h3>
+<table class="gt">
+<tr><th>记号</th><th>含义</th><th>人话解释</th></tr>
+<tr><td class="mono">&lt; &gt;</td><td>尖括号括起来的内容表示语言构造成分，称为<b>语法单元</b>，在文法中为<b>非终结符</b></td><td>"&lt;句子&gt;"这种戴尖帽子的，是"还没拆完的成分"</td></tr>
+<tr><td class="mono">:=</td><td>表示左部的语法单元由右部来定义，读作"<b>定义为</b>"</td><td>&lt;主语&gt; := &lt;代词&gt; 读作"主语定义为代词"（本页也可写成 →）</td></tr>
+<tr><td class="mono">|</td><td>或，多选一</td><td>&lt;代词&gt; := He | me：代词可以是 He 也可以是 me</td></tr>
+<tr><td class="mono">{ }</td><td>可重复 0 或者多次</td><td>{数字}：可以一个数字都没有，也可以一串</td></tr>
+<tr><td class="mono">[ ]</td><td>可选，出现或者不出现</td><td>[+数字]：这个"+数字"可以有也可以没有</td></tr>
+</table>
+<p>🔥 这 5 个记号是"读得懂语言手册"的钥匙——考试会直接问"BNF 中 { } 和 [ ] 的区别"：<b>{ } 是 0 到多次，[ ] 是 0 到 1 次</b>。</p>
+</div>
+
+<div class="card tip">
+<p><b>课件第 4 页提出的两个思考题</b>（答案在 2.3 节的例子里有完整展开）：</p>
+<ul>
+<li><b>问题 1</b>：P19 页的 BNF 表示的文法有几条规则？——答：<span class="ka">10 条</span>。就是课件第 13 页那组描述英语句子的规则（&lt;句子&gt;、&lt;主语&gt;、&lt;谓语&gt;……共 10 条），<a href="#p13grammar">完整清单点这里跳到 2.3 节</a>，那里逐条列出并数给你看。</li>
+<li><b>问题 2</b>：详细解释其描述自然语言句子的过程？——答：从 <span class="mono">&lt;句子&gt;</span> 出发，反复"把尖帽子成分换成它的定义"，直到全部换成 He、gave、me、a、book 这样的具体单词，得到句子 <span class="mono">He gave me a book.</span>。<a href="#p14derive">逐步推导过程在 2.3 节</a>，每一步用了哪条规则都标了。</li>
+</ul>
+</div>
+
+<!-- ================= 2.2（课件第5~11页） ================= -->
+<h2 class="section">🔤 2.2 符号和符号串（课件第 5~11 页）</h2>
+
+<div class="card def">
+<h3>字母表（Alphabet）——课件第 5 页</h3>
+<p>🔥 <b>定义</b>：字母表 Σ 是元素的<span class="ka">非空有穷集合</span>，字母表中的元素称为该字母表的<b>符号</b>，所以字母表也叫<b>符号集</b>。</p>
+<p><b>课件思考题：字母表中的元素一定全是英文字母吗？</b>——<span class="hl">不一定</span>！课件给的 5 个字母表例子：</p>
+<table class="gt">
+<tr><th>#</th><th>字母表</th><th>说明</th></tr>
+<tr><td>(1)</td><td class="mono">{a, b, c, d}</td><td>4 个符号的小字母表</td></tr>
+<tr><td>(2)</td><td class="mono">{a, b, c, ……, z}</td><td>26 个小写字母</td></tr>
+<tr><td>(3)</td><td class="mono">{0, 1}</td><td>二进制字母表——符号可以是数字</td></tr>
+<tr><td>(4)</td><td>ASCII 字母表（一个字节）</td><td>⭐【了解】256 个字符的编码表</td></tr>
+<tr><td>(5)</td><td>Unicode 字母表</td><td>⭐【了解】容纳全世界文字的大字符集</td></tr>
+</table>
+<p>注意定义里的两个限定词都要会抠：<b>非空</b>（至少有一个符号）、<b>有穷</b>（符号个数有限）。"任何语言程序都可以看成是一定字符集（字母表）上的字符串"（课件第 11 页原话），所以字母表是一切的出发点。</p>
+</div>
+
+<div class="card def">
+<h3>符号串（String）——课件第 6 页</h3>
+<p>🔥 <b>定义</b>：由字母表中的符号所组成的<b>任何有穷序列</b>，称为该字母表上的符号串。课件的递归式说法：</p>
+<ul>
+<li>(1) <span class="mono">ε</span> 是 Σ 上的一个符号串，也叫<b>空符号串</b>（不含任何符号的串）。</li>
+<li>(2) 若 x 是 Σ 上的符号串，a 是 Σ 中的元素，则 <span class="mono">xa</span> 是 Σ 上的符号串（往尾巴上接一个符号，还是符号串）。</li>
+<li>(3) y 是 Σ 上的符号串，<b>当且仅当</b>它能由 (1) 和 (2) 导出——也就是说，所有符号串都是"从 ε 出发不断接符号"造出来的。</li>
+</ul>
+<div class="notice">🔥🔥【考点】<b>ε、∅（课件记作 ɸ）和 {ε} 的区别</b>——年年必考的"三兄弟"：<br>
+· <span class="mono">ε</span> 是一个<b>空符号串</b>：它是一个"串"，内容为空，长度 |ε|=0；<br>
+· <span class="mono">∅（ɸ）</span> 是<b>不含任何元素的空集</b>：它是一个"集合"，里面连一个串都没有；<br>
+· <span class="mono">{ε}</span> 是<b>由空串组成的集合</b>：它有一个元素，这个元素恰好是 ε。<br>
+一句话：∅ 里啥都没有，{ε} 里有 1 个"空气串"，ε 本身是个串不是集合。</div>
+<p><b>注意（课件加粗强调）</b>：符号串是<b>有序</b>的，<span class="mono">ab</span> 和 <span class="mono">ba</span> 不一样！串看的是"排列"，集合才不看顺序。</p>
+</div>
+
+<div class="card def">
+<h3>符号串的 5 个小概念：前缀 / 后缀 / 子串 / 逆转 / 长度——课件第 7 页</h3>
+<p>课件统一用 <span class="mono">s = abc</span> 做例子：</p>
+<table class="gt">
+<tr><th>概念</th><th>定义（课件原话）</th><th>s = abc 的全部答案</th></tr>
+<tr><td>前缀 / 头</td><td>移走 s 的尾部的零个或多于零个符号</td><td class="mono">ε, a, ab, abc</td></tr>
+<tr><td>后缀 / 尾</td><td>删去 s 头部的零个或多于零个符号</td><td class="mono">ε, c, bc, abc</td></tr>
+<tr><td>子串</td><td>从 s 中删去一个前缀和一个后缀</td><td class="mono">ε, a, b, c, ab, bc, abc</td></tr>
+<tr><td>逆转</td><td>将 s 中的符号按相反次序写出而得到的符号串</td><td class="mono">cba</td></tr>
+<tr><td>长度</td><td>该符号串中的符号的数目，记 |s|</td><td class="mono">|abc| = 3，|ε| = 0</td></tr>
+</table>
+<p>🔥 常考细节：<b>前缀、后缀都算"删零个"的情况</b>，所以 abc 自己、ε 都既是前缀又是后缀；空串 ε 的长度是 0，但它确实是"一个串"。</p>
+</div>
+
+<div class="card def">
+<h3>符号串的连接和方幂——课件第 8 页</h3>
+<ul>
+<li>🔥 <b>连接</b>：设 x 和 y 是符号串，它们的连接 <span class="mono">xy</span> 是把 y 的符号写在 x 的符号之后得到的符号串。课件例子：<span class="mono">x = ba, y = nana, xy = banana</span>。（注意连接也不可交换：yx = nanaba，是另一个串。）</li>
+<li>🔥 <b>方幂</b>：同一个串自己连自己多少次。<span class="mono">x⁰ = ε，x¹ = x，x² = xx，……，xⁿ = xⁿ⁻¹x</span>。课件例子：设 <span class="mono">x = ba</span>，则 <span class="mono">x¹ = ba，x² = baba，x³ = bababa，……</span></li>
+</ul>
+<div class="formula">串的方幂口诀：0 次方是空串 ε，1 次方是自己，n 次方 = "n-1 次方再接一个自己"。</div>
+</div>
+
+<div class="card def">
+<h3>字母表的乘积与 n 次幂——课件第 9 页</h3>
+<ul>
+<li><b>乘积</b>：设 Σ₁、Σ₂ 是两个字母表，<span class="formula">Σ₁Σ₂ = { ab | a∈Σ₁，b∈Σ₂ }</span>即"第一个符号从 Σ₁ 里挑、第二个符号从 Σ₂ 里挑"组成的所有两符号串。</li>
+<li>课件例子：<span class="mono">Σ₁ = {0,1}，Σ₂ = {a,b}</span>，则 <span class="mono">Σ₁Σ₂ = {0a, 0b, 1a, 1b}</span>。</li>
+<li><b>课件思考题：交换律？Σ₁Σ₂ == Σ₂Σ₁ ？</b>——<span class="hl">不满足！</span>反例就用上面的：Σ₂Σ₁ = {a0, a1, b0, b1}，和 {0a, 0b, 1a, 1b} 完全不同（串有序，第一个位置挑谁的符号结果不一样）。</li>
+<li><b>n 次幂</b>（递归定义）：<span class="formula">⑴ Σ⁰ = { ε }；⑵ Σⁿ = Σⁿ⁻¹Σ　(n ≥ 1)</span>即"自己接连乘 n 次"。注意 Σ⁰ 是<b>由空串组成的集合 {ε}</b>，不是空串也不是空集——正好复习上面的三兄弟。</li>
+<li>课件例子：<span class="mono">Σ₁³ = {000, 001, 010, 011, 100, 101, 110, 111}</span>（Σ₁={0,1} 连乘 3 次 = 所有 3 位二进制串，共 2³ = 8 个）。</li>
+</ul>
+</div>
+
+<div class="card def">
+<h3>正闭包与克林闭包——课件第 10 页</h3>
+<div class="formula">🔥 正闭包：Σ⁺ = Σ ∪ Σ² ∪ Σ³ ∪ Σ⁴ ∪ ……<br>🔥 克林闭包（Kleene Closure）：Σ* = Σ⁰ ∪ Σ⁺</div>
+<p>人话：Σ⁺ 是"<b>长度至少为 1</b>"的所有符号串全家；Σ* 再加上空串 ε，是"<b>包括空串在内</b>"的所有符号串全家。两者只差一个 ε！</p>
+<p>课件例子（Σ = {0,1}）：</p>
+<div class="stepbox"><pre>{0,1}⁺ = {0, 1, 00, 01, 10, 11, 000, 001, 010, 011, 100, ……}   ← 没有 ε
+{0,1}* = {ε, 0, 1, 00, 01, 11, 000, 001, 010, 011, 100, …}   ← 多一个 ε 打头</pre></div>
+<p>🔥 这对闭包后面天天用：第 3 章的正规式 r* 与这里同源；"标识符 = 字母(字母|数字)*"这类式子的 * 就是克林闭包的意思。</p>
+</div>
+
+<div class="card def">
+<h3>从字母表到语言：一条主线——课件第 11 页</h3>
+<p>课件用一张层级图收束本节：<b>字母表（集合）→ 字符 → 串 → 语言（集合的组合）</b>。两句话必须记住：</p>
+<ul>
+<li><b>任何语言程序都可以看成是一定字符集（称为字母表）上的字符串（有限序列）</b>——一个 C 程序，就是 ASCII 字符集上的一个很长的符号串。</li>
+<li><b>任何一个语言程序主要由语法和语义两个方面定义</b>——语法管"长得对不对"（本章的事），语义管"意思对不对"（第 7、8 章的事）。</li>
+</ul>
+</div>
+
+<!-- ================= 2.3（课件第12~28页） ================= -->
+<h2 class="section">🧩 2.3 文法和语言的形式定义（课件第 12~28 页，本章最重）</h2>
+
+<div class="card tip">
+<p><b>课件第 12 页只提了一个问题</b>：如何实现语言结构的<b>形式化</b>描述？——"形式化"就是用数学符号严格写出来、不含糊。接下来课件用"英语句子"的例子一路引出：规则 → 推导 → 文法四元组 → 语言。</p>
+</div>
+
+<div class="card def" id="p13grammar">
+<h3>规则（重写规则 / 产生式 / 生成式）——课件第 13 页</h3>
+<p>🔥 <b>定义</b>：规则是形如 <span class="mono">α→β</span> 的 (α, β) 有序对，其中 α 称为规则的<b>左部</b>，β 称为规则的<b>右部</b>。读作"α 定义为 β"。三个名字（重写规则、产生式、生成式）说的是同一个东西。</p>
+<p><b>课件例：用 10 条规则描述一个英语句子</b>（这就是第 4 页问题 1 问的"P19 页 BNF 文法"，数一数正好 10 条）：</p>
+<div class="stepbox"><pre>&lt;句子&gt;   →  &lt;主语&gt; &lt;谓语&gt; &lt;间接宾语&gt; &lt;直接宾语&gt;     ①
+&lt;主语&gt;     →  &lt;代词&gt;                                ②
+&lt;谓语&gt;     →  &lt;动词&gt;                                ③
+&lt;间接宾语&gt; →  &lt;代词&gt;                                ④
+&lt;直接宾语&gt; →  &lt;冠词&gt; &lt;名词&gt;                          ⑤
+&lt;代词&gt;     →  He                                    ⑥
+&lt;代词&gt;     →  me                                    ⑦
+&lt;冠词&gt;     →  a                                     ⑧
+&lt;动词&gt;     →  gave                                  ⑨
+&lt;名词&gt;     →  book                                  ⑩</pre></div>
+<p>它的"终点"句子就是：<span class="mono">He gave me a book.</span>（他给了我一本书）——10 条规则，搭出一个英语句子。</p>
+</div>
+
+<div class="card def" id="p14derive">
+<h3>句子的推导：用规则一步步"生成"句子——课件第 14 页</h3>
+<p>🔥 <b>定义</b>：句子的推导就是<b>用规则（产生式）按一定方式去推导或产生句子的过程</b>。下面把课件第 14 页的完整推导逐步重演，右列标出每步用的规则：</p>
+<div class="stepbox"><pre>&lt;句子&gt;
+ ⇒  &lt;主语&gt; &lt;谓语&gt; &lt;间接宾语&gt; &lt;直接宾语&gt;     用①
+ ⇒  &lt;代词&gt; &lt;谓语&gt; &lt;间接宾语&gt; &lt;直接宾语&gt;       用②
+ ⇒  He &lt;谓语&gt; &lt;间接宾语&gt; &lt;直接宾语&gt;           用⑥
+ ⇒  He &lt;动词&gt; &lt;间接宾语&gt; &lt;直接宾语&gt;           用③
+ ⇒  He gave &lt;间接宾语&gt; &lt;直接宾语&gt;             用⑨
+ ⇒  He gave &lt;代词&gt; &lt;直接宾语&gt;                用④
+ ⇒  He gave me &lt;直接宾语&gt;                    用⑦
+ ⇒  He gave me &lt;冠词&gt; &lt;名词&gt;                用⑤
+ ⇒  He gave me a &lt;名词&gt;                      用⑧
+ ⇒  He gave me a book                        用⑩   ✓ 全终结，句子诞生</pre></div>
+<p>看清楚套路：每一步只挑一个尖帽子成分（非终结符），用它的规则把它<b>重写</b>掉，直到一个尖帽子都不剩。这个过程反过来（从句子收回到 &lt;句子&gt;）就是后面要讲的"归约"。</p>
+</div>
+
+<div class="card def">
+<h3>从这个例子提炼：文法的四个组成部分——课件第 15 页</h3>
+<p>课件把上面 10 条规则整体标为"<b>文法</b>"，并指出了四个组成部分（正式定义在第 18 页）：</p>
+<table class="gt">
+<tr><th>组成部分</th><th>在这个英语例子中是</th><th>人话</th></tr>
+<tr><td>规则（产生式）</td><td>上面 ①~⑩ 共 10 条</td><td>文法的"法律条文"</td></tr>
+<tr><td>非终结符</td><td>&lt;句子&gt;、&lt;主语&gt;、&lt;谓语&gt;、&lt;间接宾语&gt;、&lt;直接宾语&gt;、&lt;代词&gt;、&lt;冠词&gt;、&lt;动词&gt;、&lt;名词&gt;</td><td>戴尖帽子的"半成品"成分</td></tr>
+<tr><td>开始符号</td><td>&lt;句子&gt;</td><td>推导的总起点、最大的那个成分</td></tr>
+<tr><td>终结符</td><td>He、me、a、gave、book</td><td>推到头了的具体单词</td></tr>
+</table>
+</div>
+
+<div class="card def">
+<h3>温故知新（一）：符号串概念复习——课件第 16 页</h3>
+<p>课件在这里插了一页复习，把 2.2 的要点再拉清单（考前几天就背这一块）：</p>
+<ul>
+<li>主线：<b>字母表 → 符号 → 符号串 → 语言</b>（集合的组合、集合）。</li>
+<li>🔥 再看一遍：<b>ε、∅（ɸ）、{ε} 的区别</b>（空串 / 空集 / 由空串组成的集合）。</li>
+<li>🔥 符号串的连接：符号串 x 和 y 的连接表示为 <span class="mono">xy</span>。</li>
+<li>🔥 符号串的长度：<span class="mono">|abc| = 3，|ε| = 0</span>。</li>
+<li>🔥 符号串的幂运算：设 x 是一个符号串，则 <span class="mono">x⁰ = ε，x¹ = x，x² = xx，……，xⁿ = x…x（n 个 x 连接）</span>。</li>
+</ul>
+</div>
+
+<div class="card def" id="ex-uv">
+<h3>温故知新（二）：符号串集合的运算 + 课件练习——课件第 17 页</h3>
+<p>上一页复习的是"单个串"的运算，这一页把运算搬到"<b>串的集合</b>"上。设 U、V 是 Σ* 的子集：</p>
+<div class="formula">🔥 连接（积）：UV = { αβ | α∈U 且 β∈V }　（U 里取一个串接上 V 里取一个串，所有可能）<br>
+🔥 指数：Vⁿ = VV…V（n 个 V 连乘），V⁰ = { ε }<br>
+🔥 闭包：V* = V⁰ ∪ V¹ ∪ V² ∪ V³ ∪ ……<br>
+🔥 正闭包：V⁺ = VV* = V¹ ∪ V² ∪ V³ ∪ ……</div>
+<p>🔥 <b>课件练习（原题）</b>：U: { A, B, …, Z, a, b, …, z }（52 个字母），V: { 0, 1, …, 9 }（10 个数字），求 <span class="mono">UV、V*、U(V)*、U⁺</span>。分步解答：</p>
+<table class="gt">
+<tr><th>小题</th><th>分步求解</th><th>答案</th></tr>
+<tr><td>UV</td><td>U 中每个字母分别接上 V 中每个数字：52×10 = 520 个长度为 2 的串，字母在前、数字在后</td><td class="mono">{A0, A1, …, z9}（共 520 个）</td></tr>
+<tr><td>V*</td><td>V⁰ ∪ V¹ ∪ V² ∪ …：先含空串 ε，再含一切数字串（1 位、2 位、3 位……）</td><td class="mono">{ε, 0, 7, 00, 10, 007, 2024, …}（ε + 全部数字串）</td></tr>
+<tr><td>U(V)*</td><td>一个字母 U，后面跟 (V)* 即 0 个或多个数字</td><td class="mono">{x, x1, a01, temp2 形} —— 字母开头、后随任意多个数字（标识符的雏形！）</td></tr>
+<tr><td>U⁺</td><td>U¹ ∪ U² ∪ …：长度至少为 1 的纯字母串</td><td class="mono">{a, ab, abc, …}（一切非空字母串）</td></tr>
+</table>
+<p>顺手记：<span class="hl">U(V)* 正是程序语言"标识符"的骨架</span>——字母打头，后面字母数字随便跟。第 3 章正规式会再次见到它。</p>
+</div>
+
+<div class="card def">
+<h3>🔥 定义 2.1：文法是一个四元组——课件第 18 页（本章第一定义）</h3>
+<div class="formula">G = ( V<sub>N</sub>, V<sub>T</sub>, P, S )</div>
+<table class="gt">
+<tr><th>元</th><th>名称</th><th>课件定义</th><th>白话</th></tr>
+<tr><td>V<sub>N</sub></td><td>非终结符(NonTerminal)集</td><td>非空有穷；语法成分——代表某个语言的各种子结构</td><td>所有"半成品"成分的名单（尖帽子们）</td></tr>
+<tr><td>V<sub>T</sub></td><td>终结符(Terminal)集</td><td>非空有穷；且 <b>V<sub>T</sub> ∩ V<sub>N</sub> = Φ</b>（不含公共元素）、<b>V<sub>T</sub> ∪ V<sub>N</sub> = V</b>（并起来称文法的字母表 V）</td><td>最终成品的名单；两个集合不许有交集</td></tr>
+<tr><td>P</td><td>规则的集合</td><td>每个元素是 α→β，读作"α 定义为 β"；其中 <b>α ∈ (V<sub>T</sub>∪V<sub>N</sub>)⁺</b> 且 <b>α 中至少有 V<sub>N</sub> 中元素的一个出现</b>；<b>β ∈ (V<sub>T</sub>∪V<sub>N</sub>)*</b>；α 称左部(Left Part)，β 称右部(Right Part)</td><td>法律条文集合；左部不能为空且必须含非终结符，右部可以为空（可以推出 ε）</td></tr>
+<tr><td>S</td><td>开始符号(Start Symbol)</td><td>S ∈ V<sub>N</sub>；代表文法所定义的语言，<b>至少在规则左侧出现一次</b></td><td>推导的总入口、树根</td></tr>
+</table>
+<p>🔥 三处必考的"抠字眼"：① 两个集合都<b>非空有穷</b>且<b>不相交</b>；② P 中规则左部 α 属于<b>正闭包 ⁺</b>（不能是空串）且<b>至少含一个非终结符</b>，右部 β 属于<b>克林闭包 *</b>（可以为空）；③ S 必须在<b>某条规则的左部</b>出现过，否则整棵推导树根本发不了芽。</p>
+</div>
+
+<div class="card def">
+<h3>文法的简写约定 G[E]——课件第 19 页</h3>
+<p><b>课件例：一个简单算术表达式的文法</b>，四元组全写很啰嗦：</p>
+<div class="stepbox"><pre>G = ( {E}, {id, +, *, (, )}, P, E )
+P = { E → E + E
+      E → E * E
+      E → ( E )
+      E → id   }</pre></div>
+<p><b>约定：只写产生式</b>，缩写成一行（| 读"或"）：</p>
+<div class="formula">🔥 G[E]:　E → E + E | E * E | ( E ) | id</div>
+<p>方括号里的 E 就是开始符号。通常我们只给文法的简写形式——<b>课件思考题：依据简写如何识别 V<sub>N</sub>、V<sub>T</sub>、P 和 S？</b></p>
+<ul>
+<li><b>S</b>：G[ ] 方括号里那个符号（没写方括号时，就是<b>第一条规则左部</b>的符号）；</li>
+<li><b>V<sub>N</sub></b>：所有<b>在规则左部出现过</b>的符号（本例 {E}）；</li>
+<li><b>V<sub>T</sub></b>：只在规则右部出现、从没当过左部的符号（本例 {id, +, *, (, )}）；</li>
+<li><b>P</b>：竖线拆开后的每一条（本例 4 条）。</li>
+</ul>
+<p class="mono">说明：课件后面的推导里把 id 简写成 i，i 就代表一个标识符（id），两者是一回事。</p>
+</div>
+
+<div class="card def">
+<h3>文法如何定义语言？——推导——课件第 20 页</h3>
+<p>🔥 <b>方法</b>：把产生式看成<b>重写规则</b>，把当前符号串中的非终结符用其产生式右部的串来代替。课件用 G[E] 演示了两条完整推导：</p>
+<p><b>推导一：得到句子 (i + i)</b></p>
+<div class="stepbox"><pre>E ⇒ (E)         用 E→(E)
+  ⇒ (E + E)     用 E→E+E
+  ⇒ (i + E)     用 E→i
+  ⇒ (i + i)     用 E→i          ✓ 句子：(i + i)</pre></div>
+<p><b>推导二：得到句子 i + (i + i) * i</b></p>
+<div class="stepbox"><pre>E ⇒ E * E           用 E→E*E
+  ⇒ E + E * E       用 E→E+E    （替换最左的 E）
+  ⇒ i + E * E       用 E→i
+  ⇒ i + (E) * E     用 E→(E)
+  ⇒ i + (E + E) * E 用 E→E+E
+  ⇒ i + (i + E) * E 用 E→i
+  ⇒ i + (i + i) * E 用 E→i
+  ⇒ i + (i + i) * i 用 E→i      ✓ 句子：i + (i + i) * i</pre></div>
+<p>同一个文法，走的路子不同，就得到不同的句子——文法像"造句机器"，规则是零件，推导是装配过程。</p>
+</div>
+
+<div class="card def">
+<h3>🔥 定义 2.2：直接推导与直接归约——课件第 21~22 页</h3>
+<p><b>课件定义（原话整理）</b>：已给文法 G=(V<sub>N</sub>,V<sub>T</sub>,P,S)，令 α, β ∈ (V<sub>N</sub>∪V<sub>T</sub>)*，且 A→γ ∈ P。此时，由符号串 v = αAβ 能够直接推出符号串 w = αγβ，我们称：</p>
+<ul>
+<li>符号串 <span class="mono">αγβ</span> 是符号串 <span class="mono">αAβ</span> 的<b>直接推导</b>；</li>
+<li>符号串 <span class="mono">αAβ</span> 是符号串 <span class="mono">αγβ</span> 的<b>直接归约</b>；</li>
+<li>记作：<span class="formula">αAβ ⇒ αγβ</span></li>
+</ul>
+<p>人话：推导是"把某个非终结符 A 按它的一条规则换成右部 γ"；归约就是<b>同一个动作反过来看</b>——把"长得像某规则右部"的串 γ 收回成左部 A。α 和 β 是 A 前后"不动的地方"（上下文）。</p>
+<p><b>课件例（G[S]: S→0S1, S→01，注意课件此处把两条规则并排写在 S 下）</b>：</p>
+<div class="stepbox"><pre>(1) v = 0S1,  w = 0011,   有  0S1 ⇒ 0011,   使用规则 S→01
+(2) v = S,    w = 0S1,    有  S   ⇒ 0S1,    使用规则 S→0S1</pre></div>
+<p><b>课件思考题：请问在上述推导中 α 和 β 是什么？</b>分步解答：</p>
+<ul>
+<li>例 (1)：v = αAβ = 0S1 ⇒ αγβ = 0011。对照得 A = S、γ = 01，所以 <span class="ka">α = "0"（S 左边的 0），β = "1"（S 右边的 1）</span>——S 被改写时，它左边的 0 和右边的 1 原地不动。</li>
+<li>例 (2)：v = αAβ = S ⇒ αγβ = 0S1。这里 A = S、γ = 0S1，S 前后都没有别的符号，所以 <span class="ka">α = ε（空串），β = ε（空串）</span>。</li>
+</ul>
+</div>
+
+<div class="card def">
+<h3>🔥 定义 2.3 / 2.4：推导（多步）与广义推导——课件第 22 页</h3>
+<ul>
+<li><b>定义 2.3（推导）</b>：若有 α₁, α₂, …, αₙ ∈ (V<sub>N</sub>∪V<sub>T</sub>)*，且 α₁ ⇒ α₂ ⇒ … ⇒ αₙ₋₁ ⇒ αₙ，则称 αₙ 是 α₁ 的<b>推导</b>，记作 <span class="mono">α₁ ⇒⁺ αₙ</span>（走了<b>至少一步</b>，n ≥ 2）。</li>
+<li><b>定义 2.4（广义推导）</b>：若在推导关系 α₁ 到 αₙ 中<b>允许 α₁ = αₙ</b>（一步都不走也行），则称 αₙ 是 α₁ 的<b>广义推导</b>，记作 <span class="mono">α₁ ⇒* αₙ</span>（走了<b>零步或任意多步</b>）。</li>
+</ul>
+<div class="notice">🔥【考点】<b>⇒、⇒⁺、⇒* 三个记号的区别</b>（课件第 22 页直接发问）：<br>
+· <span class="mono">⇒</span> ：<b>直接推导</b>，用一条规则，恰好走 1 步；<br>
+· <span class="mono">⇒⁺</span>：推导，走<b>1 步或多步</b>（至少一步）；<br>
+· <span class="mono">⇒*</span>：广义推导，走<b>0 步或多步</b>（允许原地不动，所以任何串和自身都有 α ⇒* α）。<br>
+三者是"一步 / 至少一步 / 零步及以上"的递进关系。</div>
+</div>
+
+<div class="card def">
+<h3>🔥 定义 2.5、2.6：句型、句子和语言——课件第 23 页</h3>
+<p>已给文法 G = (V<sub>N</sub>, V<sub>T</sub>, P, S)：</p>
+<ul>
+<li>🔥 <b>句型</b>：若 <span class="mono">S ⇒* α，α ∈ (V<sub>N</sub>∪V<sub>T</sub>)*</span>，则称 α 为文法 G 的句型——<b>从 S 出发能推出来的任何串</b>（里面可以还夹着非终结符）。</li>
+<li>🔥 <b>句子</b>：若 <span class="mono">S ⇒* α，α ∈ V<sub>T</sub>*</span>，则称 α 为文法 G 的句子——<b>推到全终结符为止的句型</b>。</li>
+<li>🔥 <b>语言</b>：文法 G 所对应的语言是文法一切句子的集合：<span class="formula">L(G) = { α | α ∈ V<sub>T</sub>*，且 S ⇒* α }</span></li>
+</ul>
+<p><b>课件例</b>：<span class="mono">i + i</span> 和 <span class="mono">i + (i + i) * i</span> 都是 <span class="mono">E → i | E+E | E*E | (E)</span> 的句子（当然，推导路上经过的 E+E、i+E 等都叫句型）。</p>
+<p><b>课件思考题：L(G) 和 (V<sub>T</sub>)* 之间的关系是什么？</b>——<span class="hl">L(G) 是 (V<sub>T</sub>)* 的子集</span>：(V<sub>T</sub>* 是终结符拼出的<b>所有</b>串，L(G) 只是其中<b>能从 S 推导出来</b>的那部分。比如 E 的文法推不出 <span class="mono">i i</span> 或空串，它们在 (V<sub>T</sub>)* 里却不在 L(G) 里。）</p>
+</div>
+
+<div class="card def">
+<h3>文法的作用：语言的有穷描述——课件第 24 页</h3>
+<p><b>课件思考题：文法 E→E+E | E*E | (E) | id 可以派生出多少个句子？</b>——<span class="hl">无穷多个</span>！E 递归地包含 E，可以无限套娃：(id)、(id+id)、((id+id)*id)、……</p>
+<p>这正是文法的价值：<span class="ka">以有限的规则描述无限的语言现象</span>。</p>
+<table class="gt">
+<tr><th>有限（文法这边）</th><th>无限（语言那边）</th></tr>
+<tr><td>产生式集合、终结符集合、非终结符集合——三样全部有穷</td><td>可以导出无穷多个句子（当然 L 也可以是有穷的，比如后面的 G6 只有 4 个句子）</td></tr>
+</table>
+<div class="formula">L(G) = { α | S ⇒* α，α ∈ V<sub>T</sub>* }</div>
+</div>
+
+<div class="card def">
+<h3>文法 → 语言：例 G1、G2——课件第 25~26 页</h3>
+<p><b>例 1（课件第 25 页）：求文法 G1 定义的语言</b>。<span class="mono">G1:　S→bA，A→aA | a</span></p>
+<div class="stepbox"><pre>S ⇒ bA ⇒ ba                      （A 只用 A→a）
+S ⇒ bA ⇒ baA ⇒ baa               （A 用一次 A→aA 再用 A→a）
+S ⇒ bA ⇒ baA ⇒ baA ⇒ … ⇒ baa…a   （A→aA 用 n-1 次，最后 A→a）
+L(G1) = { baⁿ | n ≥ 1 }           ——b 打头，后面至少一个 a</pre></div>
+<p><b>例 2（课件第 26 页）：求文法 G2 定义的语言</b>。<span class="mono">G2:　S→AB，A→aA | a，B→bB | b</span></p>
+<div class="stepbox"><pre>S ⇒ AB ⇒ aB ⇒ ab                     （A、B 都各自一步到位）
+S ⇒ AB ⇒ aAB ⇒ … ⇒ a…aB ⇒ a…ab       （A 先造 m 个 a）
+S ⇒ AB ⇒ … ⇒ a…aB ⇒ … ⇒ a…abb…B ⇒ a…ab…b   （B 再造 n 个 b）
+L(G2) = { aᵐbⁿ | m, n ≥ 1 }           ——先是若干个 a，后是若干个 b，两边个数互不相干</pre></div>
+<p>解题套路（以后求语言全用这招）：看<b>每个非终结符各自负责造什么</b>——A 负责"a 的队伍"，B 负责"b 的队伍"，S 只负责把两队拼起来，所以 m 和 n 独立取值。</p>
+</div>
+
+<div class="card def" id="ex-equiv">
+<h3>语言 → 文法：不唯一 + 等价文法——课件第 27 页</h3>
+<p>课件又给了一个也能产生 <span class="mono">{aᵐbⁿ | m,n≥1}</span> 的文法 <span class="mono">G2':　S→ACB，A→aA | a，C→aCb | ab，B→bB | b</span>（C 专门造"a 和 b 一样多"的一段，A、B 再往两边加塞，合起来照样是先 a 后 b、个数随意）。由此给出两条重要结论：</p>
+<ol>
+<li>🔥 <b>给定一个文法 G，就可以从结构上唯一地确定其语言 L(G)</b>——文法到语言是"一对一"这一侧是确定的；</li>
+<li>🔥 <b>给定一种语言 L，能确定其文法，但这种文法可能不是唯一的</b>——语言到文法是"多对一"。于是有：</li>
+</ol>
+<div class="formula">定义（课件编号 2.5 处）：若 L(G2) = L(G2')，则称文法 G2 和 G2' 是<b>等价的</b>。</div>
+</div>
+
+<div class="card def" id="ex-g3">
+<h3>🔥 文法 ↔ 语言互求四连例——课件第 28 页（构造题标准题型）</h3>
+<p><b>例 A：构造文法 G3，使 L(G3) = { aⁿbⁿ | n ≥ 1 }</b>。分步思路：a 和 b <b>必须一样多</b>，那就让它们"一对一地同时产生"——每用一次递归规则就同时放出一个 a 在左、一个 b 在右：</p>
+<div class="stepbox"><pre>G3:  S → aSb | ab
+验证: S ⇒ ab            （n=1）
+      S ⇒ aSb ⇒ aabb    （n=2）
+      S ⇒ aSb ⇒aaSbb ⇒ aaabbb   （n=3）✓ aⁿbⁿ</pre></div>
+<p><b>例 B：有文法 G4: S→aSb, S→ab，它确定的语言是什么？</b>——和例 A 完全同一个文法！所以 <span class="mono">L(G4) = { aⁿbⁿ | n ≥ 1 }</span>。（这题在教你：别看见"求语言"就慌，拿递归规则"转几圈"验证即可。）</p>
+<p><b>例 C：已知语言 L(G) = { abⁿa | n ≥ 1 }，试给出其文法。</b>分步思路：两头 a <b>固定不动</b>，中间夹一串 b——两头的 a 直接写死，中间交给一个专门产 b 的非终结符 B：</p>
+<div class="stepbox"><pre>G5:   S → aBa,   B → bB | b        （B 右递归产 b）
+G5':  S → aBa,   B → Bb | b        （B 左递归产 b，效果相同）
+验证: S ⇒ aBa ⇒ aba （n=1）；S ⇒ aBa ⇒ abBa ⇒ abba （n=2）✓ abⁿa</pre></div>
+<p>两个答案都对——这正好印证课件第 27 页的结论"<b>给定语言，文法不唯一</b>"（G5 和 G5' 等价）。</p>
+<p><b>例 D：有文法 G6: S→aB | bB，B→a | b，它确定什么语言？</b>分步：S 先放出第一个符号（a 或 b），B 再放出第二个符号（a 或 b），两步各 2 选 1：</p>
+<div class="stepbox"><pre>S ⇒ aB ⇒ aa    S ⇒ aB ⇒ ab
+S ⇒ bB ⇒ ba    S ⇒ bB ⇒ bb
+L(G6) = { aa, ab, ba, bb }      ——所有长度为 2 的 a/b 串（有穷语言！只有 4 个句子）</pre></div>
+</div>
+
+<!-- ================= 2.4（课件第29~30页） ================= -->
+<h2 class="section">🏛️ 2.4 文法的类型（课件第 29~30 页）</h2>
+
+<div class="card def">
+<h3>🔥 乔姆斯基（Chomsky）把文法分为四类——课件第 29 页</h3>
+<p>对四元组 G = (V<sub>T</sub>, V<sub>N</sub>, S, P) 中<b>产生式的形状</b>逐步加以限制，就得到四型文法：</p>
+<table class="gt">
+<tr><th>类型</th><th>产生式限制（课件原话）</th><th>别名</th><th>白话</th></tr>
+<tr><td><b>0 型</b></td><td>α→β，α, β ∈ (V<sub>N</sub>∪V<sub>T</sub>)*，α 至少有一个非终结符</td><td>短语文法</td><td>几乎不加限制，只要左部里有非终结符就行</td></tr>
+<tr><td><b>1 型</b></td><td>|α| ≤ |β|（右部不比左部短），但 S→ε 可以例外；等价看法：<b>αAβ → αγβ</b> 是 1 型文法的一个产生式</td><td>上下文有关文法</td><td>改写不许"越改越短"；A 想变成 γ，得看左右两边的上下文 α 和 β 答不答应</td></tr>
+<tr><td><b>2 型</b></td><td>A → β，A ∈ V<sub>N</sub>，β ∈ (V<sub>N</sub>∪V<sub>T</sub>)*</td><td>上下文无关文法（CFG）</td><td>左部只能是<b>单独一个非终结符</b>——A 想改写就改写，不看上下文</td></tr>
+<tr><td><b>3 型</b></td><td>A → aB 或 A → a，A, B ∈ V<sub>N</sub>，a ∈ V<sub>T</sub>*</td><td>右线性文法 / 正规文法</td><td>右部最多"一个终结符 + 最多一个非终结符"，且非终结符只能乖乖站在右边</td></tr>
+</table>
+<div class="notice">🔥 <b>"上下文有关 / 上下文无关"的名字由来</b>（对照 1 型的 αAβ→αγβ 与 2 型的 A→β）：1 型里非终结符 A 的改写被它的左邻 α、右舍 β "管着"——只有处在 α_β 这个环境里才许变成 γ，这就是"<b>上下文有关</b>"；2 型里 A 是唯一的左部，左边是啥右边是啥都无所谓，随到随改，这就是"<b>上下文无关</b>"。程序语言的绝大部分语法结构用 2 型描述，所以后面第 4~6 章的语法分析全部围绕 2 型文法展开。</div>
+<p><b>拿课件已出现过的文法练"判型"（各型文法对号入座）</b>：</p>
+<table class="gt">
+<tr><th>文法</th><th>规则</th><th>判型分步</th><th>结论</th></tr>
+<tr><td>G[E]</td><td class="mono">E→E+E|E*E|(E)|id</td><td>左部全是单个非终结符 → 满足 2 型；但右部 E+E 有"非终结符+终结符+非终结符"，不是 aB / a 形</td><td><b>2 型</b>，非 3 型</td></tr>
+<tr><td>G3</td><td class="mono">S→aSb|ab</td><td>左部单非终结符 → 2 型；右部 aSb 中 S 不在最右，不满足右线性</td><td><b>2 型</b>，非 3 型</td></tr>
+<tr><td>G1</td><td class="mono">S→bA，A→aA|a</td><td>bA、aA、a 全是"终结符(+非终结符)"的右线性形状</td><td><b>3 型</b>（正规文法）</td></tr>
+<tr><td>G6</td><td class="mono">S→aB|bB，B→a|b</td><td>aB、bB、a、b 全是 aB / a 形</td><td><b>3 型</b>（正规文法）</td></tr>
+<tr><td>G2</td><td class="mono">S→AB，A→aA|a，B→bB|b</td><td>S→AB 左部单非终结符 → 2 型；但右部 AB 是"非终结符打头"，不右线性</td><td><b>2 型</b>，非 3 型</td></tr>
+<tr><td>课件 S→0S1, S→01</td><td class="mono">S→0S1，S→01</td><td>左部单非终结符 → 2 型；0S1 中 S 夹在中间不右线性</td><td><b>2 型</b></td></tr>
+</table>
+</div>
+
+<div class="card def">
+<h3>四型文法的"逐级包含"关系——课件第 30 页</h3>
+<p>课件强调：四种文法之间的关系是<b>将产生式作进一步限制而定义的</b>——限制越加越多，能描述的语言越来越少。四种文法之间的逐级"包含"关系：</p>
+<div class="stepbox"><pre>3 型 ⊂ 2 型 ⊂ 1 型 ⊂ 0 型
+正规文法 ⊂ 上下文无关文法 ⊂ 上下文有关文法 ⊂ 短语文法
+（限制最严）                            （几乎无限制）</pre></div>
+<p>🔥 人话记忆：<b>号码越大，限制越严，队伍越小</b>。每个 3 型文法天然是 2 型、1 型、0 型；判断题型给文法问"是几型"时，<b>从最严的 3 型开始试，试到第一个满足的就是答案</b>（说"G 是 2 型"通常指它满足 2 型但未必满足 3 型）。</p>
+<p>⭐【了解】四种文法分别对应四种自动机（0 型→图灵机、1 型→线性有界自动机、2 型→下推自动机、3 型→有限自动机），本章只要求记住名称与包含关系，自动机部分第 3 章接触有限自动机。</p>
+</div>
+
+<!-- ================= 2.5（课件第31~34页） ================= -->
+<h2 class="section">🌳 2.5 上下文无关文法及其语法树（课件第 31~34 页）</h2>
+
+<div class="card def">
+<h3>语法树的定义与 (i+i) 的树——课件第 31 页</h3>
+<p>🔥 <b>定义</b>：<b>语法分析树</b>是 <b>2 型文法的句型推导的图形表示</b>，简称<b>语法树</b>。课件用 E→i | E+E | E*E | (E) 画了句子 (i+i) 的推导树（无论按什么顺序替换，最后长成同一棵树）：</p>
+<div class="stepbox"><pre>E ⇒ (E) ⇒ (E+E) ⇒ (i+E) ⇒ (i+i)     （先展开括号里最左的 E）
+E ⇒ (E) ⇒ (E+E) ⇒ (E+i) ⇒ (i+i)     （先展开括号里最右的 E）
+两条路殊途同归，都是下面这棵树：
+        E
+      / | \
+     (  E  )
+       /|\
+      E + E
+      |   |
+      i   i</pre></div>
+<p>🔥 课件金句：<b>语法树表示了一个句型种种可能的不同推导过程</b>——一棵树把"所有替换顺序"一网打尽，所以后面分析句型时我们宁画树不写推导。</p>
+<p>画树规则（从推导得树）：开始符号做<b>根</b>；每用一次规则 A→γ，就给结点 A 添上 γ 里从左到右的<b>儿子</b>；终结符是<b>叶子</b>不再展开；从左到右读叶子就是那个句型。</p>
+</div>
+
+<div class="card def" id="ex-ii">
+<h3>🔥 最左推导与最右推导（规范推导）——课件第 32 页</h3>
+<ul>
+<li><b>最左推导</b>：任何一步 α ⇒ β 都是对 α 的<b>最左非终结符</b>进行替换的——记号 <span class="mono">⇒<sub>lm</sub></span>。它与<b>最右归约</b>对应。</li>
+<li><b>最右推导</b>：每步都替换<b>最右</b>的非终结符——记号 <span class="mono">⇒<sub>rm</sub></span>。最右推导又称<b>规范推导</b>，与<b>最左归约（规范归约）</b>对应。</li>
+</ul>
+<p>课件例（句子 (i+i)，两种推法对照，注意每步替换的是哪个 E）：</p>
+<div class="stepbox"><pre>最左推导:  E ⇒(lm) (E) ⇒(lm) (E+E) ⇒(lm) (i+E) ⇒(lm) (i+i)
+分步: ① E→(E)      ② 括号里最左的 E→E+E
+      ③ 现在最左的 E（+左边那个）→i
+      ④ 剩下的 E→i                     ✓ (i+i)
+
+最右推导:  E ⇒(rm) (E) ⇒(rm) (E+E) ⇒(rm) (E+i) ⇒(rm) (i+i)
+分步: ① E→(E)      ② 括号里的 E→E+E
+      ③ 最右的 E（+右边那个）先→i
+      ④ 剩下的 E→i                     ✓ (i+i)</pre></div>
+<p>🔥 考点提醒：<b>"最右推导 = 规范推导"，"最左归约 = 规范归约"</b>这两对名字是第 6 章 LR 分析的地基（LR 分析就是规范归约），现在必须把对应关系背牢。</p>
+</div>
+
+<div class="card def" id="ex-iistar">
+<h3>🔥 例：i*i+i 的最右及最左推导——课件第 33 页（解答课件留白处）</h3>
+<p><b>题目（课件原题）</b>：文法 G: E→i | E+E | E*E | (E)，给出句子 <span class="mono">i*i+i</span> 的最右及最左推导。分步解答：</p>
+<p>先想结构：i*i+i 只能切成 <span class="mono">(E*E) + E</span>（左边的 E 推成 i*i，右边的 E 推成 i）。</p>
+<div class="stepbox"><pre>最左推导（每步替换当前最左的非终结符）:
+  E ⇒ E+E ⇒ E*E+E ⇒ i*E+E ⇒ i*i+E ⇒ i*i+i
+  分步: ① E→E+E（开局定型"+"在外）
+       ② 当前最左的 E（+左边）→E*E
+       ③ 最左的 E→i    ④ 下一个最左 E→i    ⑤ 最后的 E→i
+
+最右推导（每步替换当前最右的非终结符）:
+  E ⇒ E+E ⇒ E+i ⇒ E*E+i ⇒ E*i+i ⇒ i*i+i
+  分步: ① E→E+E       ② 当前最右的 E（+右边）→i（先定型末尾）
+       ③ 剩下的 E→E*E  ④ 最右 E→i    ⑤ 最后的 E→i</pre></div>
+<p>对照口诀：<b>最左推导"从左往右一点点收"（先定型左半边），最右推导"从右往左收"（先定型右半边）</b>。🎮 这道题在第 1 关的推导模拟器（<a href="level1.html">level1.html</a>）里有互动版，去亲手推一遍。</p>
+</div>
+
+<div class="card def" id="ex-ambig">
+<h3>🔥 文法的二义性——课件第 34 页</h3>
+<p><b>课件思考题（第 33 页问、第 34 页答）：一个句型是否对应一棵唯一的语法树呢？</b>——<span class="hl">不一定！</span>课件马上用同一个文法的句子 i*i+i 给出<b>两棵</b>语法树：</p>
+<p>推法一（第一步用 E→E*E，<b>乘在外层</b>）：E ⇒ E*E ⇒ i*E ⇒ i*E+E ⇒ i*i+E ⇒ i*i+i，把 i*i+i 理解为 <span class="mono">i*(i+i)</span>：</p>
+<div class="stepbox"><pre>树一（外层是 *：i * (i+i)）:
+E
+├─ E
+│  └─ i
+├─ *
+└─ E
+   ├─ E
+   │  └─ i
+   ├─ +
+   └─ E
+      └─ i</pre></div>
+<p>推法二（第一步用 E→E+E，<b>加在外层</b>）：E ⇒ E+E ⇒ E*E+E ⇒ i*E+E ⇒ i*i+E ⇒ i*i+i，把 i*i+i 理解为 <span class="mono">(i*i)+i</span>：</p>
+<div class="stepbox"><pre>树二（外层是 +：(i*i) + i）:
+E
+├─ E
+│  ├─ E
+│  │  └─ i
+│  ├─ *
+│  └─ E
+│     └─ i
+├─ +
+└─ E
+   └─ i</pre></div>
+<div class="formula">🔥 定义（课件原话）：若一个文法存在<b>某个句子对应两棵不同的语法树</b>，则称此文法是<b>二义性文法</b>。<br>所以 E → i | E+E | E*E | (E) 是二义性文法（i*i+i 就是"呈堂证供"）。</div>
+<div class="notice">三点必须想明白（考试爱挖的坑）：① 二义性说的是<b>文法</b>的性质，不是句子好看不好看；树一对应"乘法优先级低"、树二对应"乘法优先级高"——同一句子两棵树意味着两种不同计算顺序。② 判二义性只需<b>找一个句子画出两棵不同的树</b>即可定罪；但要证明一个文法<b>无</b>二义性，必须对<b>所有</b>句子都论证唯一（难得多，了解即可）。③ 消除二义性的常用办法是改写文法、引入优先级层次（如把 E 拆成 E、T、F），第 4 章构造 LL(1) 表达式文法时会亲眼看到这种改写，详见第 4 章。</div>
+</div>
+
+<!-- ================= 2.6（课件第35~40页） ================= -->
+<h2 class="section">🔎 2.6 句型的分析（课件第 35~40 页）</h2>
+
+<div class="card def">
+<h3>什么是句型分析 + 两大流派——课件第 35 页</h3>
+<p>🔥 <b>句型分析</b>：就是<b>识别一个符号串是否为某文法的句型</b>，是<b>某个推导的构造过程</b>。句型分析算法分为两类：</p>
+<table class="gt">
+<tr><th>方法</th><th>方向</th><th>课件对应章节</th></tr>
+<tr><td>自顶向下的分析方法</td><td>从树根（开始符号）往叶子推</td><td>第 4 章</td></tr>
+<tr><td>自底向上的分析方法</td><td>从叶子往树根归约</td><td>第 5、6 章</td></tr>
+</table>
+</div>
+
+<div class="card def">
+<h3>自顶向下的分析方法——课件第 36 页</h3>
+<ul>
+<li><b>思想</b>（课件原话）：对一个输入串，从文法<b>开始符号（根结点）</b>出发，采用一切可能的办法（复用各种规则进行推导），<b>从上（根结点）而下</b>地为输入串建立一棵语法树。</li>
+<li><b>问题（课件加粗发问）</b>：在推导过程中<b>如何选择规则</b>？——一个非终结符往往有多条规则，选错了就得回头。</li>
+</ul>
+<p><b>课件例</b>：G: S→cAd，A→ab | a，构造输入串 <span class="mono">cabd</span>。分步走：</p>
+<div class="stepbox"><pre>① 从 S 开始，唯一规则 S→cAd：句型变成 cAd，最左的 c 恰好对上输入的 c ✓
+② 轮到 A，它有两条规则，先试 A→a：句型变成 cad
+     下一个输入符号是 b，可句型这里该匹配 d 了 → ✗ 失败，回溯
+③ 换 A→ab：句型变成 cabd
+     c ✓ a ✓ b ✓ d ✓ → 全部对上，cabd 是该文法的句子 ✓</pre></div>
+<p>🔥 "先猜错、再回溯"太笨了，怎么<b>一眼选对规则</b>？靠 FIRST 集 / FOLLOW 集——<b>详见第 4 章</b>（自顶向下的确定性分析、LL(1) 文法都在那里展开）。</p>
+</div>
+
+<div class="card def">
+<h3>自底向上的分析方法——课件第 37 页</h3>
+<ul>
+<li><b>思想</b>（课件原话）：对一个输入串，逐步进行"<b>归约</b>"，试图归约到文法的<b>开始符号</b>。（"规约"即课件用字，规范写法为"归约"。）</li>
+<li><b>问题（课件加粗发问）</b>：在归约过程中<b>如何选择可归约串</b>？——串里哪一段能收？收哪一段才对？</li>
+</ul>
+<p><b>课件例</b>（同一个文法 G: S→cAd，A→ab | a，输入 cabd）反向走：</p>
+<div class="stepbox"><pre>① 从左往右扫描 cabd，先拿下 c、a、b；
+② 发现栈顶的 ab 恰好是规则 A→ab 的右部 → 把 ab 归约成 A，得到 cAd
+③ cAd 恰好是规则 S→cAd 的右部 → 再归约成 S
+④ 归约到了开始符号 S：cabd 是句子 ✓（和自顶向下的结论一致）</pre></div>
+<p>呼应第 1 关的比喻：自底向上归约像<b>收拾桌上的一摞摞碗</b>——每次认准"最左边能一把端走的那摞"（它有专门的名字：句柄，马上定义），收走一摞可能又叠出新的一摞，直到桌上只剩一个大盘子 S。"选哪一摞"就是课件问的"如何选择可归约串"，第 6 章 LR 分析整章都在精确回答它——详见第 5、6 章。</p>
+</div>
+
+<div class="card def">
+<h3>🔥 定义 2.8：短语、直接短语、句柄——课件第 38 页（教材 P31）</h3>
+<p>已知文法 G，文法开始符号 S，设 <span class="mono">αβδ</span> 是文法 G 的一个<b>句型</b>：</p>
+<ul>
+<li>🔥 <b>短语</b>：若 <span class="mono">S ⇒* αAδ</span> 且 <span class="mono">A ⇒⁺ β</span>，则称 β 是句型 αβδ 的<b>相对于非终结符 A 的短语</b>。</li>
+<li>🔥 <b>直接短语</b>：若有 <span class="mono">S ⇒* αAδ</span> 且 <span class="mono">A ⇒ β</span>（只用一条规则 A→β，一步直达），则称 β 是句型 αβδ 的<b>相对于规则 A→β 的直接短语</b>。</li>
+<li>🔥 <b>句柄</b>：一个句型的<b>最左直接短语</b>称为该句型的<b>句柄</b>。</li>
+</ul>
+<div class="notice">白话版（对照语法树最好懂）：<b>短语</b> = 树中<b>某个非终结符结点</b>整棵子树从左到右的叶子（相对那个结点）；<b>直接短语</b> = 只有<b>一层</b>的子树（父结点一步就长出这些叶子，用的正是某条规则）；<b>句柄</b> = 所有直接短语里<b>最靠左</b>的那个。自底向上分析每一步归约的就是句柄——第 6 章 LR 分析的核心任务就是"精确定位句柄"。</div>
+</div>
+
+<div class="card def" id="ex-cabd">
+<h3>🔥 例：求句型 cabd 的短语、直接短语和句柄——课件第 39 页（完整解答）</h3>
+<p><b>题目（课件原题）</b>：考虑文法 G[S]：S→cAd，A→ab | a，求句型 <span class="mono">cabd</span> 的短语、直接短语和句柄。分步解答：</p>
+<p><b>第一步：画语法树</b>（S 推 cAd 一步；其中的 A 只能用 A→ab 才能对上后面的 b）：</p>
+<div class="stepbox"><pre>S
+├─ c
+├─ A
+│  ├─ a
+│  └─ b
+└─ d        （从左到右读叶子：c a b d = cabd ✓）</pre></div>
+<p><b>第二步：逐个非终结符结点找子树产物</b>（=短语）：</p>
+<table class="gt">
+<tr><th>结点</th><th>子树叶子（产物）</th><th>是短语吗</th><th>是直接短语吗</th></tr>
+<tr><td>S（根）</td><td class="mono">cabd</td><td>✓ 相对于 S 的短语（S ⇒* S，S ⇒⁺ cabd 走两步）</td><td>✗（S⇒cabd 需两步：S⇒cAd⇒cabd，不是一步）</td></tr>
+<tr><td>A（中层）</td><td class="mono">ab</td><td>✓ 相对于 A 的短语（S ⇒* cAd，A ⇒⁺ ab）</td><td>✓（恰好用规则 A→ab 一步：S ⇒* cAd 且 A ⇒ ab）</td></tr>
+</table>
+<p><b>第三步：汇总作答</b>：</p>
+<div class="formula">短语：cabd（相对于 S）、ab（相对于 A）<br>直接短语：ab（相对于规则 A→ab）　——句型里只有这一个直接短语<br>句柄（最左直接短语）：ab</div>
+<p>🔥 这就是自底向上分析归约 cabd 时"第一步先收 ab"的理论依据——句柄 ab 正是第 37 页例子里被先归约的那一段。</p>
+</div>
+
+<div class="card def" id="ex-aabbaa">
+<h3>🔥 练习：句型 aabbaa 的短语、直接短语和句柄——课件第 40 页（完整分步解答）</h3>
+<p><b>题目（课件原题，三问）</b>：考虑文法 G[S]：<span class="mono">S→aAS | a，A→SbA | SS | ba</span>：</p>
+<p><b>第 1 问：求 G[S] 的 V<sub>N</sub>、V<sub>T</sub> 和识别符号。</b>按"左部出现过的 = 非终结符，只在右部出现的 = 终结符"：</p>
+<div class="formula">V<sub>N</sub> = { S, A }　　V<sub>T</sub> = { a, b }　　识别符号（开始符号）S = S（G[S] 方括号里那个）</div>
+<p><b>第 2 问：文法 G[S] 有几条规则？</b>竖线拆开数：S→aAS、S→a、A→SbA、A→SS、A→ba，共 <span class="ka">5 条</span>。</p>
+<p><b>第 3 问：求句型 aabbaa 的短语、直接短语和句柄。</b>分步：</p>
+<p>① 先构造推导（草稿纸上试着让 S 吐出 aabbaa）：S ⇒ aAS ⇒ a(SbA)S ⇒ a(abA)S ⇒ a(ab·ba)S ⇒ aabbaa，逐条用的规则是 S→aAS、A→SbA、S→a、A→ba、S→a：</p>
+<div class="stepbox"><pre>S ⇒ aAS        用 S→aAS
+  ⇒ aSbAS      用 A→SbA
+  ⇒ aabAS      用 S→a
+  ⇒ aabbaS     用 A→ba
+  ⇒ aabbaa     用 S→a      ✓ 得到句型 aabbaa</pre></div>
+<p>② 画语法树（课件第 40 页配了这棵树）：</p>
+<div class="stepbox"><pre>S
+├─ a
+├─ A
+│  ├─ S
+│  │  └─ a
+│  ├─ b
+│  └─ A
+│     ├─ b
+│     └─ a
+└─ S
+   └─ a        （从左到右读叶子：a a b b a a = aabbaa ✓）</pre></div>
+<p>③ 逐个非终结符结点收短语、并判断是否"一层直达"：</p>
+<table class="gt">
+<tr><th>结点（位置）</th><th>子树产物</th><th>短语（相对谁）</th><th>直接短语（相对哪条规则）</th></tr>
+<tr><td>S（根）</td><td class="mono">aabbaa</td><td>✓ 相对 S</td><td>✗（S⇒aabbaa 共 5 步）</td></tr>
+<tr><td>A（a 与最后的 a 之间）</td><td class="mono">abba</td><td>✓ 相对 A</td><td>✗（A⇒abba 走 3 步：A→SbA→abA→abba）</td></tr>
+<tr><td>S（A 的第一个孩子）</td><td class="mono">a（第 2 个字符）</td><td>✓ 相对 S</td><td>✓ 规则 S→a（一步直达）</td></tr>
+<tr><td>A（A 的第三个孩子）</td><td class="mono">ba（第 3~4 字符）</td><td>✓ 相对 A</td><td>✓ 规则 A→ba（一步直达）</td></tr>
+<tr><td>S（根的最右孩子）</td><td class="mono">a（第 6 个字符）</td><td>✓ 相对 S</td><td>✓ 规则 S→a（一步直达）</td></tr>
+</table>
+<p>④ 汇总作答：</p>
+<div class="formula">短语：aabbaa（相对 S）、abba（相对 A）、a（相对 S，出现两处）、ba（相对 A）<br>直接短语：a（S→a）、ba（A→ba）、a（S→a）——共三个<br>句柄（最左直接短语）：a —— 即句型 aabbaa 中<b>最左边那个 a</b>（第 2 个字符，由 S→a 得到）</div>
+<p>🔥 检验小技巧：直接短语一定是短语；句型自身（aabbaa）必是短语但<b>很少</b>是直接短语；句柄只能从直接短语里挑最左的。判断"是不是直接短语"就看子树是不是<b>恰好一层</b>。</p>
+</div>
+
+<!-- ================= 2.7（课件第41页） ================= -->
+<h2 class="section">🧹 2.7 有关文法在实际应用中的一些说明（课件第 41 页）</h2>
+
+<div class="card def" id="ex-ga">
+<h3>🔥 有害规则：U → U 应限制文法中不得含有——课件第 41 页</h3>
+<p>形如 <span class="mono">U→U</span> 的规则（左部右部一样）叫<b>有害规则</b>，写文法时应限制不得含有。为什么有害？做一遍课件的练习就懂了。</p>
+<p><b>课件练习（原题三问）</b>：G[A]: A→a，B→b：</p>
+<p><b>(1) 求 V<sub>N</sub>、V<sub>T</sub>、P 和识别符号。</b></p>
+<div class="formula">V<sub>N</sub> = { A, B }　V<sub>T</sub> = { a, b }　P = { A→a，B→b }　识别符号 = A</div>
+<p><b>(2) 求 L(G[A])。</b>分步：从开始符号 A 出发只有 A→a 一条路，A ⇒ a 就到头；B 虽有规则 B→b，但<b>从 A 出发根本走不到 B</b>（A 的推导里不会出现 B），所以 b 永远推不出来。故：</p>
+<div class="formula">L(G[A]) = { a }</div>
+<p><b>(3) 如果存在 A→A，该文法是不是二义性的？</b>分步：加上 A→A 后，句子 a 就有了好多棵不同的语法树：</p>
+<div class="stepbox"><pre>树1: A→a                          （一步）
+树2: A⇒A→a                        （先 A→A 空转一圈，再 A→a）
+树3: A⇒A⇒A→a                      （空转两圈再收尾）
+……可以无限空转下去，同一个句子 a 对应无穷多棵不同的语法树</pre></div>
+<div class="formula">结论：是二义性文法。U→U 这种"原地转圈"的规则百无一用、徒增二义——所以叫<b>有害规则</b>，应限制文法中不得含有。</div>
+</div>
+
+<div class="card def">
+<h3>🔥 多余规则：应限制文法中不得含有多余规则——课件第 41 页</h3>
+<p>多余规则分两种情况（课件给的两行例子对照着看）：</p>
+<table class="gt">
+<tr><th>类型</th><th>含义</th><th>课件例（G[A]: A→a，B→b | Dd，D→Df）</th></tr>
+<tr><td><b>不可到达</b></td><td>某非终结符从开始符号出发<b>永远推导不出来</b>，它的规则白写</td><td>B：从 A 出发到不了 B（A→a 就终结了），所以 B→b 和 B→Dd 两条规则<b>多余</b>——上面练习(2)里 b 推不出来正是这个原因</td></tr>
+<tr><td><b>不可终止</b></td><td>某非终结符<b>永远推不出全终结符的串</b>，陷在里面出不来</td><td>D：唯一的规则 D→Df 右部又含 D，转多少圈都甩不掉 D，推不出终结符串，所以 D→Df <b>多余</b>；连带 B→Dd 里用到的 Dd 也跟着作废</td></tr>
+</table>
+<p>🔥 判断套路（两句口诀）：<b>"从 S 往下走，走不到的是多余（不可到达）；从它自己往外走，出不去的是多余（不可终止）"</b>。工程上压缩文法、考试里问"哪些规则可以删"都用这两条。</p>
+</div>
+
+<div class="card def">
+<h3>⭐ 上下文无关文法中的 ε 规则——课件第 41 页（了解级）</h3>
+<p>⭐【了解】课件在本节最后提到"上下文无关文法中的 ε 规则"，即右部为空串的规则 A→ε。它会让"某成分可以干脆不出现"，给某些定义（如 2 型文法是否允许 S→ε、句型分析）带来边界讨论。本章只需知道有这么回事；第 4 章求 FIRST/FOLLOW、判 LL(1) 时会正面处理"能推出 ε 的非终结符"，详见第 4 章。</p>
+</div>
+
+<!-- ================= 小结（课件第42~43页） ================= -->
+<h2 class="section">🎒 本章小结（课件第 42~43 页）</h2>
+
+<div class="card def">
+<h3>课件第 42 页：六条主线自查清单</h3>
+<table class="gt">
+<tr><th>#</th><th>课件小结条目</th><th>自查问题（答不上就翻回对应小节）</th></tr>
+<tr><td>1</td><td>文法的概念</td><td>四元组 G=(V<sub>N</sub>,V<sub>T</sub>,P,S) 各是什么？左部 α 有什么限制？</td></tr>
+<tr><td>2</td><td>符号和符号串的概念和相关计算</td><td>ε/∅/{ε} 区别？前缀后缀子串？连接、方幂、正闭包 / 克林闭包怎么算？</td></tr>
+<tr><td>3</td><td>句型、句子、语言</td><td>句型和句子差在哪？L(G) 怎么定义？L(G) 与 V<sub>T</sub>* 什么关系？</td></tr>
+<tr><td>4</td><td>符号串的推导和归约</td><td>⇒、⇒⁺、⇒* 分别几步？推导与归约怎么互为反向？最左 / 最右（规范）推导？</td></tr>
+<tr><td>5</td><td>文法的二义性</td><td>判定定义是什么？E→i|E+E|E*E|(E) 为什么二义（拿哪个句子、画哪两棵树）？</td></tr>
+<tr><td>6</td><td>语法树、短语、直接短语、句柄</td><td>短语 / 直接短语 / 句柄的定义与"子树"白话版？句柄是最左的什么？</td></tr>
+</table>
+</div>
+
+<div class="card def">
+<h3>课件第 43 页：一张图把本章接进编译器</h3>
+<div class="stepbox"><pre>符号 → 字符串 → 单词符号 ──→ 词法分析器（第3章，用正规式）
+                                ↓
+表达式、语句、程序块、程序 ──→ 语法分析器（第4~6章，用上下文无关文法）──→ 语法分析树
+                                ↓
+语言（集合） ← 字母表（集合）的组合（集合）</pre></div>
+<ul>
+<li>第 3 章的词法分析用<b>正规式（3 型文法）</b>认<b>单词符号</b>——本章的字母表 / 闭包运算就是它的数学准备；</li>
+<li>第 4~6 章的语法分析用<b>上下文无关文法（2 型）</b>认<b>表达式 / 语句 / 程序</b>，产出的就是本章的<b>语法分析树</b>；本章的句型分析两大流派分别通向第 4 章（自顶向下，靠 FIRST/FOLLOW 选规则——详见第 4 章）和第 5、6 章（自底向上，靠句柄归约）。</li>
+</ul>
+</div>
+
+<!-- ================= 章末练习（课件第44页） ================= -->
+<h2 class="section">📝 章末练习总览（课件第 44 页）</h2>
+
+<div class="card def">
+<h3>课件内全部练习与思考题索引（题目 + 解答都在本页）</h3>
+<table class="gt">
+<tr><th>出处</th><th>题目</th><th>答案速览</th><th>详解位置</th></tr>
+<tr><td>课件第 4 页</td><td>P19 页的 BNF 文法有几条规则？</td><td>10 条</td><td><a href="#ex-bnf">2.1 节 / #ex-bnf</a> 与 <a href="#p13grammar">#p13grammar</a></td></tr>
+<tr><td>课件第 4 页</td><td>详细解释 BNF 描述自然语言句子的过程？</td><td>逐条重写尖帽子成分直到全终结</td><td><a href="#p14derive">#p14derive</a> 十步全推导</td></tr>
+<tr><td>课件第 5 页</td><td>字母表元素一定全是英文字母吗？</td><td>不一定（{0,1}、ASCII、Unicode…）</td><td>2.2 节字母表卡</td></tr>
+<tr><td>课件第 9 页</td><td>Σ₁Σ₂ == Σ₂Σ₁（交换律）？</td><td>不满足，{0a,0b,1a,1b} ≠ {a0,a1,b0,b1}</td><td>2.2 节乘积卡</td></tr>
+<tr><td>课件第 17 页</td><td>U=字母集，V=数字集，求 UV、V*、U(V)*、U⁺</td><td>字母+数字 / ε+数字串 / 字母打头 / 非空字母串</td><td><a href="#ex-uv">#ex-uv</a></td></tr>
+<tr><td>课件第 19 页</td><td>由简写识别 V<sub>N</sub>、V<sub>T</sub>、P、S？</td><td>左部符号=V<sub>N</sub>；只在右部=V<sub>T</sub>；方括号/首条左部=S</td><td>2.3 节 G[E] 卡</td></tr>
+<tr><td>课件第 21 页</td><td>两例推导中 α 和 β 是什么？</td><td>例(1) α=0, β=1；例(2) α=ε, β=ε</td><td>定义 2.2 卡末尾</td></tr>
+<tr><td>课件第 22 页</td><td>⇒、⇒⁺、⇒* 的区别？</td><td>一步 / 至少一步 / 零步及以上</td><td>定义 2.3/2.4 卡</td></tr>
+<tr><td>课件第 23 页</td><td>L(G) 与 (V<sub>T</sub>)* 的关系？</td><td>L(G) ⊆ (V<sub>T</sub>)*（子集）</td><td>定义 2.5/2.6 卡末尾</td></tr>
+<tr><td>课件第 24 页</td><td>E→E+E|E*E|(E)|id 可派生多少句子？</td><td>无穷多个（递归可无限展开）</td><td>"有穷描述"卡</td></tr>
+<tr><td>课件第 28 页</td><td>构造 G3 使 L={aⁿbⁿ|n≥1}；G4 的语言？L={abⁿa} 的文法？G6 的语言？</td><td>S→aSb|ab；{aⁿbⁿ}；S→aBa,B→bB|b（或 B→Bb|b）；{aa,ab,ba,bb}</td><td><a href="#ex-g3">#ex-g3</a> 四连例</td></tr>
+<tr><td>课件第 33 页</td><td>i*i+i 的最右及最左推导</td><td>两式各 5 步（详见推导步骤）</td><td><a href="#ex-iistar">#ex-iistar</a></td></tr>
+<tr><td>课件第 33/34 页</td><td>一个句型是否对应唯一语法树？（判二义性）</td><td>不一定；i*i+i 有两棵树 → E 文法二义</td><td><a href="#ex-ambig">#ex-ambig</a></td></tr>
+<tr><td>课件第 39 页</td><td>cabd 的短语、直接短语、句柄</td><td>短语 cabd、ab；直接短语 ab；句柄 ab</td><td><a href="#ex-cabd">#ex-cabd</a></td></tr>
+<tr><td>课件第 40 页</td><td>G[S] 三问（V<sub>N</sub>/V<sub>T</sub>；规则数；aabbaa）</td><td>{S,A}/{a,b}；5 条；句柄 a</td><td><a href="#ex-aabbaa">#ex-aabbaa</a></td></tr>
+<tr><td>课件第 41 页</td><td>G[A] 三问（四元组；L(G[A])；含 A→A 是否二义）</td><td>见卡；{a}；是二义（无穷多棵树）</td><td><a href="#ex-ga">#ex-ga</a></td></tr>
+</table>
+</div>
+
+<div class="card tip">
+<p><b>课件第 44 页布置的课后作业（原样照录）</b>：</p>
+<ul>
+<li>教材 P34 页习题：<span class="ka">1、2、5、6(2)、7、9、10、11</span>（题干在教材上，做完可回本页对照各定义自查；构造文法题按 <a href="#ex-g3">2.3 节四连例</a>的套路，求短语句柄题按 <a href="#ex-aabbaa">aabbaa 例</a>的三步法）。</li>
+<li>阅读教材 P13 页 PL/0 语言的 BNF 描述——正好复习 2.1 节的 BNF 五记号，看能不能数清 PL/0 文法有多少条规则、哪些是终结符。</li>
+</ul>
+<p>🎮 章末别光看：到第 1 关玩<b>推导模拟器</b>（<a href="level1.html">level1.html</a>），把最左 / 最右推导亲手跑一遍，本章就真正闭环了。下一章（第 3 章 · 词法分析）将用本章的字母表和闭包去造"认单词"的机器。</p>
+</div>
+
+<div class="footer">📖 全书精讲 ｜ <a href="chapter1.html">← 上一章</a> ｜ <a href="textbook.html">目录</a> ｜ <a href="chapter3.html">下一章 →</a> ｜ <a href="level1.html">🎮 配套第1关</a></div>
+</div>
+</body>
+</html>

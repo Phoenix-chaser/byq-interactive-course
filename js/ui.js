@@ -32,6 +32,7 @@
   /* ---------- 顶部导航 ---------- */
   const LEVELS = [
     { id: 'index.html', name: '🏠 首页' },
+    { id: 'textbook.html', name: '📖 全书精讲' },
     { id: 'level1.html', name: '第1关 · 编译全景与文法' },
     { id: 'level2.html', name: '第2关 · 词法分析' },
     { id: 'level3.html', name: '第3关 · LL(1)' },
