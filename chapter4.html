@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>第4章 · 自顶向下语法分析 精讲 | 编译原理闯关</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=2">
 </head>
 <body>
 <div class="topnav"><span class="brand">⚙️ 编译原理闯关</span>
@@ -34,7 +34,7 @@
 <tr><th>语法分析</th><th>子类</th><th>特点 / 去处</th></tr>
 <tr><td rowspan="2">自顶向下分析（本章）</td><td>确定的</td><td class="ok">LL(1) 分析，无回溯，4.1–4.3、4.5 节</td></tr>
 <tr><td>不确定的</td><td>带回溯，效率低，4.4 节</td></tr>
-<tr><td rowspan="2">自底向上分析</td><td>算法优先分析</td><td>第 5 章</td></tr>
+<tr><td rowspan="2">自底向上分析</td><td>算符优先分析<span style="color:var(--muted)">（课件原文印作"算法优先"）</span></td><td>第 5 章</td></tr>
 <tr><td>LR 分析</td><td>第 6 章</td></tr>
 </table>
 <p>🗣️ <b>人话版</b>：自顶向下 = <b>从树根（开始符号）往下长叶子</b>，用"推导"；自底向上 = <b>从叶子（输入串）往上归约到树根</b>，用"归约"。本章只管前者的"确定"版本。</p>
@@ -387,7 +387,7 @@
 <tr><td>先判别</td><td>A→ad|Bc，B→aA|bB</td><td>FIRST(A 的右部)：ad 给 {a}，Bc 给 FIRST(B)={a,b}——两集在 a 上相撞。表面上 A 的右部没有公共前缀，但 B 能以 a 开头，所以 <b>ad 与 Bc 隐含地共享左公因子 a</b>，不是 LL(1)</td></tr>
 <tr><td>代入展开（把隐含变明确）</td><td><b>A→ad|aAc|bBc，B→aA|bB</b></td><td>把 B 的两条右部代入 A→Bc 得 Bc⇒aAc / bBc，左公因子 a 显形</td></tr>
 <tr><td>提公因子</td><td><b>A→aA'|bBc，A'→d|Ac，B→aA|bB</b></td><td>A 的三条按公式提 δ=a：A→aA'|bBc，A'→d|Ac；B 的右部 a、b 打头不同，不用提</td></tr>
-<tr><td>判别</td><td>SELECT(A→aA')={a} ∩ SELECT(A→bBc)={b} = ∅；SELECT(A'→d)={d} ∩ SELECT(A'→Ac)={a} = ∅；SELECT(B→aA)={a} ∩ SELECT(B→bB)={b} = ∅</td><td class="ok">是 LL(1) 文法（课件答案：是）</td></tr>
+<tr><td>判别</td><td>SELECT(A→aA')={a} ∩ SELECT(A→bBc)={b} = ∅；SELECT(A'→d)={d} ∩ SELECT(A'→Ac)={a,b} = ∅；SELECT(B→aA)={a} ∩ SELECT(B→bB)={b} = ∅</td><td class="ok">是 LL(1) 文法（课件答案：是）</td></tr>
 </table>
 </div>
 
@@ -476,7 +476,7 @@ SELECT(A→β) = FIRST(β)。<br>
 <div class="formula">LL(1) 文法：任两个产生式 A→α|β 都满足：<br>
 ① FIRST(α) ∩ FIRST(β) = ∅（α、β 均不可空时的直观形式）；<br>
 ② 若 β ⇒* ε，那么 FIRST(α) ∩ FOLLOW(A) = ∅。</div>
-<p><b>LL(1) 文法有一些明显的性质：没有左公因子；不含左递归</b>（无二义性）——反向不成立，二者只是必要条件。</p>
+<p><b>LL(1) 文法有一些明显的性质：没有左公因子；不含左递归</b>（另：LL(1) 文法亦无二义性，见课件第 69 页）——反向不成立，二者只是必要条件。</p>
 </div>
 
 <div class="card warn">

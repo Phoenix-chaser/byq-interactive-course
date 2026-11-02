@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>第10章 · 代码优化和目标代码生成 精讲 | 编译原理闯关</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=2">
 </head>
 <body>
 <div class="topnav"><span class="brand">⚙️ 编译原理闯关</span>
@@ -52,7 +52,7 @@
 </div>
 
 <div class="card def">
-<h3>2.2 课件例一：赋值语句序列（"就是一个基本块"）</h3>
+<h3>2.2 课件例一：赋值语句序列（顺序执行、单入单出——本站判断：整段构成一个基本块）</h3>
 <div class="stepbox"><pre>a := 20;
 b := a + 20;
 c := a * b;</pre></div>
@@ -74,10 +74,9 @@ if k ≥ 10 then x := x + 1
 <p>按此切分：块1 = <code>k:=1</code> 与 if 条件判断（<b>转移语句是"出口"，属于它所在的块并封口</b>）；块2 = then 分支；块3 = else 分支。<b>口诀：第一句、跳转目标、转移语句的下一句——三者皆入口。</b></p>
 </div>
 
-<h2 class="section">3. 10.2 优化工作分类：两个维度 <span class="badge hot">🔥 考点</span></h2>
+<h2 class="section">2.4 手算示范：带 goto 的序列划分基本块（把"入口三来源"用全）</h2>
 
 <div class="card def">
-<h3>2.5 手算示范：带 goto 的序列划分基本块（把"入口三来源"用全）</h3>
 <div class="stepbox"><pre>1:  i := 1
 2:  t := 4 * i
 3:  if i ≥ 100 goto L2
@@ -93,10 +92,12 @@ if k ≥ 10 then x := x + 1
 <tr><td>4</td><td><b>紧跟转移语句之后</b> → 入口来源③，起块2</td></tr>
 <tr><td>5</td><td>又是转移，封口 → 块2={4,5}</td></tr>
 <tr><td>6</td><td>带标号 L2，是<b>跳转目标</b> → 入口来源②，起块3={6}</td></tr>
-<tr><td>7</td><td>紧跟转移之后的跳转目标 L3 → 起块4={7}</td></tr>
+<tr><td>7</td><td>带标号 L3，是 goto L3 的<b>跳转目标</b> → 入口来源②，起块4={7}</td></tr>
 </table>
 <p>结果共 4 块。对照 2.3 的口诀自查：<b>第一句、跳转目标、转移语句的下一句——三者皆入口；转移语句收尾封口。</b></p>
 </div>
+
+<h2 class="section">3. 10.2 优化工作分类：两个维度 <span class="badge hot">🔥 考点</span></h2>
 
 <div class="card def">
 <p>课件给出两个分类维度（选择题最爱把两维度混在一起设错项，注意区分）：</p>

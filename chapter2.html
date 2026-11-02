@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>第2章 · 高级语言及其描述 精讲 | 编译原理闯关</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=2">
 </head>
 <body>
 <div class="topnav"><span class="brand">⚙️ 编译原理闯关</span>
@@ -239,10 +239,10 @@
 <tr><th>小题</th><th>分步求解</th><th>答案</th></tr>
 <tr><td>UV</td><td>U 中每个字母分别接上 V 中每个数字：52×10 = 520 个长度为 2 的串，字母在前、数字在后</td><td class="mono">{A0, A1, …, z9}（共 520 个）</td></tr>
 <tr><td>V*</td><td>V⁰ ∪ V¹ ∪ V² ∪ …：先含空串 ε，再含一切数字串（1 位、2 位、3 位……）</td><td class="mono">{ε, 0, 7, 00, 10, 007, 2024, …}（ε + 全部数字串）</td></tr>
-<tr><td>U(V)*</td><td>一个字母 U，后面跟 (V)* 即 0 个或多个数字</td><td class="mono">{x, x1, a01, temp2 形} —— 字母开头、后随任意多个数字（标识符的雏形！）</td></tr>
+<tr><td>U(V)*</td><td>一个字母 U，后面跟 (V)* 即 0 个或多个数字</td><td class="mono">{x, x1, a01, b007 形} —— 字母开头、后随任意多个数字</td></tr>
 <tr><td>U⁺</td><td>U¹ ∪ U² ∪ …：长度至少为 1 的纯字母串</td><td class="mono">{a, ab, abc, …}（一切非空字母串）</td></tr>
 </table>
-<p>顺手记：<span class="hl">U(V)* 正是程序语言"标识符"的骨架</span>——字母打头，后面字母数字随便跟。第 3 章正规式会再次见到它。</p>
+<p>顺手记：<span class="hl">U(V)* 是"字母打头、后跟数字"的串</span>（如 a01、b007）——它比真正的标识符集 U(U|V)* 窄：标识符在首字母之后还允许继续出现字母（字母(字母|数字)*，第 3 章正规式会再次见到）。</p>
 </div>
 
 <div class="card def">
@@ -370,7 +370,7 @@ L(G2) = { aᵐbⁿ | m, n ≥ 1 }           ——先是若干个 a，后是若�
 
 <div class="card def" id="ex-equiv">
 <h3>语言 → 文法：不唯一 + 等价文法——课件第 27 页</h3>
-<p>课件又给了一个也能产生 <span class="mono">{aᵐbⁿ | m,n≥1}</span> 的文法 <span class="mono">G2':　S→ACB，A→aA | a，C→aCb | ab，B→bB | b</span>（C 专门造"a 和 b 一样多"的一段，A、B 再往两边加塞，合起来照样是先 a 后 b、个数随意）。由此给出两条重要结论：</p>
+<p>课件借文法 <span class="mono">G2':　S→ACB，A→aA | a，C→aCb | ab，B→bB | b</span> 与 G2 示意"等价文法"概念（课件原句是条件式"<b>若</b> L(G2)=L(G2') <b>则</b>称等价"）。较真地说：按所给产生式，G2' 只能生成 {aⁱbʲ | i,j≥2}（推不出 ab、aab、abb），与 G2 并不真正等价——若要等价，C 需可空（如 C→aCb|ε）。记住结论即可。由此给出两条重要结论：</p>
 <ol>
 <li>🔥 <b>给定一个文法 G，就可以从结构上唯一地确定其语言 L(G)</b>——文法到语言是"一对一"这一侧是确定的；</li>
 <li>🔥 <b>给定一种语言 L，能确定其文法，但这种文法可能不是唯一的</b>——语言到文法是"多对一"。于是有：</li>
@@ -408,7 +408,7 @@ L(G6) = { aa, ab, ba, bb }      ——所有长度为 2 的 a/b 串（有穷语�
 <tr><td><b>0 型</b></td><td>α→β，α, β ∈ (V<sub>N</sub>∪V<sub>T</sub>)*，α 至少有一个非终结符</td><td>短语文法</td><td>几乎不加限制，只要左部里有非终结符就行</td></tr>
 <tr><td><b>1 型</b></td><td>|α| ≤ |β|（右部不比左部短），但 S→ε 可以例外；等价看法：<b>αAβ → αγβ</b> 是 1 型文法的一个产生式</td><td>上下文有关文法</td><td>改写不许"越改越短"；A 想变成 γ，得看左右两边的上下文 α 和 β 答不答应</td></tr>
 <tr><td><b>2 型</b></td><td>A → β，A ∈ V<sub>N</sub>，β ∈ (V<sub>N</sub>∪V<sub>T</sub>)*</td><td>上下文无关文法（CFG）</td><td>左部只能是<b>单独一个非终结符</b>——A 想改写就改写，不看上下文</td></tr>
-<tr><td><b>3 型</b></td><td>A → aB 或 A → a，A, B ∈ V<sub>N</sub>，a ∈ V<sub>T</sub>*</td><td>右线性文法 / 正规文法</td><td>右部最多"一个终结符 + 最多一个非终结符"，且非终结符只能乖乖站在右边</td></tr>
+<tr><td><b>3 型</b></td><td>A → aB 或 A → a，A, B ∈ V<sub>N</sub>，a ∈ V<sub>T</sub>*</td><td>右线性文法 / 正规文法</td><td>右部是"终结符串（可为多个终结符）+ 至多一个非终结符，且非终结符只能站在最右"，或单独一个终结符串</td></tr>
 </table>
 <div class="notice">🔥 <b>"上下文有关 / 上下文无关"的名字由来</b>（对照 1 型的 αAβ→αγβ 与 2 型的 A→β）：1 型里非终结符 A 的改写被它的左邻 α、右舍 β "管着"——只有处在 α_β 这个环境里才许变成 γ，这就是"<b>上下文有关</b>"；2 型里 A 是唯一的左部，左边是啥右边是啥都无所谓，随到随改，这就是"<b>上下文无关</b>"。程序语言的绝大部分语法结构用 2 型描述，所以后面第 4~6 章的语法分析全部围绕 2 型文法展开。</div>
 <p><b>拿课件已出现过的文法练"判型"（各型文法对号入座）</b>：</p>
@@ -475,7 +475,7 @@ E ⇒ (E) ⇒ (E+E) ⇒ (E+i) ⇒ (i+i)     （先展开括号里最右的 E）
 <div class="card def" id="ex-iistar">
 <h3>🔥 例：i*i+i 的最右及最左推导——课件第 33 页（解答课件留白处）</h3>
 <p><b>题目（课件原题）</b>：文法 G: E→i | E+E | E*E | (E)，给出句子 <span class="mono">i*i+i</span> 的最右及最左推导。分步解答：</p>
-<p>先想结构：i*i+i 只能切成 <span class="mono">(E*E) + E</span>（左边的 E 推成 i*i，右边的 E 推成 i）。</p>
+<p>先想结构：按通常"先乘后加"，i*i+i 切成 <span class="mono">(E*E) + E</span> 作答（左边的 E 推成 i*i，右边的 E 推成 i；注意该文法二义，还存在 i*(E+E) 的切法，见下方二义性卡片）。</p>
 <div class="stepbox"><pre>最左推导（每步替换当前最左的非终结符）:
   E ⇒ E+E ⇒ E*E+E ⇒ i*E+E ⇒ i*i+E ⇒ i*i+i
   分步: ① E→E+E（开局定型"+"在外）

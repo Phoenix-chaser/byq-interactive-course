@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>第9章 · 运行时存储组织 精讲 | 编译原理闯关</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=2">
 </head>
 <body>
 <div class="topnav"><span class="brand">⚙️ 编译原理闯关</span>
@@ -95,7 +95,7 @@
 <tr><td>传给形参的是什么</td><td>实参的<b>值</b>（拷贝一份）</td><td>实参的<b>地址</b></td></tr>
 <tr><td>对形参的操作</td><td class="ok">只动"复印件"，<b>不影响实参</b></td><td class="no">直接写"原件"，<b>会影响实参</b></td></tr>
 <tr><td>函数能否改外面的变量</td><td class="no">不能</td><td class="ok">能</td></tr>
-<tr><td>C 语言对应</td><td>默认方式 <code>f(a)</code></td><td>指针 <code>f(&amp;a)</code> / 引用 <code>f(a&amp;)</code></td></tr>
+<tr><td>C 语言对应</td><td>默认方式 <code>f(a)</code></td><td>指针 <code>f(&amp;a)</code>（C 即可）；引用 <code>f(a)</code> 声明 <code>void f(int &amp;a)</code>（仅 C++）</td></tr>
 </table>
 </div>
 

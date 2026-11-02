@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>第8章 · 静态语义分析和中间代码生成 精讲 | 编译原理闯关</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=2">
 </head>
 <body>
 <div class="topnav"><span class="brand">⚙️ 编译原理闯关</span>
@@ -121,7 +121,7 @@
 <tr><td><b>栈符号表</b></td><td>按作用域进栈/退栈方式组织</td><td>适合分程序结构、嵌套作用域</td></tr>
 <tr><td><b>Hash 表</b></td><td>散列函数定位</td><td class="ok">实用编译器主流，快</td></tr>
 </table>
-<p>课件举例：P200 给出 <b>PL/0 程序段</b>及其符号表的登记过程——PL/0 用无序线性表：遇到新声明就顺次填一行，查名字就从表头线性往下找（程序短，扛得住；这也是 PL/0 "简单"哲学的一部分）。</p>
+<p>课件举例：P200 的 PL/0 程序段（以下为站方展开）：PL/0 用无序线性表——遇到新声明就顺次填一行，查名字就从表头线性往下找（程序短，扛得住；这也是 PL/0 "简单"哲学的一部分）。</p>
 </div>
 
 <h2 class="section">2. 8.2 静态语义分析：编译期把能查的都查掉 <span class="badge hot">🔥 考点</span></h2>
@@ -214,7 +214,7 @@
 
 <div class="card def">
 <h3>4.2 课件经典例：Z := X + 0.618 * Y（含语义分析的 inttoreal）</h3>
-<p>这是课件（第 1 章 P23 引入、第 8 章沿用）的招牌例子：源语句 <code>Z := X + 0.618 * Y</code>，其中 <b>0.618 是实型、Y 是整型</b>。语义分析（类型检查）发现 mixed 运算，<b>先插入一条类型转换指令 inttoreal 把 Y 转成实型</b>，再翻译成四元式：</p>
+<p>这是课件的招牌例子（第 1 章课件第 23 页原例，本页作补充精讲）：源语句 <code>Z := X + 0.618 * Y</code>，其中 <b>0.618 是实型、Y 是整型</b>。语义分析（类型检查）发现 mixed 运算，<b>先插入一条类型转换指令 inttoreal 把 Y 转成实型</b>，再翻译成四元式：</p>
 <table class="gt">
 <tr><th>序号</th><th>算符</th><th>左操作数</th><th>右操作数</th><th>结果</th><th>【旁注】</th></tr>
 <tr><td>(1)</td><td>inttoreal</td><td>Y</td><td>—</td><td>T1</td><td>语义分析插入的类型转换：整型 Y → 实型 T1</td></tr>

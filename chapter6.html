@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>第6章 · LR分析 精讲 | 编译原理闯关</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=2">
 </head>
 <body>
 <div class="topnav"><span class="brand">⚙️ 编译原理闯关</span>
@@ -29,7 +29,7 @@
 <h2 class="section">🧗 1. 自底向上分析回顾：难题是找句柄 <span class="mono" style="font-size:13px;color:var(--muted)">课件 p1、p118</span></h2>
 <div class="card def">
 <p>🗣️ <b>人话版</b>：自顶向下（第 4 章）是"从树根 S 长到句子"；自底向上反过来——手里拿着成品串，不断把<b>符合某条规则右部的小块还原成左部</b>，最后若能拼回开始符号，它就是合法句子。全章真正要解决的难题只有一个：<span class="hl">此刻栈顶这一段，是不是句柄？该不该归约？</span></p>
-<p><b>三个必须滚瓜烂熟的概念</b>（课件 p118 总结页也强调）：设 S=*&gt;αAδ 且 A=+&gt;β，则 β 是句型 αβδ 相对于 A 的<b>短语</b>；若 A⇒β（一步直接推导），β 是<b>直接短语</b>；<b>句柄＝最左直接短语</b>。</p>
+<p><b>三个必须滚瓜烂熟的概念</b>（p118 总结页点名的三个概念；形式定义见教材）：设 S=*&gt;αAδ 且 A=+&gt;β，则 β 是句型 αβδ 相对于 A 的<b>短语</b>；若 A⇒β（一步直接推导），β 是<b>直接短语</b>；<b>句柄＝最左直接短语</b>。</p>
 <ul>
 <li><b>移进-归约法</b>：用一个符号栈，每步要么把当前输入符号<b>移进</b>栈，要么把栈顶的句柄按规则 A→α <b>归约</b>成 A，动作只有四种：移进 s、归约 r、接受 acc、报错。</li>
 <li><b>规范归约</b>：每一步都归约<b>当前句型最左直接短语（句柄）</b>——它恰好是<b>最右推导（规范推导）的逆过程</b>，所以也叫最左归约。</li>
@@ -56,7 +56,7 @@
 <tr><td><b>LR(0)</b></td><td>最简单分析表，分析表的局限性大，是其它 LR 分析法的基础</td></tr>
 <tr><td><b>SLR(1)</b></td><td>简单分析表，分析表稍有局限性，但较易实现</td></tr>
 <tr><td><b>LR(1)</b></td><td>分析表能力最强，但代价过高</td></tr>
-<tr><td><b>LALR(1)</b></td><td>称为向前看 LR 分析表，能力介于 SLR(1) 和 LR(1) 之间，适用于大多数程序设计语言的结构，并且可以比较有效地实现</td></tr>
+<tr><td><b>LALR(1)</b></td><td>称为向前看 LR 分析表，分析表能力介于 SLR(1) 和 LR(1) 之间，适用于大多数程序设计语言的结构，并且可以比较有效地实现</td></tr>
 </table>
 <p>说明：四种分析表对应四类文法（判定顺序见本章第 14 节）。</p>
 </div>
@@ -527,7 +527,7 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <h2 class="section">🚧 11. SLR(1) 的软肋：FOLLOW 太粗 <span class="mono" style="font-size:13px;color:var(--muted)">课件 p80–p87</span></h2>
 <div class="card">
 <h3>🔥 反例文法（p80–p82）：S→aAd|bAc|aec|bed, A→e —— SLR(1) 失灵</h3>
-<p>文法：0. S'→S　1. S→aAd　2. S→bAc　3. S→aec　4. S→bed　5. A→e。先按 LR(0)/SLR 流程造 DFA（p81 原图，12 个状态）：</p>
+<p>文法：0. S'→S　1. S→aAd　2. S→bAc　3. S→aec　4. S→bed　5. A→e。先按 LR(0)/SLR 流程造 DFA（p81 原图 12 个状态；p84 温故知新页重放了同一张图）：</p>
 <table class="gt">
 <tr><th>状态</th><th>项目集</th><th>出边</th></tr>
 <tr><td><b>I0</b></td><td class="mono">S'→·S<br>S→·aAd<br>S→·bAc<br>S→·aec<br>S→·bed</td><td>S→I1，a→I2，b→I3</td></tr>
@@ -674,18 +674,18 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 </div>
 <div class="card">
 <h3>🔥 课堂练习（p106）：S'→S, S→rD, D→D,i, D→i 的 LR(1) 版</h3>
-<p>所有项目的搜索符都是 #（逗号只出现在 D 之后，永远轮不到做"归约后的下一个符号"）：</p>
+<div class="notice">⚠️ <b>课件 p106 这页从简了</b>：它给的所有项目只标了搜索符 #。但按 p92 的闭包规则（对 b∈FIRST(βa) 加 [B→·γ,b]），I2 中 [D→·D,i, #] 点后的 β="&amp;nbsp;,i"，FIRST(",i#") 含逗号——所以 D 的项目搜索符应是 <b>#/, 两个</b>（否则按那张表分析合法串 ri,i# 会在第 3 步 ACTION[4, 逗号] 空白处误报错，比 SLR 还弱，说不通）。下面给<b>修正后</b>的项目集与表（可用第4关计算器选 LR1 验证）：</div>
 <table class="gt">
-<tr><th>状态</th><th>LR(1) 项目集</th><th>出边</th></tr>
+<tr><th>状态</th><th>LR(1) 项目集（修正后）</th><th>出边</th></tr>
 <tr><td><b>I0</b></td><td class="mono">[S'→·S, #]<br>[S→·rD, #]</td><td>S→I1，r→I2</td></tr>
 <tr><td><b>I1</b></td><td class="mono">[S'→S·, #]</td><td>接受</td></tr>
-<tr><td><b>I2</b></td><td class="mono">[S→r·D, #]<br>[D→·D,i, #]<br>[D→·i, #]</td><td>D→I3，i→I4</td></tr>
-<tr><td><b>I3</b></td><td class="mono">[S→rD·, #]<br>[D→D·,i, #]</td><td>,（逗号）→I5</td></tr>
-<tr><td><b>I4</b></td><td class="mono">[D→i·, #]</td><td>归约 r3</td></tr>
-<tr><td><b>I5</b></td><td class="mono">[D→D,·i, #]</td><td>i→I6</td></tr>
-<tr><td><b>I6</b></td><td class="mono">[D→D,i·, #]</td><td>归约 r2</td></tr>
+<tr><td><b>I2</b></td><td class="mono">[S→r·D, #]<br>[D→·D,i, #/,]<br>[D→·i, #/,]</td><td>D→I3，i→I4</td></tr>
+<tr><td><b>I3</b></td><td class="mono">[S→rD·, #]<br>[D→D·,i, #/,]</td><td>,（逗号）→I5</td></tr>
+<tr><td><b>I4</b></td><td class="mono">[D→i·, #/,]</td><td>归约 r3</td></tr>
+<tr><td><b>I5</b></td><td class="mono">[D→D,·i, #/,]</td><td>i→I6</td></tr>
+<tr><td><b>I6</b></td><td class="mono">[D→D,i·, #/,]</td><td>归约 r2</td></tr>
 </table>
-<p><b>LR(1) 分析表（p106，完整）</b>——与第 8 节 LR(0) 版（I3 冲突）、第 10 节 SLR 版对照：归约项只出现在搜索符 # 列（I4、I6 行连逗号列都不填了），I3 行移进归约天然错开：</p>
+<p><b>LR(1) 分析表（按修正后的项目集）</b>——与第 8 节 LR(0) 版（I3 冲突）、第 10 节 SLR 版对照：I3 行移进归约天然错开（, 列 s5、# 列 r1）：</p>
 <table class="gt">
 <tr><th rowspan="2">状态</th><th colspan="4">ACTION</th><th colspan="2">GOTO</th></tr>
 <tr><th>r</th><th>,</th><th>i</th><th>#</th><th>S</th><th>D</th></tr>
@@ -693,9 +693,9 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <tr><td>1</td><td></td><td></td><td></td><td>acc</td><td></td><td></td></tr>
 <tr><td>2</td><td></td><td></td><td>s4</td><td></td><td></td><td>3</td></tr>
 <tr><td>3</td><td></td><td>s5</td><td></td><td>r1</td><td></td><td></td></tr>
-<tr><td>4</td><td></td><td></td><td></td><td>r3</td><td></td><td></td></tr>
+<tr><td>4</td><td></td><td>r3</td><td></td><td>r3</td><td></td><td></td></tr>
 <tr><td>5</td><td></td><td></td><td>s6</td><td></td><td></td><td></td></tr>
-<tr><td>6</td><td></td><td></td><td></td><td>r2</td><td></td><td></td></tr>
+<tr><td>6</td><td></td><td>r2</td><td></td><td>r2</td><td></td><td></td></tr>
 </table>
 </div>
 <div class="card def">

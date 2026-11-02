@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>编译原理互动闯关课堂</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=2">
 </head>
 <body>
 <div class="container">
@@ -23,7 +23,18 @@
 </ol>
 </div>
 
-<div class="card tip"><span class="emoji">🧭</span><b>全课一张图</b>：源程序 → <b>词法分析</b>（第2关·正规式/自动机）→ <b>语法分析</b>（第3关 LL(1) 自顶向下 / 第4关 LR 自底向上）→ <b>语义分析与中间代码</b>（第5关·属性文法/符号表/四元式）→ <b>优化与目标代码</b>（第6关）→ 目标程序；运行时怎么放数据也在第6关。表格管理与出错处理贯穿全程。</div>
+<div class="card tip">
+<span class="emoji">🧭</span><b>全课一张图</b>
+<div class="flow" style="margin:12px 0 6px">
+  <div class="fnode" style="cursor:default;min-width:86px"><b>📄 源程序</b></div><span class="arrow">→</span>
+  <div class="fnode" style="cursor:default"><b>词法分析</b>第2关·正规式/自动机</div><span class="arrow">→</span>
+  <div class="fnode" style="cursor:default"><b>语法分析</b>第3关 LL(1) ｜ 第4关 LR</div><span class="arrow">→</span>
+  <div class="fnode" style="cursor:default"><b>语义·中间代码</b>第5关·属性文法/四元式</div><span class="arrow">→</span>
+  <div class="fnode" style="cursor:default"><b>优化·目标代码</b>第6关（含运行时存储）</div><span class="arrow">→</span>
+  <div class="fnode" style="cursor:default;min-width:86px;border-color:var(--good)"><b>🎯 目标程序</b></div>
+</div>
+<div style="text-align:center;color:var(--muted);font-size:13.5px">🔌 表格管理与出错处理两根"电线"贯穿全程</div>
+</div>
 
 <h2 class="section">🗺️ 选择你的关卡</h2>
 <div class="levelgrid" id="grid"></div>

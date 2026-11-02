@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>第3章 · 词法分析 精讲 | 编译原理闯关</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=2">
 </head>
 <body>
 <div class="topnav"><span class="brand">⚙️ 编译原理闯关</span>
@@ -130,7 +130,7 @@
 <!-- ==================== 3 3.2 PL/0 ==================== -->
 <h2 class="section"><span class="tag">⭐ 了解</span>3.2 PL/0 词法分析程序的设计和实现</h2>
 <div class="card">
-<span class="emoji">🔬</span>课件本节为演示性质：<b>识别单词统计可视化展示分析</b>；并提示参考 <b>教材 P375 页的 PL/0 词法分析程序</b>源码（3.1 节课件同页也给了这个参考）。核心要点已在 3.1 交代：PL/0 采用"<b>作为语法分析器的子程序</b>"接口、种别编码、符号表配合。三级项目/课程设计要用到，建议对照教材源码走读一遍。
+<span class="emoji">🔬</span>课件本节为演示性质：<b>识别单词统计可视化展示分析</b>；3.1 节课件（第 9 页）另提示参考 <b>教材 P375 页的 PL/0 词法分析程序</b>源码。核心要点已在 3.1 交代：PL/0 采用"<b>作为语法分析器的子程序</b>"接口、种别编码、符号表配合。三级项目/课程设计要用到，建议对照教材源码走读一遍。
 </div>
 
 <!-- ==================== 4 3.3 正规文法 ==================== -->
@@ -149,7 +149,7 @@
 <div class="card def">
 <span class="emoji">📐</span><b>正规文法的定义（第 2 章乔姆斯基文法四类的回忆）</b>
 <p>文法 G = (V<sub>T</sub>, V<sub>N</sub>, S, P)。乔姆斯基把文法分为四类，其中：<b>3 型文法（正规文法）</b>：
-<span class="formula">A → aB 或 A → a　（A、B ∈ V<sub>N</sub>，a 为终结符）</span>
+<span class="formula">A → αB 或 A → α　（A、B ∈ V<sub>N</sub>，α ∈ V<sub>T</sub>*，即终结符串，特例为单个终结符 a）</span>
 每条产生式右边<b>最多一个非终结符且在最右</b>（所以又叫<b>右线性文法 = 正规文法</b>）。课件结论：<b>正规文法有能力描述程序设计语言中的单词</b>。</p>
 <p>🗣️ <b>人话版</b>：用文法拼单词，规矩是"每条规则只往前吐<b>一个</b>字符，最多再捎上一个还没展开的非终结符"——像报数一样一个一个来，绝不回头。第 2 章的四类包含关系还记得吧：3 ⊂ 2 ⊂ 1 ⊂ 0，正规文法是"最笨但也最够用"的那层——描述单词刚好够，描述句子（比如括号配对）就不够了。</p>
 </div>
@@ -254,7 +254,7 @@
 <tr><th>符号</th><th>含义</th></tr>
 <tr><td>K</td><td>状态集合，有限集合</td></tr>
 <tr><td>Σ</td><td>有穷字母表，它的每个元素称为一个<b>输入符号</b></td></tr>
-<tr><td>f</td><td><b>状态转换函数</b>，f：K×Σ→K 的单值映射。例如 f(kᵢ, a) = kⱼ 表示：当前状态为 kᵢ，输入符号 a，经状态转换函数转向状态 kⱼ</td></tr>
+<tr><td>f</td><td><b>状态转换函数</b>，f：K×Σ→K 的单值映射（课件原文印作"单射"，应为"单值"——一个状态对一个输入只有唯一后继）。例如 f(kᵢ, a) = kⱼ 表示：当前状态为 kᵢ，输入符号 a，经状态转换函数转向状态 kⱼ</td></tr>
 <tr><td>S</td><td><b>唯一</b>的一个初始状态，S ∈ K</td></tr>
 <tr><td>Z</td><td>终止状态集，Z ⊆ K，终态也称为<b>可接受状态</b></td></tr>
 </table>
@@ -693,11 +693,11 @@ f(等号, =) = Z</pre></div>
 <p>该 NFA 无 ε 弧，ε-closure 就是集合本身。</p>
 <table class="gt">
 <tr><th>I</th><th>Iₐ</th><th>I_b</th></tr>
-<tr><td>I₀ = {0}</td><td>Move={0,1} ⇒ I₁ = {0,1}</td><td>{0} = I₀</td></tr>
-<tr><td>I₁ = {0,1}</td><td>{0,1} = I₁</td><td>Move={2} ⇒ I₂ = {2}</td></tr>
-<tr><td class="ok">I₂ = {2}</td><td>∅</td><td>∅</td></tr>
+<tr><td>I₀ = {0}</td><td>Move={0,1} ⇒ I₁ = {0,1}</td><td>Move={0} = I₀</td></tr>
+<tr><td>I₁ = {0,1}</td><td>{0,1} = I₁</td><td>Move={0,2} ⇒ I₂ = {0,2}</td></tr>
+<tr><td class="ok">I₂ = {0,2}</td><td>Move={0,1} = I₁</td><td>Move={0} = I₀</td></tr>
 </table>
-<p>DFA：初态 I₀，终态 I₂（含 NFA 终态 2）。转移：I₀—a→I₁，I₀—b→I₀；I₁—a→I₁，I₁—b→I₂；I₂ 无出边（再读任何字符即失败）。验算：ab：I₀—a→I₁—b→I₂ ✔。</p>
+<p>DFA：初态 I₀，终态 I₂（含 NFA 终态 2）。转移：I₀—a→I₁，I₀—b→I₀；I₁—a→I₁，I₁—b→I₂；I₂—a→I₁，I₂—b→I₀。验算：ab：I₀—a→I₁—b→I₂ ✔；abab：I₂—a→I₁—b→I₂ ✔（(a|b)*ab 的串无论再读什么都不丢"已到终点"的机会）。</p>
 </details>
 <details class="fold">
 <summary>自测 4：自测 3 得到的 3 状态 DFA 还能再最小化吗？</summary>
