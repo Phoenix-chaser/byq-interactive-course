@@ -54,6 +54,7 @@
         if (timer) { clearInterval(timer); timer = null; autoBtn.textContent = '▶ 自动播放'; }
       }
       bar.addEventListener('click', function (e) {
+        activeBar = bar;
         var t = e.target;
         while (t && t !== bar && !t.dataset.a) t = t.parentNode;
         var a = t && t.dataset ? t.dataset.a : null;
@@ -75,6 +76,19 @@
       render();
     });
   }
+
+  /* 键盘快捷键：←→ 翻步、空格 播放/暂停（作用于最近点过的播放器） */
+  var activeBar = null;
+  document.addEventListener('keydown', function (e) {
+    if (!activeBar || activeBar.isConnected !== true) return;
+    var tag = (document.activeElement && document.activeElement.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    var btn;
+    if (e.key === 'ArrowRight') btn = activeBar.querySelector('[data-a="next"]');
+    else if (e.key === 'ArrowLeft') btn = activeBar.querySelector('[data-a="prev"]');
+    else if (e.key === ' ') btn = activeBar.querySelector('[data-a="auto"]');
+    if (btn) { e.preventDefault(); btn.click(); }
+  });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();

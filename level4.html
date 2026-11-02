@@ -260,14 +260,16 @@ function buildLR(){
   // 项目集列表
   html+='<h3>② 项目集规范族（共 '+t.C.length+' 个状态，'+(method==='LR1'||method==='LALR'?'含向前搜索符':'LR(0)项目')+'）</h3><div style="columns:2;column-gap:18px">';
   t.C.forEach((I,i)=>{
-    html+='<div style="break-inside:avoid;margin-bottom:8px" class="mono"><b>I'+i+':</b><br>'+I.items.map(it=>(method==='LR1'||method==='LALR')?BYQ.item1Str(G,it).replace(/ /g,'&nbsp;'):BYQ.itemStr(G,it)).map(s=>'&nbsp;&nbsp;'+s).join('<br>')+'</div>';
+    html+='<div id="lrI'+i+'" style="break-inside:avoid;margin-bottom:8px" class="mono"><b>I'+i+':</b><br>'+I.items.map(it=>(method==='LR1'||method==='LALR')?BYQ.item1Str(G,it).replace(/ /g,'&nbsp;'):BYQ.itemStr(G,it)).map(s=>'&nbsp;&nbsp;'+s).join('<br>')+'</div>';
   });
   html+='</div>';
   if(method==='LALR'&&t.mergedInfo&&t.mergedInfo.length){
     html+='<div class="notice good">🗜️ 同心集合并：'+t.mergedInfo.map(m=>m.merged.join(' + ')+' → '+m.to).join('；')+'</div>';
   }
   // DFA
-  html+='<h3>③ 识别活前缀的 DFA（双圈=含归约/接受项目）</h3><div id="lrDFA"></div>';
+  html+='<h3>③ 识别活前缀的 DFA（双圈=含归约/接受项目；<b>点状态节点可联动查看项目集</b>）</h3><div id="lrDFA"></div>'+
+        '<div class="stepper"><button class="btn small" id="lrTour">▶ 逐状态游览</button><span class="pinfo" id="lrTourInfo">点 DFA 上任意状态节点试试</span></div>'+
+        '<div id="lrStateInfo" class="stepbox" style="display:none"></div>';
   // 冲突
   html+='<h3>④ 冲突诊断</h3>';
   if(t.conflicts.length===0){
@@ -299,6 +301,33 @@ function buildLR(){
   }
   BYUI.drawFA('lrDFA',{states:t.C.map((I,i)=>({name:'I'+i})),start:0,finals,
     edges:Object.entries(t.trans).flatMap(([f,m])=>Object.entries(m).map(([sym,to])=>({from:+f,sym,to:+to})))});
+  // ---- DFA ↔ 项目集 联动 ----
+  const svgRoot=document.getElementById('lrDFA');
+  const infoBox=document.getElementById('lrStateInfo');
+  const tourInfo=document.getElementById('lrTourInfo');
+  function showState(i){
+    svgRoot.querySelectorAll('.nodehl').forEach(n=>n.classList.remove('nodehl'));
+    svgRoot.querySelectorAll('[data-node="'+i+'"]').forEach(n=>n.classList.add('nodehl'));
+    const isFinal=finals.includes(i);
+    const conflict=t.conflicts.find(c=>c.state==='I'+i);
+    infoBox.style.display='block';
+    infoBox.innerHTML='<b style="color:var(--gold)">I'+i+'</b>'+(isFinal?'（终态：含归约/接受项目）':'')+(conflict?' <b style="color:var(--bad)">⚠ '+conflict.cell+' 列 '+conflict.had+' 与 '+conflict.add+' 冲突</b>':'')+'<br>'+
+      t.C[i].items.map(it=>(method==='LR1'||method==='LALR')?BYQ.item1Str(G,it):BYQ.itemStr(G,it)).join('<br>');
+    const block=document.getElementById('lrI'+i);
+    if(block){block.scrollIntoView({block:'nearest'});}
+    tourInfo.textContent='当前 I'+i+' / I'+(t.C.length-1);
+  }
+  svgRoot.addEventListener('click',e=>{
+    const n=e.target.closest('[data-node]');
+    if(n) showState(+n.getAttribute('data-node'));
+  });
+  let tourTimer=null;
+  document.getElementById('lrTour').addEventListener('click',function(){
+    if(tourTimer){clearInterval(tourTimer);tourTimer=null;this.textContent='▶ 逐状态游览';return;}
+    this.textContent='⏸ 停止';
+    let i=0; showState(i);
+    tourTimer=setInterval(()=>{i++;if(i>=t.C.length){clearInterval(tourTimer);tourTimer=null;document.getElementById('lrTour').textContent='▶ 逐状态游览';return;}showState(i);},1500);
+  });
 }
 buildLR();
 
