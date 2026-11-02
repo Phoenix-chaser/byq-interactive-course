@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第1关 · 编译全景与文法基础 | 编译原理闯关</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+<div class="hero">
+  <h1>第 1 关 · 编译全景与文法基础</h1>
+  <div class="sub">第1章 引论 + 第2章 文法和语言 ｜ 全课程的地基，后面每一关都会用到它</div>
+</div>
+
+<!-- ============ 1.1 编译器是什么 ============ -->
+<h2 class="section">🗺️ 1. 先看全景：编译器到底在干什么？</h2>
+
+<div class="card tip"><span class="emoji">🎯</span><b>一个比喻贯穿全课</b>：编译器就像一位<span class="ka">中翻英翻译家</span>——
+你写的 C 语言是"汉语"（人好写），计算机只懂"英语"（机器指令）。把整篇文章先完整翻译完再交给对方读，就是<span class="hl">编译</span>；
+请个口译坐旁边，你说一句他翻一句，就是<span class="hl">解释</span>。</div>
+
+<div class="card def">
+<h3>三个必须分清的定义（考试常考）</h3>
+<ul>
+<li><b>翻译程序</b>：读入<span class="ka">源程序</span>，翻译成等价的另一种语言程序（<span class="ka">目标程序</span>）。上位概念。</li>
+<li><b>编译程序</b>：源语言是<b>高级语言</b>（C、Java、Pascal），目标语言是<b>低级语言</b>（汇编 / 机器语言）。整体翻译完再执行。</li>
+<li><b>解释程序</b>：对源程序<span class="hl">边解释、边执行，不生成目标程序</span>（Shell、JavaScript、SQL）。</li>
+</ul>
+<div class="formula">编译 vs 解释的<span class="ka">本质区别：是否生成目标代码</span></div>
+<table class="gt">
+<tr><th></th><th>编译型（C/C++）</th><th>解释型（Shell/JS/SQL）</th></tr>
+<tr><td>是否生成目标程序</td><td class="ok">生成</td><td class="no">不生成</td></tr>
+<tr><td>错误发现时机</td><td>编译时（一句错整个编译不过）</td><td>运行时（一句错可跳过继续下一句）</td></tr>
+<tr><td>执行效率</td><td class="ok">高</td><td>较低</td></tr>
+</table>
+</div>
+
+<h3>🖱️ 点击下面的每个阶段，看它具体做什么（必考点）</h3>
+<div class="card">
+<div class="flow" id="flow"></div>
+<div id="flowDetail" class="notice good" style="min-height:76px">👆 点一个阶段试试！比如"词法分析"。</div>
+<div class="card tip" style="margin-bottom:0"><span class="emoji">🧠</span><b>记忆主线</b>：<span class="hl">词法分析</span>认<b>单词</span> → <span class="hl">语法分析</span>认<b>句子</span> → <span class="hl">语义分析</span>查<b>含义</b> → 中间代码（四元式）→ 优化 → 目标代码。<br>
+<b>前四个阶段 = 分析</b>（拆解源程序），<b>后两个阶段 = 综合</b>（拼装目标程序）。全程有两根"电线"陪伴：<span class="ka">表格管理</span>（登记名字属性）与<span class="ka">出错处理</span>（语法错误在词法/语法阶段查，语义错误在语义分析阶段查）。</div>
+</div>
+
+<div class="card def">
+<h3>前端 / 后端 与"遍"</h3>
+<ul>
+<li><b>编译前端</b>：与<span class="ka">源语言</span>有关、与目标机无关（词法、语法、语义、中间代码）。<b>编译后端</b>：与源语言无关、<span class="ka">依赖于中间代码</span>、与<span class="ka">目标机</span>有关（优化、目标代码生成）。</li>
+<li>好处：前端相同、后端不同 → 同一语言编译到多种机器（X86/X64）；前端不同、后端相同 → 多种语言编译到同一中间语言。</li>
+<li><b>程序设计环境</b>：编辑程序、连接程序、调试程序等工具与编译程序一起构成程序设计环境；把它们集成在一起就是 IDE（集成开发环境）。</li>
+<li><b>遍（趟 pass）</b>：对源程序或中间结果<span class="hl">从头到尾扫描一次</span>并加工处理。PL/0 是<b>单遍</b>扫描的编译程序；分几遍由设计者权衡决定。</li>
+<li>编译程序结构 = 8 个框：词法、语法、语义分析程序 + 中间代码生成、代码优化、目标代码生成程序 + 表格管理程序 + 出错处理程序。</li>
+</ul>
+</div>
+
+<!-- ============ 2. 文法 ============ -->
+<h2 class="section">🔤 2. 文法：给语言立规矩（第2章）</h2>
+
+<div class="card tip"><span class="emoji">🎯</span>程序设计语言本质是一个<b>记号系统</b>。自然语言有"主谓宾"，程序语言也要有规矩——这套规矩的数学写法就是<b>文法</b>。第3~6章的所有算法都建立在它上面。</div>
+
+<div class="card def">
+<h3>2.1 从符号到语言：一层层搭积木</h3>
+<ul>
+<li><b>字母表 Σ</b>：符号的<b>非空有穷</b>集合。如 {0,1}、{a,b,c}、ASCII 表。<b>注意</b>：元素不一定全是英文字母！</li>
+<li><b>符号串</b>：字母表上符号组成的<b>有穷序列</b>。<b>有序</b>！ab ≠ ba。<b>ε 是空串</b>（长度0）。</li>
+</ul>
+<div class="notice">❗<b> ε、∅、{ε} 三兄弟（经典考点）</b>：<code>ε</code> 是一个<span class="ka">空串</span>（一个"内容为空"的串）；<code>∅</code> 是<span class="ka">空集合</span>（里面连串都没有）；<code>{ε}</code> 是<span class="ka">由空串组成的集合</span>（有一个元素，这个元素是空串）。∅ 里没有元素，{ε} 里有一个元素！</div>
+</div>
+
+<div class="card">
+<h3>🔬 符号串实验室（输入任何串，看它的"全家福"）</h3>
+<input type="text" id="strLabIn" value="abc" maxlength="10">
+<div id="strLabOut"></div>
+</div>
+
+<div class="card def">
+<h3>2.2 符号串的运算与闭包</h3>
+<ul>
+<li><b>连接</b>：xy = 把 y 接在 x 后面。x=ba, y=nana → xy=banana。</li>
+<li><b>方幂</b>：x⁰=ε，x¹=x，x²=xx，xⁿ=xⁿ⁻¹x。x=ba → x³=bababa。</li>
+<li><b>字母表乘积</b>：Σ₁Σ₂ = {ab | a∈Σ₁, b∈Σ₂}，<b>不满足交换律</b>。Σ⁰={ε}，Σⁿ=Σⁿ⁻¹Σ。</li>
+<li><b>正闭包</b> Σ⁺ = Σ∪Σ²∪Σ³∪…（长度≥1的所有串）；<b>克林闭包</b> Σ* = Σ⁰∪Σ⁺（<span class="hl">多了个 ε</span>）。对符号串集合 U、V 同理有 UV、V*、V⁺。</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>🔬 闭包生成器</h3>
+字母表：<input type="text" id="closureIn" value="ab" maxlength="4" style="max-width:120px;display:inline-block">
+<button class="btn small" id="closureBtn">生成</button>
+<div id="closureOut"></div>
+</div>
+
+<div class="card def">
+<h3>2.3 文法的形式定义（四元组）</h3>
+<div class="card tip"><span class="emoji">🗣️</span><b>人话版</b>：文法就是一本<b>造句说明书</b>。四元组 G=(V<sub>N</sub>,V<sub>T</sub>,P,S) 用大白话读：V<sub>N</sub>=半成品符号（还要继续替换的"词类"）、V<sub>T</sub>=成品符号（能写进最终句子的字）、P=替换规则手册、S=开工起点。<br>
+先玩个只有 <b>1 条规则</b>的玩具文法 <code>G[S]: S→ab</code>：从 S 出发，S ⇒ ab，一步造成一个句子——真实文法不过是规则更多、步数更多而已。</div>
+<div class="formula">G = ( V<sub>N</sub>, V<sub>T</sub>, P, S )</div>
+<table class="gt">
+<tr><th>成分</th><th>含义</th><th>要点</th></tr>
+<tr><td>V<sub>N</sub></td><td>非终结符集</td><td>语法成分（"词类"），如 E、A、S；非空有穷</td></tr>
+<tr><td>V<sub>T</sub></td><td>终结符集</td><td>能出现在最终句子里的符号；V<sub>T</sub>∩V<sub>N</sub>=∅</td></tr>
+<tr><td>P</td><td>规则(产生式)集</td><td>α→β；左部 α∈(V<sub>T</sub>∪V<sub>N</sub>)⁺ 且至少含一个非终结符</td></tr>
+<tr><td>S</td><td>开始符号</td><td>S∈V<sub>N</sub>，至少在左部出现一次</td></tr>
+</table>
+<p>约定简写：只写产生式，如 <code>G[E]: E→E+E | E*E | (E) | i</code>（大写=非终结符，第一条规则左部=开始符号）。</p>
+<div class="notice">📏 <b>BNF 范式（元语言，可考）</b>：用一套<b>元符号</b>描述文法——<code>&lt; &gt;</code> 括起语法单元（非终结符）、<code>::=</code> 表示"定义为"、<code>|</code> 表示"或"、<code>{ }</code> 表示重复 0 或多次、<code>[ ]</code> 表示可选（0 或 1 次）。例：<code>&lt;数字&gt; ::= 0|1|2|…|9</code>。PL/0 语言的语法定义用的就是 BNF 描述（教材 P13；PL/0 编译系统是本课程贯穿始终的示例语言）。</div>
+<h3>推导与归约（互为逆过程）</h3>
+<div class="card tip" style="margin:8px 0"><span class="emoji">🗣️</span><b>人话版</b>：<b>推导</b>=照着规则手册造句，把大符号一步步换成小符号；<b>归约</b>=反方向验收，把小符号一步步收拢回大符号。一个自顶向下、一个自底向上，走的是同一条路的两个方向。</div>
+<div class="stepbox"><pre>推导 ⬇ 造句： S ⇒ cAd ⇒ cabd   （大 → 小，自顶向下）
+归约 ⬆ 验收： cabd ⇐ cAd ⇐ S   （小 → 大，自底向上）</pre></div>
+<div class="formula">αAβ <span class="hl">⇒</span> αγβ　（用了规则 A→γ，把串里的 A 换成 γ）<br>
+一步叫<b>直接推导</b>；多步记 <b>⇒⁺</b>；允许一步也不走（α=β）记广义推导 <b>⇒*</b></div>
+<ul>
+<li><b>句型</b>：S ⇒* α，α 可含非终结符（推导途中的半成品）</li>
+<li><b>句子</b>：S ⇒* α 且 α ∈ V<sub>T</sub>*（全是终结符的成品）</li>
+<li><b>语言</b>：L(G) = { α | α∈V<sub>T</sub>* 且 S ⇒* α }——所有句子的集合，L(G) ⊆ V<sub>T</sub>*</li>
+</ul>
+<div class="notice good">💡 文法的价值：<span class="ka">用有限条规则描述无限的语言</span>（当然 L(G) 也可以是有穷的）。</div>
+</div>
+
+<div class="card">
+<h3>🎮 文法推导模拟器（亲手推一遍！）</h3>
+<p>文法 G[S]：<code>S→cAd　A→ab|a</code>（课件例）。目标：推出句子 <code>cabd</code>。<br>
+玩法：每一步点一条产生式按钮，程序会把<b>最左边</b>的非终结符替换掉，看你能推出目标串吗？</p>
+<div id="derivMount"></div>
+</div>
+
+<div class="card def">
+<h3>2.4 文法 ↔ 语言：互推经典四例（必背）</h3>
+<table class="gt">
+<tr><th>文法</th><th>语言</th><th>套路</th></tr>
+<tr><td>S→bA, A→aA|a</td><td>L = { baⁿ | n≥1 }</td><td>A→aA|a 自复制出连续 a</td></tr>
+<tr><td>S→AB, A→aA|a, B→bB|b</td><td>L = { aᵐbⁿ | m,n≥1 }</td><td>两段独立：A 管 a、B 管 b</td></tr>
+<tr><td>S→aSb|ab</td><td>L = { aⁿbⁿ | n≥1 }</td><td>两端同时长：递归要"配对"时用</td></tr>
+<tr><td>S→aB|bB, B→a|b</td><td>L = { aa,ab,ba,bb }</td><td>有限语言直接枚举</td></tr>
+</table>
+<p>反过来由语言写文法：L={abⁿa | n≥1} → <code>S→aBa, B→bB|b</code>。<br>
+⚠️ 一个文法唯一确定一个语言；但一个语言可对应<b>多个等价文法</b>（L(G1)=L(G2) 则 G1、G2 <b>等价</b>）。</p>
+</div>
+
+<div class="card def">
+<h3>2.5 乔姆斯基(Chomsky)四型文法（逐级收紧）</h3>
+<div class="card tip"><span class="emoji">🗣️</span><b>人话版</b>：四型文法就像交规逐级收紧——0 型"想怎么开怎么开"，3 型"只能沿固定车道直行"。规矩越严，能描述的语言越少，但机器分析起来越省力。所以<b>简单的活（认单词）交给最严的 3 型，复杂的活（认句子结构）才动用 2 型</b>。判断题型时盯住产生式的"长相"：左部一整个非终结符=2 型；右部最多"一个终结符带个尾巴"=3 型。</div>
+<table class="gt">
+<tr><th>类型</th><th>别名</th><th>产生式限制</th><th>对应自动机（了解）</th></tr>
+<tr><td>0型</td><td>短语文法</td><td>α→β，α 至少含一个非终结符</td><td>图灵机</td></tr>
+<tr><td>1型</td><td>上下文有关</td><td>|α| ≤ |β|（S→ε 可例外）</td><td>线性界限自动机</td></tr>
+<tr><td><b>2型</b></td><td><b>上下文无关 CFG</b></td><td>A→β（左部单个非终结符）</td><td>下推自动机</td></tr>
+<tr><td><b>3型</b></td><td><b>正规文法(右线性)</b></td><td>A→aB 或 A→a</td><td>有限自动机</td></tr>
+</table>
+<div class="notice good">关系：<b>3型 ⊂ 2型 ⊂ 1型 ⊂ 0型</b>（限制越来越严）。语法分析用 <b>2型</b>；词法分析用 <b>3型</b>——第3、4、6章分别围绕它们展开。</div>
+</div>
+
+<!-- 语法树 -->
+<div class="card def">
+<h3>2.6 语法树、最左/最右推导、二义性</h3>
+<div class="card tip"><span class="emoji">🗣️</span><b>人话版</b>：二义性 = 同一个句子<b>能画出两棵不一样的语法树</b>，即"这句话有两种拆法"。就像中文"我看见了山上的人用望远镜"——到底谁拿着望远镜？两种理解都通。人可以靠语境猜，机器不能猜，所以含二义性的文法必须改造后才能用于编译。</div>
+<ul>
+<li><b>语法树</b>：<b>2型文法</b>句型推导过程的图形表示，一棵树代表该句型<b>所有可能的推导</b>。</li>
+<li><b>最左推导</b>：每步都替换<span class="ka">最左</span>非终结符；<b>最右推导 = 规范推导</b>（每步最右），与<span class="ka">最左归约（规范归约）</span>对应——LR 分析走的就是规范归约！</li>
+<li><b>二义性文法</b>：存在某个句子对应<span class="hl">两棵不同的语法树</span>（等价说法：最左推导不唯一）。</li>
+</ul>
+<h3>✍️ 手算示范：i+i*i 的最左推导（一步一行）</h3>
+<table class="gt">
+<tr><th>步</th><th>句型</th><th>用哪条规则</th><th>【旁注】</th></tr>
+<tr><td>0</td><td>E</td><td>（起点）</td><td>从开始符号出发，此刻只有一个可换的符号</td></tr>
+<tr><td>1</td><td>E+E</td><td>E→E+E</td><td>句子里有 +，选加法规则；句型里出现两个 E，<b>规定先换最左那个</b>——这就是"最左"推导</td></tr>
+<tr><td>2</td><td>i+E</td><td>E→i</td><td>最左的 E 直接换成 i（i 可看作标识符/数字）</td></tr>
+<tr><td>3</td><td>i+E*E</td><td>E→E*E</td><td>剩下的 E 造"先乘"的结构：对照树2，乘法在下层</td></tr>
+<tr><td>4</td><td>i+i*E</td><td>E→i</td><td>又是替换<b>当前最左</b>的非终结符</td></tr>
+<tr><td>5</td><td>i+i*i</td><td>E→i</td><td>全是终结符=句子，推导结束 ✅</td></tr>
+</table>
+<div class="card warn" style="margin:8px 0"><span class="emoji">⚠️</span>经典例子：<code>E→i | E+E | E*E | (E)</code> 是<b>二义</b>的——句子 <code>i+i*i</code> 既能先算 +（树1）也能先算 *（树2）。消除方法见第4关（改写成 E→TE' 那套分层文法）。</div>
+<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start">
+<div style="flex:1;min-width:260px"><b>树1：先算 (i+i)*i</b><div id="tree1"></div></div>
+<div style="flex:1;min-width:260px"><b>树2：先算 i+(i*i)（符合优先级）</b><div id="tree2"></div></div>
+</div>
+</div>
+
+<div class="card def">
+<h3>2.7 句型分析与"句柄"（第4/6章的地基）</h3>
+<p>判断一个串是否为句型，两条路：<b>自顶向下</b>（从 S 向下推导建树，难点：选哪条规则）；<b>自底向上</b>（从串向上归约到 S，难点：找<span class="ka">可归约串</span>）。</p>
+<div class="card tip" style="margin:8px 0"><span class="emoji">🧅</span><b>人话版</b>：自底向上归约像<b>收拾桌子上的好几摞碗</b>（好几 个直接短语）——规矩是<b>每次只收最左边那一摞</b>（句柄）。收走一摞，桌上可能又叠出新的一摞（归约出新非终结符），再找新的"最左一摞"继续收，直到桌面只剩一个大盘子 S。考试找句柄就是问：<b>现在最左边能一把端走的那摞是啥？</b></div>
+<div class="formula">设 αβδ 是句型，若 S ⇒* αAδ 且 A ⇒⁺ β：β 是 αβδ 的<b>短语</b>；若 A ⇒ β（一步）：β 是<b>直接短语</b>；<span class="hl">最左直接短语 = 句柄</span></div>
+<div class="card tip" style="margin:8px 0"><span class="emoji">🧠</span><b>形象理解</b>：短语=树上某棵子树的全部叶子；直接短语=只有父子两层的子树叶子；句柄=<b>最左边</b>那棵"两层的子树"。自底向上分析每一步就归约当前句柄！</div>
+<p>例：G[S]: S→cAd, A→ab|a，句型 <code>cabd</code>：短语 {cabd, ab}（整棵树和 A 子树的叶子串）、直接短语 {ab}、<b>句柄 = ab</b>。</p>
+<h3>✍️ 手算示范：句型 cabd 找短语 / 直接短语 / 句柄（一步一行）</h3>
+<div class="stepbox"><pre>先画语法树（答题第一步，永远是画树）：        S
+                                           / | \
+                                          c  A  d
+                                            / \
+                                           a   b</pre></div>
+<table class="gt">
+<tr><th>步</th><th>做什么</th><th>结果</th><th>【旁注】</th></tr>
+<tr><td>1</td><td>画出语法树</td><td>S⇒cAd⇒cabd 的树如上</td><td>推导路径唯一，树就唯一；<b>树是找短语唯一可靠的依据</b></td></tr>
+<tr><td>2</td><td>数一数有几棵"子树"</td><td>整棵树（根 S）＋A 那棵小树</td><td>子树=某结点连同它全部后代；c、d、a、b 是叶子不算</td></tr>
+<tr><td>3</td><td>每棵子树的<b>叶子串</b>=短语</td><td>{cabd, ab}</td><td>整棵树的叶子串 cabd 也是短语，<b>最容易漏</b>！</td></tr>
+<tr><td>4</td><td>其中"只有父子两层"的=直接短语</td><td>{ab}</td><td>A→ab 只<b>一步</b>就到叶子，a、b 那层到底了</td></tr>
+<tr><td>5</td><td>最左边的直接短语=<b>句柄</b></td><td><b>ab</b></td><td>桌上只有一摞碗，那最左那摞就是它；若有多摞，认准<b>最左</b></td></tr>
+</table>
+</div>
+
+<div class="card def">
+<h3>2.8 实用约束：别写"坏"文法</h3>
+<ul>
+<li><b>有害规则</b>：U→U（自己推自己，除了引起二义毫无用处），禁止出现。</li>
+<li><b>多余规则</b>：<span class="ka">不可到达</span>（从 S 出发永远用不到，如 B→b 但没有规则提到 B）或<span class="ka">不可终止</span>（永远推不出终结符串，如 D→Df），应删除。</li>
+</ul>
+</div>
+
+<!-- ============ 测验 ============ -->
+<h2 class="section">📝 3. 第 1 关 · 关末测验</h2>
+<div id="quiz1"></div>
+
+<h2 class="section">✍️ 4. 大题演练（做完复制发给 AI 老师批改）</h2>
+<div id="bigq1"></div>
+
+<div class="footer">编译原理互动课堂 · 第1关 ｜ 对应课件第1、2章 ｜ <a href="index.html">返回闯关地图</a> ｜ <a href="level2.html">下一关：词法分析 →</a></div>
+</div>
+
+<script src="js/engine.js"></script>
+<script src="js/ui.js"></script>
+<script>
+BYUI.nav('level1.html');
+
+/* ---- 编译流程点击图 ---- */
+const STAGES = [
+ { n:'源程序', d:'你写的高级语言代码，如 <code>for i := 1 to 100 do</code>', tip:false },
+ { n:'词法分析', d:'<b>扫描器</b>。从左至右逐字符扫描，把字符流切成<b>单词符号</b>，输出（种别码,属性值）二元式序列。单词5类：基本字(关键字)、标识符、常数、运算符、界符。<br>例：<code>for i := 1 to 100 do</code> → 基本字for, 标识符i, 赋值号:=, 整常数1, 基本字to, 整常数100, 基本字do。<br>词法规则用<b>正规式/有限自动机</b>描述（第3章）。语法错误如"非法字符"在这里查。', tip:true },
+ { n:'语法分析', d:'把单词符号串组建成<b>语法单位</b>（短语、句柄、句子、程序段和程序），判断是否构成语法上正确的程序。规则用<b>上下文无关文法</b>描述（第4、5、6章）。语法错误如"括号不匹配"在这里查。', tip:true },
+ { n:'语义分析', d:'按语义规则检查语法单位：<b>变量是否定义、类型是否正确</b>（如 int 转 real：inttoreal）。静态语义检查（第7、8章部分）。语义错误（类型错误）在这里查。', tip:true },
+ { n:'中间代码生成', d:'翻译成与机器无关的<b>中间代码</b>，常用<b>四元式</b>（算符,左操作数,右操作数,结果）。例：<code>Z:=X+0.618*Y</code>（X 为整型，先转类型）→<br>(1) (inttoreal, Y, -, T1)<br>(2) (*, 0.618, T1, T2)<br>(3) (+, X, T2, Z)（第8章）', tip:true },
+ { n:'代码优化', d:'对中间代码做<b>等价变换</b>提高质量、省时间省空间（Debug/Release 的区别就在优化程度）。第10章。', tip:true },
+ { n:'目标代码生成', d:'把中间代码翻译成<b>目标程序</b>（汇编/机器码），编译的最后一步，涉及具体机器（第10章）。', tip:true }
+];
+const flow = document.getElementById('flow');
+flow.innerHTML = STAGES.map((s,i)=>`<div class="fnode" data-i="${i}"><b>${s.n}</b></div>${i<STAGES.length-1?'<div class="arrow">➜</div>':''}`).join('');
+const fd = document.getElementById('flowDetail');
+flow.querySelectorAll('.fnode').forEach(n=>n.addEventListener('click',()=>{
+  const s=STAGES[+n.dataset.i];
+  fd.innerHTML=(s.tip?'📌 <b>考试重点 · ':'📋 <b>')+s.n+'：</b>'+s.d;
+}));
+
+/* ---- 符号串实验室 ---- */
+function strLab(){
+  const s=document.getElementById('strLabIn').value;
+  if(!s){document.getElementById('strLabOut').innerHTML='';return;}
+  const prefs=[...Array(s.length+1).keys()].map(i=>s.slice(0,i)||'ε');
+  const sufs=[...Array(s.length+1).keys()].map(i=>s.slice(i)||'ε');
+  const subs=[]; for(let i=0;i<=s.length;i++)for(let j=i+1;j<=s.length;j++){const x=s.slice(i,j);if(!subs.includes(x))subs.push(x);}
+  const rev=[...s].reverse().join('');
+  document.getElementById('strLabOut').innerHTML=BYUI.gt(['性质','结果(以 '+s+' 为例)'],[
+    ['长度 |s|',s.length+'　（|ε|=0）'],
+    ['前缀(头)','{ '+prefs.join(', ')+' }'],
+    ['后缀(尾)','{ '+sufs.join(', ')+' }'],
+    ['子串','{ '+[...new Set(subs)].join(', ')+' }'],
+    ['逆转',[...s].reverse().join('')],
+    ['方幂','x¹='+s+'，x²='+s+s+'，x³='+s+s+s]
+  ]);
+}
+document.getElementById('strLabIn').addEventListener('input',strLab); strLab();
+
+/* ---- 闭包生成器 ---- */
+function closureGen(){
+  const set=[...new Set(document.getElementById('closureIn').value.split(''))].filter(c=>c.trim());
+  if(!set){document.getElementById('closureOut').innerHTML='';return;}
+  const all=[]; const q=[''];
+  while(q.length&&all.length<40){ const w=q.shift(); for(const c of set){ const nw=w+c; if(!all.includes(nw)){all.push(nw);q.push(nw);} } all.sort((a,b)=>a.length-b.length||a.localeCompare(b)); }
+  document.getElementById('closureOut').innerHTML=
+   '<b>Σ⁺</b>（正闭包，无ε）= { '+all.slice(0,15).join(', ')+', … }<br><b>Σ*</b>（克林闭包）= { <b>ε</b>, '+all.slice(0,14).join(', ')+', … }<br><span style="color:var(--muted)">Σ* 只比 Σ⁺ 多一个 ε！</span>';
+}
+document.getElementById('closureBtn').addEventListener('click',closureGen); closureGen();
+
+/* ---- 推导模拟器 ---- */
+(function(){
+  const g=BYQ.parseGrammar('S->cAd\nA->ab\nA->a');
+  const target=['c','a','b','d'];
+  let form=[g.start]; let steps=[{f:[...form],rule:'初始'}]; let finished=false,dead=false;
+  const mount=document.getElementById('derivMount');
+  function viable(f){
+    // 死路检测：已确定的终结符前缀必须与目标一致
+    let i=0;
+    while(i<f.length&&i<target.length){
+      const c=f[i];
+      if(c===c.toUpperCase()&&/[A-Z]/.test(c)){ // 非终结符：不确定，通过
+        return true;
+      }
+      if(c!==target[i]) return false;
+      i++;
+    }
+    return true;
+  }
+  function render(){
+    let html='<div class="stepbox"><pre>';
+    steps.forEach((s,i)=>{html+=(i===steps.length-1?'<span class="hlrow">':'')+s.i+': '+BYQ.formToStr(s.f)+(s.rule?'    ← '+s.rule:'')+(i===steps.length-1?'</span>':'')+'\n';});
+    html+='</pre></div><div style="margin:8px 0"><b>选择产生式</b>（替换最左非终结符 <span class="mono">'+(form.find(x=>/[A-Z]/.test(x)&&x===x.toUpperCase())||'无')+'</span>）：';
+    if(!finished&&!dead){
+      const nt=form.find(x=>/[A-Z]/.test(x)&&x===x.toUpperCase());
+      if(nt) html+=g.prods.filter(p=>p.lhs===nt).map((p,i)=>{
+        const idx=g.prods.indexOf(p);
+        return '<button class="btn small" data-p="'+idx+'">'+p.lhs+'→'+(p.rhs.join('')||'ε')+'</button>';
+      }).join('');
+    }
+    html+=' <button class="btn small ghost" data-reset>↺ 重新开始</button></div>';
+    if(finished) html+='<div class="notice good">🎉 推导成功！<b>'+BYQ.formToStr(target)+'</b> 是 G[S] 的句子。你刚才做的就是"最左推导"。</div>';
+    else if(dead) html+='<div class="notice">💀 走进死路了：确定的终结符前缀已经和目标 cabd 对不上。点"重新开始"再试！</div>';
+    else html+='<div style="color:var(--muted)">当前句型：'+BYQ.formToStr(form)+'　目标：cabd</div>';
+    mount.innerHTML=html;
+    mount.querySelectorAll('[data-p]').forEach(b=>b.addEventListener('click',()=>step(+b.dataset.p)));
+    mount.querySelector('[data-reset]').addEventListener('click',reset);
+  }
+  function step(pi){
+    const p=g.prods[pi];
+    const nf=BYQ.deriveStep(form,p);
+    if(!nf)return;
+    form=nf; steps.push({f:[...form],rule:'用 '+p.lhs+'→'+(p.rhs.join('')||'ε'),i:steps.length});
+    if(form.join('')===target.join('')) finished=true;
+    else if(!viable(form)) dead=true;
+    else if(!form.some(x=>/[A-Z]/.test(x)&&x===x.toUpperCase())) dead=true; // 无非终结符但没到目标
+    render();
+  }
+  function reset(){form=[g.start];steps=[{f:[...form],rule:'初始',i:0}];finished=false;dead=false;render();}
+  steps[0].i=0; render();
+})();
+
+/* ---- 简易语法树 SVG ---- */
+function drawTree(mountId,edges,labels){
+  // edges: {parent:-1.., me:'E', children order}——用嵌套结构 {v, kids:[...]}
+  const el=document.getElementById(mountId);
+  function size(node){
+    if(!node.kids||!node.kids.length){node.w=1;return 1;}
+    node.w=node.kids.reduce((a,k)=>a+size(k),0);
+    return node.w;
+  }
+  function pos(node,y){
+    let x=node.x0;
+    (node.kids||[]).forEach(k=>{k.x0=x;x+=pos(k,y+1);});
+    return node.w;
+  }
+  function deep(n){return 1+((n.kids&&n.kids.length)?Math.max(...n.kids.map(deep)):0);}
+  const tree=edges;
+  size(tree); tree.x0=0; pos(tree,0);
+  const unit=46, depth=deep(tree);
+  const W=(tree.w)*unit+60, H=depth*70+40;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" width="${Math.min(W,420)}" style="max-width:100%" xmlns="http://www.w3.org/2000/svg">`;
+  (function walk(n,y){
+    n.px=n.x0*unit+unit/2+20; n.py=y*62+24;
+    (n.kids||[]).forEach(k=>{walk(k,y+1);});
+  })(tree,0);
+  (function lines(n){
+    (n.kids||[]).forEach(k=>{
+      svg+=`<line x1="${n.px}" y1="${n.py}" x2="${k.px}" y2="${k.py}" stroke="#5a6196" stroke-width="1.6"/>`;
+      lines(k);
+    });
+  })(tree);
+  (function nodes(n){
+    const isLeaf=!n.kids||!n.kids.length;
+    svg+=`<circle cx="${n.px}" cy="${n.py}" r="17" fill="${isLeaf?'#262c5c':'#1e2348'}" stroke="${isLeaf?'#4dd6ff':'#7c6cff'}" stroke-width="2"/>`;
+    svg+=`<text x="${n.px}" y="${n.py+5}" text-anchor="middle" font-size="14" fill="#e8eaf6">${n.v}</text>`;
+    (n.kids||[]).forEach(nodes);
+  })(tree);
+  svg+='</svg>';
+  el.innerHTML=`<div class="svgwrap">${svg}</div>`;
+}
+drawTree('tree1',{v:'E',kids:[
+  {v:'E',kids:[{v:'E',kids:[{v:'i'}]},{v:'+'},{v:'E',kids:[{v:'i'}]}]},
+  {v:'*'},{v:'E',kids:[{v:'i'}]}]});
+drawTree('tree2',{v:'E',kids:[
+  {v:'E',kids:[{v:'i'}]},{v:'+'},
+  {v:'E',kids:[{v:'E',kids:[{v:'i'}]},{v:'*'},{v:'E',kids:[{v:'i'}]}]}]});
+
+/* ---- 测验 ---- */
+BYUI.quiz.render('quiz1',{
+  id:'level1', title:'第1关·编译全景与文法基础',
+  questions:[
+   {type:'single',q:'编译程序和解释程序的本质区别是：',options:['执行效率不同','是否生成目标代码','处理的语言类型不同','是否需要内存'],answer:1,
+    explain:'编译生成完整的目标代码再执行；解释边解释边执行、不生成目标程序。效率、错误发现时机等都是这一本质区别的衍生。'},
+   {type:'single',q:'编译过程中，"前四个阶段完成对源程序的分析，后两个阶段完成综合"。下列属于"综合"部分的是：',options:['语法分析、语义分析','中间代码生成、代码优化','代码优化、目标代码生成','词法分析、语法分析'],answer:2,
+    explain:'分析=词法、语法、语义、中间代码生成（拆解理解源程序）；综合=代码优化、目标代码生成（拼装出目标程序）。'},
+   {type:'multi',q:'编译程序的"全程陪伴者"（贯穿所有阶段的成分）包括：',options:['表格管理（符号表管理）','出错处理','词法分析','目标代码生成'],answer:[0,1],
+    explain:'表格管理和出错处理贯穿编译全过程；词法分析、目标代码生成只是某个（些）阶段。'},
+   {type:'single',q:'关于编译前端和后端：',options:['前端与目标机有关','后端与源语言有关','前端与源语言有关、与目标机无关','后端与目标机无关'],answer:2,
+    explain:'前端面向源语言（词法/语法/语义/中间代码），后端面向目标机（优化/目标代码生成）。这是"一个前端配多个后端=多目标机"的基础。'},
+   {type:'single',q:'关于"遍（pass）"，下列说法正确的是：',options:['遍数越多编译越快','一遍就是对源程序或中间结果从头到尾扫描一次并加工处理','每个编译程序都必须至少扫描两遍','PL/0 编译程序是多遍扫描的'],answer:1,
+    explain:'遍=从头到尾扫描一次并处理；PL/0 是单遍扫描的编译程序；遍数由设计者综合权衡。'},
+   {type:'single',q:'词法分析器的输出是：',options:['目标代码','单词符号的二元式（种别码,属性值）序列','语法树','四元式'],answer:1,
+    explain:'词法分析把字符流切成单词，输出（单词种别,单词符号的属性值）二元式序列，供语法分析使用。'},
+   {type:'single',q:'ε、∅、{ε} 三者的关系，正确的是：',options:['三者相同','∅={ε}','{ε} 中有一个元素（空串），∅ 中没有元素','ε 是一个集合'],answer:2,
+    explain:'ε是空串（不是集合）；∅是空集合；{ε}是只含一个元素（空串）的集合。'},
+   {type:'single',q:'设 x=01，则 x² 与 |x²| 分别是：',options:['0101，4','0110，4','010，3','0101，2'],answer:0,
+    explain:'方幂即自我连接：x²=xx=0101；长度 |x²|=4。'},
+   {type:'single',q:'文法 G=(V_N,V_T,P,S) 中，对产生式 α→β 的左部 α 的要求是：',options:['α 必须是单个终结符','α∈(V_T∪V_N)⁺ 且至少含一个非终结符','α 只能是开始符号','α∈V_T*'],answer:1,
+    explain:'左部必须非空且至少含一个非终结符；右部 β∈(V_T∪V_N)*（可为空，即ε产生式）。'},
+   {type:'single',q:'句型和句子的区别在于：',options:['没有区别','句子是全由终结符组成的句型','句型是全由终结符组成的句子','句子可以含非终结符'],answer:1,
+    explain:'S⇒*α 都是句型；α∈V_T*（全终结符）的句型才是句子。语言=所有句子的集合。'},
+   {type:'single',q:'文法 S→aSb|ab 产生的语言是：',options:['{aⁿbⁿ|n≥1}','{aⁿbᵐ|n,m≥1}','{baⁿ|n≥1}','{ab}','{aⁿbⁿ|n≥0}'],answer:0,
+    explain:'每用一次 S→aSb 就两端各加一个a和b，最后用 S→ab 收尾，故 a 与 b 个数相等且至少各1个。'},
+   {type:'single',q:'乔姆斯基文法分类中，描述程序语言语法结构（语法分析用）的是：',options:['0型 短语文法','1型 上下文有关文法','2型 上下文无关文法','3型 正规文法'],answer:2,
+    explain:'语法分析基于2型（上下文无关）文法；词法分析基于3型（正规）文法。四种文法限制逐级收紧：3⊂2⊂1⊂0。'},
+   {type:'single',q:'最右推导又称规范推导，与它对应的归约是：',options:['最右归约','最左归约（规范归约）','自顶向下推导','没有对应的归约'],answer:1,
+    explain:'最右推导的逆过程恰好是最左归约，即规范归约——这正是第6章 LR 分析执行的过程。'},
+   {type:'single',q:'文法 G[S]: S→cAd, A→ab|a 的句型 cabd 中，句柄是：',options:['c','ab','a','abd'],answer:1,
+    explain:'句柄=最左直接短语。S⇒cAd⇒cabd，A⇒ab 一步得 ab，ab 是直接短语（也是唯一直接短语；cabd 整体也是短语），即句柄。'},
+   {type:'single',q:'若文法中存在某个句子对应两棵不同的语法树，则该文法：',options:['是二义性文法','是正规文法','存在多余规则','无法用于编译'],answer:0,
+    explain:'这正是二义性文法的定义。等价说法：该句子存在两个不同的最左推导。'}
+  ]
+});
+BYUI.bigQuestions('bigq1',{
+  id:'level1', title:'第1关·大题',
+  questions:[
+   {q:'文法 G[S]: S→aAS | a，A→SbA | SS | ba。求句型 aabbaa 的短语、直接短语和句柄。<br><span style="color:var(--muted)">（课件第2章练习题；提示：先画出语法树，短语=子树叶子串）</span>',
+    hint:'从 S 出发：S→aAS→aSbAS→…多试几种推导，找到能推出 aabbaa 的那棵树，再在树上找子树。'},
+   {q:'已知语言 L={ aⁿbⁿcᵐ | n≥1, m≥0 }，请构造满足 L(G)=L 的文法 G。<br><span style="color:var(--muted)">（提示：a、b 必须配对，c 独立出现；配对部分用递归 S→aSb 思路）</span>',
+    hint:'顶层用两个独立非终结符：S→AC；A→aAb|ab 保证 aⁿbⁿ(n≥1)；C→cC|ε 保证 cᵐ(m≥0)。注意 aⁿbⁿ 的配对和 c 的重复要交给不同非终结符分管，不能都压在 S 身上。'},
+   {q:'给出文法 G[E]: E→i | E+E | E*E | (E)，分别写出句子 i*i+i 的最左推导和最右推导。',
+    hint:'最左推导（每步替换最左非终结符）：E⇒E*E⇒i*E⇒i*E+E⇒i*i+E⇒i*i+i。最右推导/规范推导（每步替换最右非终结符）：E⇒E*E⇒E*E+E⇒E*E+i⇒E*i+i⇒i*i+i。注意 i*i+i 要先出现 E*E：对照句子 i+i*i 则是 E⇒E+E⇒…先加后乘。'}
+  ]
+});
+</script>
+</body>
+</html>

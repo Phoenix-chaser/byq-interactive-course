@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第5关 · 语法制导与中间代码 | 编译原理闯关</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+<div class="hero">
+  <h1>第 5 关 · 语法制导的语义计算与中间代码（第7、8章）</h1>
+  <div class="sub">属性文法 · 符号表 · 四元式 ｜ 让语法分析"边走边算"</div>
+</div>
+
+<!-- ============ 7章 ============ -->
+<h2 class="section">🧮 1. 语义分析：检查 + 翻译（第7章）</h2>
+
+<div class="card tip"><span class="emoji">🎯</span><b>比喻</b>：词法分析认单词、语法分析看结构，都像检查一篇文章"每个词是否合法、句子是否通顺"；<b>语义分析</b>则问"<b>这句话讲不讲得通</b>"——"你们是一个优秀的燕大学子"语法没错，但语义不对（量词冲突）。实际编译器里，语义分析通常<b>搭着语法分析的便车</b>一起做（语法制导翻译）。</div>
+
+<div class="notice">📏 <b>词法 vs 语法 的"字母"口径（课件导引，易考辨析）</b>：词法分析和语法分析都是对符号串进行分析，区别在于——词法分析<b>识别单词</b>，语法分析<b>识别句子/程序</b>；且两种分析中"一个字母"的含义不同：<b>词法分析中一个字母代表组成单词的一个符号；语法分析中一个字母代表一个单词</b>。</div>
+
+<div class="card def">
+<h3>语义分析的两项功能</h3>
+<ul>
+<li><b>静态语义检查</b>（编译期）：① <b>类型检查</b>（操作数类型是否合法、int×real 要不要转换）② <b>控制流检查</b>（转向点是否合法，如 C 的 goto 不许转入 case）③ <b>一致性检查</b>（同一作用域标识符只能声明一次）。动态语义检查则发生在运行期（如除零溢出）。</li>
+<li><b>执行翻译</b>：通过检查后翻译成中间代码（第8章）或目标代码（第10章）。</li>
+<li>课件另一口径：与语义分析相关的工作 = 静态检查 + <b>收集语义信息</b>（为语义检查和代码生成等后续阶段收集程序的语义信息，有些内容并入中间代码生成部分讨论）。</li>
+</ul>
+<div class="notice">📍 <b>语义分析和中间代码生成的逻辑位置</b>（课件 8.2 图示）：词法分析 → 语法分析 → <b>中间代码生成</b> → 中间代码优化 → 目标代码优化 → 目标代码生成；<b>静态语义分析</b>在语法分析之后、中间代码生成之前把关（贯穿语义处理）。</div>
+</div>
+
+<div class="card def">
+<h3>属性文法：给文法符号"贴标签、算数值"</h3>
+<div class="card tip"><span class="emoji">🗣️</span><b>人话版</b>：普通文法只管结构，不管"值"。属性文法给每个文法符号<b>贴便签</b>——记号 X.a 读作"<b>X 身上那张便签 a 上写的值</b>"。语法分析每用一条规则，就顺手按语义规则算几张便签：结构认清的同时，值也算出来了。三元组 A=(G,V,F) 用大白话读：老文法 G ＋ 一套便签 V ＋ 便签怎么算的规则 F。</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0">
+<span style="border:2px dashed var(--warn);border-radius:8px;padding:4px 10px">便签示例：E 的便签 <b>E.val = 27</b></span>
+<span style="border:2px dashed var(--warn);border-radius:8px;padding:4px 10px">d 的便签 <b>d.lexval = 3</b>（词法分析早贴好了）</span>
+</div>
+<p><b>引入属性文法的目的</b>：借助这个工具来<b>说明程序设计语言的语义</b>。在上下文无关文法基础上扩展，形式上是<b>三元组 A = (G, V, F)</b>：G 是上下文无关文法，V 是<b>属性</b>的有穷集合，F 是关于属性的断言（语义规则）的有穷集合。</p>
+<ul>
+<li><b>属性</b>：刻画文法符号我们关心的特性——值、类型、名字、偏移地址、代码片段……记号 <code>X.a</code>（符号X的属性a）。</li>
+<li><b>语义规则</b>：挂在每个产生式上，两种形态——<b>复写规则</b> <code>X.a := Y.b</code>；<b>语义函数</b> <code>b := f(c₁,…,cₖ)</code> 或纯动作 <code>f(c₁,…,cₖ)</code>（如 print）。</li>
+</ul>
+<div class="formula">经典例（表达式求值属性文法，E、T、F 都有属性 val）：<br>
+S→E　　　{ print(E.val) }<br>
+E→E₁+T　{ E.val := E₁.val + T.val }<br>
+E→T　　　{ E.val := T.val }<br>
+T→T₁*F　{ T.val := T₁.val × F.val }<br>
+T→F　　　{ T.val := F.val }<br>
+F→(E)　　{ F.val := E.val }<br>
+F→d　　　{ F.val := d.lexval }　<span style="color:var(--muted)">（d.lexval 由词法分析给出）</span></div>
+<p><b>综合属性</b>：由子结点算出父结点（信息<b>自下而上</b>传）。对语法树做<b>自下而上（后序）遍历</b>，遇到能算的就算，就能完成求值。</p>
+<div class="card tip" style="margin:8px 0"><span class="emoji">🧮</span><b>人话版</b>：综合属性就像手算 3*(5+4)——<b>必须先算最里层括号</b>：有了 5 和 4，才能算出 9；有了 3 和 9，才能算出 27。先有孩子（叶）的值，才有父亲（根）的值，数值从树根往上看是一层层"汇上去"的。从最深处往上算，算到根，答案自然出来。</div>
+</div>
+
+<div class="card">
+<h3>🎬 属性求值动画：3*(5+4) = ?（课件7.1节原例）</h3>
+<div id="attrTree"></div>
+<div id="attrSteps"></div>
+<h3>✍️ 静态手算版：前 4 步逐步旁注（先自己算，再看动画对答案）</h3>
+<table class="gt">
+<tr><th>步</th><th>执行什么</th><th>得到什么</th><th>【旁注】</th></tr>
+<tr><td>1</td><td>领取叶子的便签 d.lexval</td><td>3、5、4</td><td>这些值<b>词法分析早就贴好了</b>，白拿，不用算</td></tr>
+<tr><td>2</td><td>对最左叶子用 F→d：F.val := d.lexval</td><td>F.val = 3</td><td>从<b>最深处</b>（叶子）开工，规则用到谁就算谁</td></tr>
+<tr><td>3</td><td>同样规则算另外两个叶子 F</td><td>F.val = 5、F.val = 4</td><td>括号里、括号外的叶子各自贴好自己的 val</td></tr>
+<tr><td>4</td><td>用 T→F、E→T 把值往上抄</td><td>T.val=3；括号内 T.val=5、T.val=4</td><td>复写规则=把孩子的便签<b>原样抄给父亲</b>，综合属性自下而上</td></tr>
+</table>
+<p style="color:var(--muted)">后面只剩：括号内 E.val:=5+4=9 → F.val:=9 → T.val:=3×9=27 → E.val:=27 → print(27)，一路汇到根。</p>
+</div>
+
+<div class="card def">
+<h3>翻译模式 与 语法制导翻译</h3>
+<ul>
+<li><b>语法制导翻译</b>：在<b>语法规则指导下</b>，通过执行语义规则完成对输入串的翻译（第4/6章的分析器走一步，语义动作跟着执行一步）。</li>
+<li><b>翻译模式（Translation Scheme）</b>：另一种描述形式——把语义动作<b>嵌入产生式的具体位置</b>（花括号里），体现"何时调用哪个动作"的翻译算法。</li>
+</ul>
+<h3>YACC：分析器自动生成工具（7.3节）</h3>
+<p><b>YACC</b>（Yet Another Compiler-Compiler）根据文法+语义动作自动生成 C 语言写的<b>语法分析器</b>，与词法分析器生成工具 <b>Lex</b> 配合：两者生成的 C 程序一起编译成编译器。正是"语法制导翻译"思想的工业化落地。</p>
+</div>
+
+<!-- ============ 8章 ============ -->
+<h2 class="section">🗂️ 2. 符号表：编译器的"户口本"（第8章）</h2>
+
+<div class="card tip"><span class="emoji">🎯</span><b>比喻</b>：符号表就是编译器的<b>户籍管理处</b>——程序里每个名字（变量、常量、过程）都要来登记；用的时候查一下；写错了（重名、未登记就使用）它负责报警。</div>
+
+<div class="card def">
+<h3>符号表的功能（三句话，简答必背）</h3>
+<div class="card tip" style="margin:8px 0"><span class="emoji">🗂️</span><b>先看一张真的长什么样</b>：写了 <code>int a; real x;</code> 之后，表里就多两行——<code>a｜int｜…地址</code>、<code>x｜real｜…地址</code>。<b>名字栏</b>是钥匙，<b>信息栏</b>记属性；查表=按名字找到这行、读后面几栏。下面的一切功能，都是围绕这张表的"登记、查验、按表分房"。</div>
+<ol>
+<li><b>收集符号属性</b>（标识符、常量、变量、过程、函数等）；</li>
+<li>作为<b>上下文语义合法性检查</b>的依据（如 a:=b+c 的类型检查）；</li>
+<li>作为<b>目标代码生成阶段地址分配</b>的依据（看类型定大小和地址）。</li>
+</ol>
+<p>它<span class="hl">贯穿编译全过程</span>：词法/语法阶段不断更新，语义分析阶段写入属性，代码生成阶段读取。PL/0 词法分析（线性表实现）就在用它。</p>
+<h3>组成与常见属性</h3>
+<p>符号表 = <b>名字栏（主栏，内容叫关键字 keyword）</b> + <b>信息栏</b>（多列，含许多子栏和标志位）。常见属性：① 符号名（按名存取，不能重名）② 类别（常量/变量/过程/函数）③ 类型（类型检查依据）④ 存储信息（地址）⑤ 作用域（全局/局部）⑥ 其他（数组内情向量、记录成员、形参等）。</p>
+<p><b>符号表总体结构的设计取决于</b>：① <b>源语言的复杂性</b>（词法、语法结构的复杂性）② 对编译系统<b>时间效率和空间效率</b>的要求。</p>
+<h3>五类操作 与 实现数据结构</h3>
+<p>操作：① 查询名字是否已在表中 ② 插入新名字 ③ 访问某名字的信息 ④ 填写/更新信息 ⑤ 删除无用项。</p>
+<table class="gt">
+<tr><th>结构</th><th>特点</th></tr>
+<tr><td>线性表（无序）</td><td>简单，PL/0 采用</td></tr>
+<tr><td>有序表</td><td>可折半查找</td></tr>
+<tr><td>栈符号表</td><td>适合嵌套作用域</td></tr>
+<tr><td>Hash 表</td><td>查找快，实用编译器主流</td></tr>
+</table>
+</div>
+
+<div class="card def">
+<h3>静态语义检查与"声明/使用"查错</h3>
+<p>静态检查是<b>代码生成前合法性检查的最后阶段</b>，包括：控制流检查（break 必须有合法包围）、唯一性检查（枚举元素不重复）、名字上下文相关性检查、类型检查。</p>
+<div class="formula">查错流程（简答模板）：<br>
+遇<b>新声明</b> → 查符号表：已有同名 ⇒ <b>重复声明</b>错误；没有 ⇒ 登记属性入表<br>
+遇<b>使用</b> → 查符号表：查无 ⇒ <b>未声明</b>错误；查到 ⇒ 取属性做进一步分析</div>
+</div>
+
+<!-- 中间代码 -->
+<h2 class="section">🏭 3. 中间代码：先译成"世界语"（8.3节）</h2>
+
+<div class="card def">
+<h3>为什么要中间代码</h3>
+<p><b>优点</b>：① 与机器无关，<b>便于移植</b>（换目标机只换后端）② 对中间代码做优化比在源/目标代码上做<b>更容易</b>。<b>缺点</b>：多了一级翻译。<b>总体优大于缺</b>。（注意：PL/0 没有中间代码生成阶段。）</p>
+<p>常见形式：<b>AST</b> 抽象语法树 ｜ <b>TAC</b> 三地址码（<b>四元式</b>）｜ <b>P-code</b>（Pascal 用）｜ <b>Bytecode</b>（Java→JVM）｜ <b>SSA</b> 静态单赋值。</p>
+<h3>四元式（本关主角）</h3>
+<div class="card tip" style="margin:8px 0"><span class="emoji">🗣️</span><b>人话版</b>：四元式就是一张<b>三地址便条</b>，四个格子问四件事：<b>拿谁、对谁、做什么运算、结果放哪</b>。一行只干一件事；复杂表达式拆成几张便条<b>接力</b>，先写的先算，临时变量 T₁、T₂ 就是接力棒。<br>
+玩具版只有一条：<code>a+b</code> ⇒ <code>(+, a, b, T₁)</code>——就这么简单，难的只是式子更长、要按"先乘除后加减"排好出条的顺序。</div>
+<div class="formula">四元式 = （<b>算符 op，左操作数 ARG1，右操作数 ARG2，结果 RESULT</b>）<br>
+例（X 为整型、0.618/Y 为实型，先做类型转换）：<code>Z := X + 0.618*Y</code> ⇒<br>
+(1) ( inttoreal, Y, -, T₁ )　　<span style="color:var(--muted)">把 Y 从整型转成实型</span><br>
+(2) ( *, 0.618, T₁, T₂ )<br>
+(3) ( +, X, T₂, Z )</div>
+<h3>✍️ 手算示范：Z := X + 0.618*Y 逐条旁注</h3>
+<table class="gt">
+<tr><th>#</th><th>写出的四元式</th><th>【旁注】为什么是它</th></tr>
+<tr><td>1</td><td>( inttoreal, Y, -, T₁ )</td><td>类型对齐：X 整型、0.618 实型，先把 Y 转实型放 T₁；<b>一元运算没有右操作数，写 "-" 占位</b></td></tr>
+<tr><td>2</td><td>( *, 0.618, T₁, T₂ )</td><td><b>先乘除</b>：0.618×T₁ 最先算，结果用接力棒 T₂ 传下去</td></tr>
+<tr><td>3</td><td>( +, X, T₂, Z )</td><td><b>后加减</b>：X+T₂ 才算；最终结果有名字 Z，就不用再借临时变量了</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>🎮 四元式生成器（输入表达式，看翻译过程）</h3>
+<input type="text" id="quadIn" value="X+0.618*Y" style="max-width:320px;display:inline-block">
+<button class="btn small" id="quadGo">翻译</button>
+<div id="quadOut"></div>
+</div>
+
+<!-- ============ 测验 ============ -->
+<h2 class="section">📝 4. 第 5 关 · 关末测验</h2>
+<div id="quiz5"></div>
+
+<h2 class="section">✍️ 5. 大题演练</h2>
+<div id="bigq5"></div>
+
+<div class="footer">编译原理互动课堂 · 第5关 ｜ 对应课件第7、8章 ｜ <a href="level4.html">← 上一关</a> ｜ <a href="index.html">闯关地图</a> ｜ <a href="level6.html">下一关：运行存储与优化 →</a></div>
+</div>
+
+<script src="js/engine.js"></script>
+<script src="js/ui.js"></script>
+<script>
+BYUI.nav('level5.html');
+
+/* ---- 属性求值动画：3*(5+4) ---- */
+(function(){
+  // 语法树（带属性）
+  const steps=[
+   {note:'词法分析已给出：d.lexval：最左 d=3，中间 d=5，右 d=4。开始后序（自下而上）遍历执行语义规则。'},
+   {note:'F→d：F.val := d.lexval ⇒ 三个叶子：F.val=3、F.val=5、F.val=4'},
+   {note:'T→F：T.val := F.val ⇒ 最左 T.val=3'},
+   {note:'T→F：T.val := F.val ⇒ 括号里左侧的 T.val=5'},
+   {note:'E→T：E.val := T.val ⇒ 括号里左侧的 E₁.val=5'},
+   {note:'T→F：T.val := F.val ⇒ 括号里右侧（加数）的 T.val=4'},
+   {note:'E→E₁+T：E.val := E₁.val+T.val = 5+4 = 9'},
+   {note:'F→(E)：F.val := E.val ⇒ 括号结点 F.val=9'},
+   {note:'T→T₁*F：T.val := T₁.val×F.val = 3×9 = 27'},
+   {note:'E→T：E.val := T.val = 27'},
+   {note:'S→E：print(E.val) ⇒ 输出 27 ✅ 分析完毕，语义计算完成！'}
+  ];
+  const rows=steps.map(s=>({cells:['<div style="text-align:left">'+s.note+'</div>']}));
+  BYUI.stepPlayer('attrSteps',['语义规则执行（自下而上后序）'],rows,{speed:1600});
+  // 树
+  function drawTree(mount,node){
+    const el=document.getElementById(mount);
+    function deep(n){return 1+(n.kids&&n.kids.length?Math.max(...n.kids.map(deep)):0);}
+    function width(n){return n.kids&&n.kids.length?n.kids.reduce((a,k)=>a+width(k),0):1;}
+    const unit=64,d=deep(node),w=width(node);
+    const W=w*unit+70,H=d*74+70;
+    let svg=`<svg viewBox="0 0 ${W} ${H}" width="${Math.min(W,520)}" style="max-width:100%" xmlns="http://www.w3.org/2000/svg">`;
+    (function pos(n,y,x0){ n.px=x0*unit+width(n)*unit/2+30; n.py=y*64+30; let x=x0; (n.kids||[]).forEach(k=>{pos(k,y+1,x); x+=width(k);}); })(node,0,0);
+    (function lines(n){(n.kids||[]).forEach(k=>{svg+=`<line x1="${n.px}" y1="${n.py}" x2="${k.px}" y2="${k.py}" stroke="#5a6196" stroke-width="1.6"/>`;lines(k);});})(node);
+    (function nodes(n){
+      svg+=`<circle cx="${n.px}" cy="${n.py}" r="17" fill="#1e2348" stroke="#7c6cff" stroke-width="2"/>`;
+      svg+=`<text x="${n.px}" y="${n.py+5}" text-anchor="middle" font-size="13.5" fill="#e8eaf6">${n.v}</text>`;
+      if(n.attr!==undefined)svg+=`<text x="${n.px}" y="${n.py-24}" text-anchor="middle" font-size="12" fill="#ffd166">${n.attr}</text>`;
+      (n.kids||[]).forEach(nodes);
+    })(node);
+    svg+='</svg>';
+    el.innerHTML=`<div class="svgwrap">${svg}</div><p style="color:var(--muted)">金色数字 = 各结点算出的属性值 val（子结点值 → 父结点值，综合属性自下而上传递）</p>`;
+  }
+  drawTree('attrTree',
+    {v:'S',attr:'print(27)',kids:[
+      {v:'E',attr:'27',kids:[
+        {v:'T',attr:'27',kids:[
+          {v:'T',attr:'3',kids:[
+            {v:'F',attr:'3',kids:[{v:'d',attr:'lex=3'}]}
+          ]},
+          {v:'*'},
+          {v:'F',attr:'9',kids:[
+            {v:'('},
+            {v:'E',attr:'9',kids:[
+              {v:'E',attr:'5',kids:[
+                {v:'T',attr:'5',kids:[
+                  {v:'F',attr:'5',kids:[{v:'d',attr:'lex=5'}]}
+                ]}
+              ]},
+              {v:'+'},
+              {v:'T',attr:'4',kids:[
+                {v:'F',attr:'4',kids:[{v:'d',attr:'lex=4'}]}
+              ]}
+            ]},
+            {v:')'}
+          ]}
+        ]}
+      ]}
+    ]});
+})();
+
+/* ---- 四元式生成器 ---- */
+document.getElementById('quadGo').addEventListener('click',()=>{
+  try{
+    const {quads}=BYQ.exprToQuads(document.getElementById('quadIn').value);
+    let html=BYUI.gt(['序号','算符 OP','ARG1','ARG2','RESULT T'],quads.map((q,i)=>[i+1,'<b>'+q.op+'</b>',q.l,q.r,'<b>'+q.res+'</b>']));
+    html+='<div class="notice good">💡 翻译顺序 = 运算优先级顺序：先算的先翻译，临时变量 T1、T2… 接力传递结果（递归下降/语法制导翻译自动保证这个顺序）。</div>';
+    document.getElementById('quadOut').innerHTML=html;
+  }catch(e){document.getElementById('quadOut').innerHTML='<div class="notice">⚠️ '+e.message+'</div>';}
+});
+document.getElementById('quadGo').click();
+
+/* ---- 测验 ---- */
+BYUI.quiz.render('quiz5',{
+  id:'level5',title:'第5关·语法制导与中间代码',
+  questions:[
+   {type:'multi',q:'静态语义检查包括：',options:['类型检查','控制流检查（如goto不许转入case）','一致性检查（同作用域不可重复声明）','除零溢出检查'],answer:[0,1,2],
+    explain:'除零溢出属于动态语义检查（运行期）。静态检查在编译期完成。'},
+   {type:'single',q:'属性文法 A=(G,V,F) 中 V、F 分别是：',options:['文法符号集、产生式集','属性的有穷集合、关于属性的断言(语义规则)的有穷集合','变量集、函数集','终结符集、非终结符集'],answer:1,
+    explain:'G是上下文无关文法，V是属性集合，F是语义规则集合。'},
+   {type:'single',q:'记号 X.a 表示：',options:['文法符号X关联属性a的值','X乘以a','X的第a个字符','a的属性属于X'],answer:0,
+    explain:'如 E.val、d.lexval：符号.属性。'},
+   {type:'single',q:'语义规则的两种形式是：',options:['推导和归约','复写规则(X.a:=Y.b)和语义函数(b:=f(c1..ck))','移进和归约','声明和定义'],answer:1,
+    explain:'复写规则直接传递属性值；语义函数通过计算得到属性值（或执行动作如print）。'},
+   {type:'single',q:'综合属性的信息传递方向是：',options:['自上而下','自下而上（由子结点算出父结点属性）','左右传递','随机'],answer:1,
+    explain:'综合属性自下而上：叶子的值逐层汇总到根（如表达式求值）。对语法树后序遍历即可求值。'},
+   {type:'single',q:'语法制导翻译的含义是：',options:['先翻译后分析','在语法规则指导下执行语义规则完成翻译','只做语法分析','人工指导翻译'],answer:1,
+    explain:'语法分析每走一步，相应语义动作跟着执行——分析与翻译同步进行。'},
+   {type:'single',q:'YACC 的作用是：',options:['词法分析器生成工具','语法分析器(解析器)生成工具，生成C语言Parser，与Lex配合使用','目标代码优化器','链接器'],answer:1,
+    explain:'YACC=Yet Another Compiler-Compiler，按文法+语义动作生成语法分析器；Lex负责词法。'},
+   {type:'multi',q:'符号表的功能包括：',options:['收集符号属性','作为上下文语义合法性检查的依据','作为目标代码生成阶段地址分配的依据','存放目标代码'],answer:[0,1,2],
+    explain:'三大功能：收集属性、检查依据、地址分配依据。符号表不存目标代码。'},
+   {type:'single',q:'符号表的主栏（名字栏）内容称为：',options:['属性','关键字(keyword)','地址','类型'],answer:1,
+    explain:'名字栏是主栏，其内容称为关键字，按名查找。'},
+   {type:'single',q:'PL/0 编译程序中符号表采用的数据结构是：',options:['Hash表','有序表','线性（无序）表','栈'],answer:2,
+    explain:'PL/0用无序线性表，简单；实用编译器多用Hash表。'},
+   {type:'single',q:'遇到标识符的使用而符号表中查无此名，属于：',options:['语法错误','未声明错误（语义错误）','重复声明错误','词法错误'],answer:1,
+    explain:'查无=未声明；查到同名再声明=重复声明。两者都靠查符号表发现。'},
+   {type:'multi',q:'使用中间代码的优点：',options:['与机器无关便于移植','对中间代码优化更容易','减少编译步骤','不需要语法分析'],answer:[0,1],
+    explain:'中间代码机器无关、优化容易；缺点是多一级翻译。PL/0没有中间代码生成阶段。'},
+   {type:'single',q:'四元式的四个成分是：',options:['(算符,左操作数,右操作数,结果)','(操作数,操作数,操作数,操作数)','(标号,算符,地址,注释)','(类型,名字,值,地址)'],answer:0,
+    explain:'(op, ARG1, ARG2, RESULT)，如(+, X, T2, Z)。'},
+   {type:'single',q:'Java 编译器输出的 Bytecode 属于：',options:['目标代码','中间代码的一种','四元式','汇编语言'],answer:1,
+    explain:'Bytecode是Java虚拟机的输入，是中间代码的形式之一（同类还有P-code、TAC、SSA、AST）。'},
+   {type:'single',q:'表达式 a+b*c 翻译成四元式的条数和第一条是：',options:['2条，(+,a,b,T1)','2条，(*,b,c,T1)','3条，(*,b,c,T1)','1条，(+,a,b*c,T1)'],answer:1,
+    explain:'先乘后加：(*) b c T1；再(+) a T1 T2。共2条，第一条是乘法。'}
+  ]
+});
+BYUI.bigQuestions('bigq5',{
+  id:'level5',title:'第5关·大题',
+  questions:[
+   {q:'给文法 G: N→S₁.S₂, S→S₁B|B, B→0|1 配上语义规则（属性文法），使其能把任意二进制小数转换成十进制小数，如 (101.101)B=(5.625)D。（课件本章作业题）',
+    hint:'整数部分和小数部分分开算：S综合属性记录"值"和"位数"；小数部分除以2的幂。可设 S.val 与 S.len，N.val := S1.val + S2.val/2^(S2.len) 一类的规则。'},
+   {q:'把下列表达式翻译成四元式序列：a*(b+c)-d/e，并标明临时变量。',
+    hint:'按优先级：先算 t1=b+c，再 t2=a*t1，t3=d/e，最后 t4=t2-t3。四元式四元组(op,ARG1,ARG2,RESULT)。'},
+   {q:'简述符号表在编译各阶段的作用，并说明"标识符未声明"和"重复声明"两类错误分别如何借助符号表检查。',
+    hint:'词法/语法阶段登记更新；语义分析写入属性；代码生成读取属性分配地址。未声明=使用时查无；重复声明=再声明时查到同名。'}
+  ]
+});
+</script>
+</body>
+</html>

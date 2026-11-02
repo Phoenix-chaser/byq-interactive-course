@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第2关 · 词法分析 | 编译原理闯关</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+<div class="hero">
+  <h1>第 2 关 · 词法分析（第3章）</h1>
+  <div class="sub">把字符流切成单词 ｜ 正规式 · NFA · DFA · 子集法 · 最小化 ｜ <b style="color:var(--warn)">⭐ 考试重点关</b></div>
+</div>
+
+<!-- ============ 3.1 ============ -->
+<h2 class="section">✂️ 1. 词法分析器在干什么</h2>
+
+<div class="card tip"><span class="emoji">🎯</span><b>比喻</b>：读英文文章时，你先做的不是理解句子，而是把 <i>yo/​u/​are/good</i> 这些<b>单词</b>一个个认出来、查词典。词法分析器（扫描器 Scanner）干的就是这个：把源程序的<b>字符流</b>切成一个个<b>单词符号（Token）</b>，交给语法分析器当"单词"用。</div>
+
+<div class="card def">
+<h3>词法分析器的功能与输出</h3>
+<p>🗣️ <b>人话版</b>：词法分析器就是个<b>"切单词、贴标签"的工人</b>——左边吃进一长串字符，右边吐出一排小票，每张写着（这是哪类单词、值是什么）：把 <code>for i := 1</code> 切成（基本字,for）（标识符,i）（算符,:=）（常数,1）。它只管"认字"，不管"句子通不通"（那是语法分析的事）。</p>
+<ul>
+<li><b>主要功能</b>：从左至右、从上至下逐字符扫描源程序，输出单词符号序列。</li>
+<li><b>其他功能</b>：滤掉空格、跳过注释和换行符；行列计数（出错定位用）；发现并定位<b>词法错误</b>（非法字符）。</li>
+<li>与语法分析器的两种接口：① <b>独立一遍</b>（简单但开销大）；② <b>作为语法分析器的子程序</b>，随用随取（<span class="ka">PL/0 采用</span>，节省内存）。</li>
+<li>分离出词法分析的好处：编译器结构更<b>简洁清晰</b>、<b>效率</b>改进、<b>可移植性</b>增强。</li>
+</ul>
+<div class="formula">单词符号分 5 类：<b>基本字</b>（关键字/保留字：for、if）｜<b>标识符</b>（变量名、过程名）｜<b>常数</b>（整型、实型）｜<b>运算符</b>（+ - * /）｜<b>界符</b>（; , ( )）<br>
+输出形式：二元式 <b>（单词种别码，单词符号的属性值）</b>；种别编码方式：一类一种 / 按类分种 / <b>一符一种</b>（关键字常用）<br>
+描述词法规则的 5 种工具（课件清单）：<b>EBNF</b>（扩充 BNF）、<b>正规文法</b>（3型）、<b>正规式</b>、<b>有限状态自动机</b>、<b>状态转换图</b>——本章主角是中间三个，且它们可以互相转换</div>
+</div>
+
+<div class="card">
+<h3>🔬 单词切分演示器</h3>
+<p>输入一行类 Pascal 代码，看看词法分析器怎么切（识别不了会报"词法错误"——注意 '#' 是故意用来演示非法字符的）：</p>
+<input type="text" id="lexIn" value="for i := 1 to 100 do x:=x+i">
+<div id="lexOut"></div>
+</div>
+
+<!-- ============ 3.3 正规式 ============ -->
+<h2 class="section">📐 2. 单词的数学描述：正规文法与正规式</h2>
+
+<div class="card def">
+<h3>正规文法（3型）描述单词</h3>
+<p>🗣️ <b>人话版</b>：用文法拼单词，规矩是"每条规则只往前吐<b>一个</b>字符，最多再捎上一个还没展开的非终结符"——像报数一样一个一个来，绝不回头。</p>
+<p>第1关讲过 3 型文法：A→aB 或 A→a。它能描述程序语言的单词结构：</p>
+<div class="formula">&lt;标识符&gt; → l | l&lt;字母数字&gt;<br>&lt;字母数字&gt; → l | d | l&lt;字母数字&gt; | d&lt;字母数字&gt;<br>&lt;无符号整数&gt; → d | d&lt;无符号整数&gt;<br><span style="color:var(--muted)">l 代表任一字母，d 代表任一数字</span></div>
+</div>
+
+<div class="card def">
+<h3>正规式与正规集（重点）</h3>
+<p>🗣️ <b>人话版</b>：正规式是写"单词配方"的<b>通配符</b>：竖线 <code>|</code>＝"或者"，星号 <code>*</code>＝"前面那坨重复任意遍（0 遍也行）"。一个正规式代表<b>一整类长得像的串</b>（这堆串就叫正规集）。为什么需要它？一行就能说清"标识符长什么样"，而且机器能自动把它变成识别程序（Lex 干的就是这个）。</p>
+<p><b>正规式</b>是用来描述单词结构的更紧凑写法；它表示的字符串集合叫<b>正规集</b>。递归定义（Σ 上）：</p>
+<table class="gt">
+<tr><th>正规式</th><th>正规集</th></tr>
+<tr><td>ε、∅、a（a∈Σ）</td><td>{ε}、∅、{a}</td></tr>
+<tr><td>e₁|e₂（或）</td><td>L(e₁)∪L(e₂)</td></tr>
+<tr><td>e₁·e₂（连接，·可省）</td><td>L(e₁)L(e₂)</td></tr>
+<tr><td>e₁*（闭包）</td><td>(L(e₁))*</td></tr>
+</table>
+<div class="formula">运算优先级：<b>* ＞ 连接 ＞ |</b></div>
+<table class="gt">
+<tr><th>正规式（Σ={a,b}）</th><th>正规集</th></tr>
+<tr><td>a|b</td><td>{a, b}</td></tr>
+<tr><td>ab</td><td>{ab}</td></tr>
+<tr><td>a*</td><td>{aⁿ|n≥0}（含 ε）</td></tr>
+<tr><td>a*b</td><td>{aⁿb|n≥0}</td></tr>
+<tr><td>(a|b)*</td><td>Σ* = 所有 a、b 串</td></tr>
+<tr><td>a*b*</td><td>{aⁿbᵐ|n,m≥0}</td></tr>
+</table>
+<p>标识符 = <code>(A|B)(A|B|0|1)*</code>（以字母开头）；数 = <code>(0|1)(0|1)*</code>。<br>
+<b>正规式等价</b>：正规集相同则等价，记 U=V。经典等价式：<code>b(ab)* = (ba)*b</code>，<code>(a|b)* = (a*b*)*</code>。</p>
+</div>
+
+<!-- ============ NFA/DFA ============ -->
+<h2 class="section">🤖 3. 有穷自动机：会认单词的"小机器人"</h2>
+
+<div class="card tip"><span class="emoji">🎯</span><b>比喻</b>：自动机就是一台"投币售货机式"的机器人：站在某个状态上，来一个字符就按规则跳到下一个状态；串读完了如果恰好站在<b>终态</b>（双圈），就说"这个词我认识（接受）"。</div>
+
+<div class="card def">
+<h3>DFA vs NFA 定义对比（必考）</h3>
+<p>🗣️ <b>人话版</b>：DFA 是<b>没有选择困难症</b>的机器人：站在任何状态、读任何字符，下一步去哪<b>唯一确定</b>；NFA 允许"分身"——同一个字符面前几条路都能走，还有不吃字符的"ε 传送门"。两者认串能力其实一样，但 NFA 要不停试错、没法直接写成程序，所以后面要把它"确定化"成 DFA。</p>
+<table class="gt">
+<tr><th></th><th>DFA 确定的</th><th>NFA 不确定的</th></tr>
+<tr><td>五元组</td><td>(K, Σ, f, S, Z)</td><td>(K, Σ, f, S, Z)</td></tr>
+<tr><td>f 映射</td><td class="ok">K×Σ→K 单值</td><td class="no">K×Σ*→K 的子集（多值）</td></tr>
+<tr><td>初态 S</td><td class="ok">唯一一个</td><td class="no">非空初态集（可多个）</td></tr>
+<tr><td>终态集 Z</td><td>Z⊆K</td><td>Z⊆K（可为空集）</td></tr>
+</table>
+<p><b>直观特点</b>：DFA——初态唯一、边上只有一个字符、<b>无 ε 弧</b>、一个状态对同一字符只有<b>一条</b>出边；NFA——初态不唯一、边上可以是串、可以含 ε 弧、同一字符可有多条出边。<b>DFA 是 NFA 的特例</b>；两者识别能力相同（对每个 NFA M 都存在 DFA M' 使 L(M)=L(M')）。</p>
+<p><b>识别/接受</b>：从初态出发，存在到某终态的通路，弧上标记连接起来恰好是 t ⇒ t 被识别，记 f(S,t)∈Z。DFA 初态同时是终态 ⇒ 可识别 ε；NFA 若存在某初态到某终态的 <b>ε 通路</b>，空字 ε 也可被识别。L(M)=自动机能识别的字的全体。NFA 识别慢（要试探多条路）、DFA 占空间大——所以要"确定化+最小化"。</p>
+<p><b>状态转换矩阵</b>（可考）：自动机除了画<b>状态转换图</b>，还可以写成矩阵——行=状态、列=输入字母、格=转向的状态（DFA 一格一个状态；NFA 一格一个状态集，ε 列也要写）。给你一个矩阵要会读出五元组和识别的串。如下面这个 DFA 模拟器的课件例，矩阵就是：行 S/U/V/Q，a 列填 U/Q/U/Q，b 列填 V/V/Q/Q（无转换的格记 —，表示报错）。</p>
+</div>
+
+<div class="card">
+<h3>🎮 DFA 识别模拟器（课件例 M=({S,U,V,Q},{a,b},f,S,{Q})）</h3>
+<div id="dfaFig1"></div>
+<p>输入一个 a、b 串，机器人一步步走给你看（课件练习：证明 <code>baab</code> 被接受）：</p>
+<input type="text" id="dfaRunIn" value="baab" style="max-width:260px;display:inline-block">
+<button class="btn small" id="dfaRunBtn">▶ 开跑</button>
+<div id="dfaRunOut"></div>
+</div>
+
+<!-- ============ 子集法 ============ -->
+<h2 class="section">🧮 4. 子集法：NFA → DFA（考试大题重灾区）</h2>
+
+<div class="card tip"><span class="emoji">🎯</span><b>核心思想一句话</b>：NFA 走到岔路口时"人格分裂"——<b>DFA 的一个状态 = NFA 的一组状态（子集）</b>。把"可能同时处在的所有 NFA 状态"打包当成一个新状态，不确定性就消失了。</div>
+
+<div class="card def">
+<h3>两个基本运算（必须会手算）</h3>
+<p>🗣️ <b>人话版</b>：把 ε 弧想成<b>免费传送门</b>：<b>ε-closure(I)</b>＝不吃任何字符、光靠传送门能到的所有位置——走 <b>0 条</b>传送门也算数，所以 I 自己永远在集合里；<b>Move(I,a)</b>＝真吃下一个字符 a 后能站的位置（这一步<b>不</b>顺传送门）。一句话区别：<b>Move 只吃字符，Iₐ＝吃完字符还要免费传送一遍</b>。</p>
+<div class="formula">① <b>ε-闭包</b> ε-closure(I)：从 I 中任一状态出发，经<span class="hl">任意条 ε 弧</span>能到达的状态全体（I 自身当然在内）<br>
+② <b>Move(I, a)</b>：从 I 中某状态出发经<span class="hl">一条 a 弧</span>到达的状态全体<br>
+③ I<sub>a</sub> = ε-closure( Move(I, a) )　——子集法每步真正用的就是它</div>
+<p>课件/教材例（教材 3.4 节那张 11 状态 NFA，状态 0~10，非本页实验室的图）：ε-closure({0}) = <code>{0,1,2,4,7}</code>；Move({0,1,2,4,7}, a) = <code>{3,8}</code>；ε-closure({3,8}) = <code>{1,2,3,4,6,7,8}</code>。下面实验室里你可以拿任意正规式自己算同类结果。</p>
+</div>
+
+<div class="card">
+<h3>🔬 子集法全流程实验室（正规式 → NFA → DFA 一条龙）</h3>
+<p>选一个预置正规式（或自己写，支持 <code>| * ( )</code> 和任意单字符），点"开工"看三步：<br>
+① Thompson 构造出 NFA → ② 子集法逐行确定化 → ③ 画出 DFA 并可测试任意串。</p>
+<div>
+<select id="rxSel" style="max-width:280px;display:inline-block">
+  <option value="(a|b)*abb">(a|b)*abb —— 课件经典例</option>
+  <option value="(A|B)(A|B|0|1)*">(A|B)(A|B|0|1)* —— 标识符</option>
+  <option value="a*b">a*b</option>
+  <option value="b(ab)*">b(ab)* —— 与(ba)*b等价</option>
+</select>
+<input type="text" id="rxCustom" placeholder="或在此输入自定义正规式（如 (a|b)*a）" style="max-width:300px;display:inline-block">
+<button class="btn" id="rxGo">🚀 开工</button>
+</div>
+<div id="rxOut"></div>
+</div>
+
+<div class="card def">
+<h3>子集法手算流程（照这个套路写解题过程）</h3>
+<p>🗣️ <b>人话版</b>：整个算法就是"广度优先登记户口"：从初态打包盒出发，对每个盒子挨个字母算出下一站；这个盒子见过就跳过，没见过就登记编号，直到再也冒不出新盒子为止。</p>
+<ol>
+<li><b>预处理</b>（若给的 NFA 初态/终态不唯一）：加新初态 X 指向所有初态、所有终态指向新终态 Y（都走 ε 弧）。</li>
+<li>令 I₀ = ε-closure(初态集)，作为 DFA 初态。</li>
+<li>对每个未标记的 I，逐个字母 a 求 I<sub>a</sub> = ε-closure(Move(I,a))：得到新子集就编号登记，重复直到不再产生新子集。</li>
+<li>含 NFA 终态的子集 = DFA 终态。</li>
+</ol>
+<div class="notice">⚠️ <b>常见错误</b>：算 Move 之后忘了再做 ε-闭包；把 I 本身忘在闭包外；漏掉"含终态的子集都是终态"。</div>
+</div>
+
+<div class="card">
+<h3>🔬 迷你例：2 状态 NFA 完整走一遍子集法（先啃小例子，再做大题）</h3>
+<p>玩具 NFA（初态 0，终态 {1}）：<span class="mono">0 —a→ 0</span>、<span class="mono">0 —a→ 1</span>（读 a 两条路＝岔路口）、<span class="mono">0 —ε→ 1</span>（免费传送门）、<span class="mono">1 —b→ 1</span>，识别 a*b*。</p>
+<table class="gt">
+<tr><th>步</th><th>当前子集 I</th><th>① 先 Move（吃一个字符）</th><th>② 再 ε-闭包＝Iₐ</th><th>【旁注】这步在干嘛</th></tr>
+<tr><td>0</td><td>闭包({0})＝I₀</td><td>—</td><td>{0,1}</td><td>开局只做闭包：0 自己（走 0 条 ε 也算）＋传送门到的 1；含终态 ⇒ DFA 初态即终态，能认 ε</td></tr>
+<tr><td>1</td><td>{0,1} 读 a</td><td>{0,1}</td><td>{0,1}＝I₀</td><td>0 吃 a 可留原地也可去 1，分身全部打包；没冒出新子集，不必登记</td></tr>
+<tr><td>2</td><td>{0,1} 读 b</td><td>{1}</td><td>{1}＝I₁ ★新</td><td>只有 1 认识 b；{1} 头一次见 → 登记新状态；含终态 ⇒ DFA 终态</td></tr>
+<tr><td>3</td><td>{1} 读 a</td><td>∅</td><td>—</td><td>{1} 上没有 a 弧，死路；转换表这格填 "—"（读 a 报错）</td></tr>
+<tr><td>4</td><td>{1} 读 b</td><td>{1}</td><td>{1}＝I₁</td><td>绕回自己；再无新子集 ⇒ 算法结束：2 状态 NFA → 2 状态 DFA</td></tr>
+</table>
+<div class="notice good">💡 看：DFA 的状态不再是 0、1，而是 {0,1}、{1} 这样的<b>打包盒</b>——岔路口的所有可能一次揣进兜里，每读一个字符结果仍是一个确定的盒子，"不确定"就是这么被消掉的。</div>
+</div>
+
+<!-- ============ 最小化 ============ -->
+<h2 class="section">✨ 5. DFA 最小化：分割法</h2>
+
+<div class="card tip"><span class="emoji">🎯</span><b>比喻</b>：给一群机器人"查户口"分宿舍。先按"是不是终态"分成两栋楼（<b>一致性</b>），再在每个楼里按"收到 a、b 后去的楼号是否相同"继续细分（<b>蔓延性</b>），直到每间房里的人行为完全一致，每房派一个代表即可。</div>
+
+<div class="card def">
+<h3>等价状态两条件 + 分割法四步</h3>
+<p>🗣️ <b>人话版</b>：最小化＝给状态"查重合并"：两个状态无论以后喂什么串，接受/拒绝的结果永远相同（＝等价），留一个就够。怎么查？先按<b>终态/非终态</b>分成两栋楼（成绩单都不同的，一眼拆开——这叫<b>一致性</b>）；再反复检查每间房里的人"读 a、读 b 后进的楼号"是否相同，不同就分家（这叫<b>蔓延性</b>）；分到不能再分，每间房派一个代表。</p>
+<ul>
+<li>状态 s、t <b>等价</b> ⇔ ① <b>一致性</b>：同终态或同非终态；② <b>蔓延性</b>：对一切输入符号，s、t 转到<b>等价状态</b>里。</li>
+<li>先删<b>多余状态</b>：不可到达状态（从初态永远到不了）、不可终止状态（到不了终态）。</li>
+<li><b>四步</b>：① 分成终态集 / 非终态集 → ② 对每个子集，看各状态经每个字母转向的目标落在哪个子集，目标子集不同就分裂 → ③ 重复②直到不再分裂 → ④ 每个子集选一个代表合并；<b>含原初态的子集代表是新初态，含原终态的都是终态</b>。</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>🔬 迷你例：4 状态 DFA 逐轮分割（每轮旁注）</h3>
+<p>玩具 DFA（初态 A，终态 {D}）：<span class="mono">A: a→B, b→C</span>；<span class="mono">B: a→B, b→D</span>；<span class="mono">C: a→B, b→D</span>；<span class="mono">D: a→D, b→D</span>。</p>
+<table class="gt">
+<tr><th>轮次</th><th>动作</th><th>分割结果</th><th>【旁注】为什么这么分</th></tr>
+<tr><td>第0轮</td><td>按终态分堆</td><td>{A,B,C} ｜ {D}</td><td><b>一致性</b>：D 是终态（双圈），先和普通人分两栋楼</td></tr>
+<tr><td>第1轮</td><td>逐个查 {A,B,C} 的去向</td><td>{A} ｜ {B,C} ｜ {D}</td><td><b>蔓延性</b>：读 a 大家都进 {A,B,C}，不分；读 b 时 A→C（非终态楼）、B/C→D（终态楼）——A 表现不同，分家</td></tr>
+<tr><td>第2轮</td><td>复查各堆</td><td>不再分裂</td><td>{B,C}：读 a 都到 B、读 b 都到 D，去的楼相同 ⇒ B、C 行为完全一致，等价</td></tr>
+<tr><td>合并</td><td>每堆留一个代表</td><td>剩 3 个状态</td><td>B、C 合成一个；含 A 的堆代表当新初态，含 D 的堆都是终态</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>🔬 分割法动画（课件例：7 状态 DFA，终态 {3,4,5,6}）</h3>
+<div id="dfaFig2"></div>
+<div id="minSteps"></div>
+<div id="minResult"></div>
+</div>
+
+<!-- ============ 等价性与Lex ============ -->
+<h2 class="section">🔗 6. 等价全家福 与 Lex</h2>
+
+<div class="card tip"><span class="emoji">🛠️</span><b>流水线全景：每一步图什么？</b>
+<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px">
+<span style="border:2px solid var(--muted);border-radius:8px;padding:4px 10px;text-align:center"><b>正规式</b><br><small>人写着省事</small></span><span>→</span>
+<span style="border:2px solid var(--muted);border-radius:8px;padding:4px 10px;text-align:center"><b>NFA</b><br><small>机器照公式拼，但会"分身"</small></span><span>→</span>
+<span style="border:2px solid var(--muted);border-radius:8px;padding:4px 10px;text-align:center"><b>DFA</b><br><small>子集法打包分身，程序能跑</small></span><span>→</span>
+<span style="border:2px solid var(--good);border-radius:8px;padding:4px 10px;text-align:center"><b>最小 DFA</b><br><small>合并等价状态，最省</small></span>
+</div>
+<p>一句话动机：<b>人爱写正规式，机器只会跑 DFA</b>——这条流水线就是把"人话"一步步翻译成"机器腿"，每一站都是为了下一站更好实现。</p>
+</div>
+
+<div class="card def">
+<h3>正规文法 ↔ 自动机 的转换规则（3.6节，选择题常考）</h3>
+<p>🗣️ <b>人话版</b>：文法推导和自动机走图，本来就是<b>同一件事的两种说法</b>：A→aB 读作"状态 A 吃了字符 a 就到状态 B"，A→a 读作"状态 A 吃完 a 就到终点"。所以每个非终结符＝一个状态，再新设一个终点 Z，收留所有"A→a"式的收尾。</p>
+<div class="formula"><b>正规文法 G → FA M</b>：字母表 = G 的终结符集；<b>每个非终结符对应一个状态</b>，开始符号为初态；<b>另加一个新终态 Z</b>；<br>　规则 A→tB ⇒ f(A,t)=B；　规则 A→t ⇒ f(A,t)=Z<br>
+<b>FA M → 正规文法</b>：f(A,t)=B（B≠Z）⇒ A→tB；　f(A,t)=Z ⇒ A→t</div>
+<div class="notice good">💡 <b>能力等价链条（背！）</b>：正规式 ⇔ 正规文法 ⇔ NFA —子集法→ DFA —合并等价状态→ 最简DFA。它们在<b>接收语言的能力上完全等价</b>，DFA 可直接编程实现。</div>
+<h3>Lex：词法分析器的自动构造工具（3.7节，了解流程）</h3>
+<p>用正规式写好单词规则 → <b>Lex 编译器</b>生成 C 程序 Lex.yy.c → C 编译器编译 → 得到词法分析器，输入流进、Token 序列出。背后的原理就是上面这条等价链条。</p>
+</div>
+
+<!-- ============ 测验 ============ -->
+<h2 class="section">📝 7. 第 2 关 · 关末测验</h2>
+<div id="quiz2"></div>
+
+<h2 class="section">✍️ 8. 大题演练</h2>
+<div id="bigq2"></div>
+
+<div class="footer">编译原理互动课堂 · 第2关 ｜ 对应课件第3章 ｜ <a href="level1.html">← 上一关</a> ｜ <a href="index.html">闯关地图</a> ｜ <a href="level3.html">下一关：LL(1) →</a></div>
+</div>
+
+<script src="js/engine.js"></script>
+<script src="js/ui.js"></script>
+<script>
+BYUI.nav('level2.html');
+
+/* ---- 单词切分演示器 ---- */
+const KEYWORDS=new Set(['begin','end','if','then','else','while','do','for','to','const','var','procedure','call','read','write','repeat','until']);
+function lexDemo(){
+  const src=document.getElementById('lexIn').value;
+  const toks=[];let i=0,err=[];
+  while(i<src.length){
+    const c=src[i];
+    if(/\s/.test(c)){i++;continue;}
+    if(/[A-Za-z]/.test(c)){
+      let w='';while(i<src.length&&/[A-Za-z0-9_]/.test(src[i]))w+=src[i++];
+      toks.push({cat:KEYWORDS.has(w.toLowerCase())?'基本字':'标识符',val:w});
+    } else if(/[0-9]/.test(c)){
+      let n='';while(i<src.length&&/[0-9.]/.test(src[i]))n+=src[i++];
+      toks.push({cat:'常数',val:n});
+    } else if(src.slice(i,i+2)===':='){toks.push({cat:'算符',val:':='});i+=2;}
+    else if('+-*/=<>.#'.includes(c)){
+      if(c==='#'){err.push('第'+(i+1)+'列：非法字符 #');i++;continue;}
+      toks.push({cat:'算符',val:c});i++;
+    }
+    else if(';,().:'.includes(c)){toks.push({cat:'界符',val:c});i++;}
+    else {err.push('第'+(i+1)+'列：无法识别的字符 "'+c+'"');i++;}
+  }
+  let html=BYUI.gt(['序号','单词','类别（种别）','属性值'],toks.map((t,i)=>[i+1,t.val,t.cat,t.val]));
+  if(err.length)html+='<div class="notice">🚨 词法错误：'+err.join('；')+'（词法分析器负责发现并<b>定位</b>错误）</div>';
+  document.getElementById('lexOut').innerHTML=html;
+}
+document.getElementById('lexIn').addEventListener('input',lexDemo);lexDemo();
+
+/* ---- DFA识别模拟器（课件例） ---- */
+const dfa1={states:['S','U','V','Q'],start:0,finals:[3],
+  edges:[{from:0,sym:'a',to:1},{from:0,sym:'b',to:2},{from:1,sym:'a',to:3},{from:1,sym:'b',to:2},
+         {from:2,sym:'a',to:1},{from:2,sym:'b',to:3},{from:3,sym:'a',to:3},{from:3,sym:'b',to:3}]};
+BYUI.drawFA('dfaFig1',dfa1);
+document.getElementById('dfaRunBtn').addEventListener('click',()=>{
+  const inp=document.getElementById('dfaRunIn').value;
+  let cur=0;const trace=[{s:0,c:''}];
+  for(const c of inp){
+    const e=dfa1.edges.find(e=>e.from===cur&&e.sym===c);
+    if(!e){document.getElementById('dfaRunOut').innerHTML='<div class="notice">💀 在状态 '+dfa1.states[cur]+' 上没有 '+c+' 弧 → 拒绝</div>';return;}
+    cur=e.to;trace.push({s:cur,c});
+  }
+  const ok=dfa1.finals.includes(cur);
+  document.getElementById('dfaRunOut').innerHTML=
+   '<div class="stepbox"><pre>'+trace.map((t,i)=>(i===0?'初始状态':'读入 '+inp[i-1]).padEnd(10)+' →  当前状态: '+dfa1.states[t.s]).join('\n')+
+   '\n\n读完后停在 '+dfa1.states[cur]+(ok?'（终态，双圈）✅ 接受！':'（非终态）❌ 拒绝')+'</pre></div>';
+});
+
+/* ---- 正规式全流程实验室 ---- */
+document.getElementById('rxGo').addEventListener('click',runRx);
+function runRx(){  const custom=document.getElementById('rxCustom').value.trim();
+  const rx=custom||document.getElementById('rxSel').value;
+  const out=document.getElementById('rxOut');
+  try{
+    const nfa=BYQ.regexToNFA(rx);
+    let html='<h3>① Thompson 构造的 NFA（'+nfa.states.length+' 个状态，虚线环境：ε 弧默认显示为 ε）</h3>';
+    html+='<div id="rxNFA"></div>';
+    const {dfa,steps}=BYQ.subsetConstruct(nfa);
+    html+='<h3>② 子集法确定化（逐行算，跟手算过程一模一样）</h3>';
+    html+=BYUI.gt(['当前子集 I','Move→闭包','输入符号','得到 Iₐ'],steps.map(s=>['{'+ (s.from.startsWith('I')? dfa.states.find(x=>x.name===s.from).set.join(','):'?') +'}',
+      'Move='+s.move+' → 闭包='+s.closure,s.sym,s.to+' = {'+dfa.states.find(x=>x.name===s.to).set.join(',')+'}']));
+    html+='<h3>③ 确定化后的 DFA（双圈=终态，子集内容标在状态下方）</h3><div id="rxDFA"></div>';
+    html+='<div>🔍 试一试这个 DFA：识别测试 <input type="text" id="rxTest" value="'+(rx.includes('A')?'AB01':'abb')+'" style="max-width:200px;display:inline-block"> <button class="btn small" id="rxTestBtn">测试</button> <span id="rxTestR"></span></div>';
+    out.innerHTML=html;
+    BYUI.drawFA('rxNFA',{states:nfa.states.map((s,i)=>({name:String(i)})),start:0,finals:nfa.finals,
+      edges:Object.entries(nfa.trans).flatMap(([f,m])=>Object.entries(m).flatMap(([sym,ts])=>ts.map(t=>({from:+f,sym,to:+t}))))});
+    BYUI.drawFA('rxDFA',{states:dfa.states.map(s=>({name:s.name,label:'{'+s.set.join(',')+'}'})),start:0,finals:dfa.finals,
+      edges:Object.entries(dfa.trans).flatMap(([f,m])=>Object.entries(m).map(([sym,t])=>({from:+f,sym,to:+t})))});
+    document.getElementById('rxTestBtn').addEventListener('click',()=>{
+      const w=document.getElementById('rxTest').value;
+      const r=BYQ.dfaRun(dfa,w);
+      document.getElementById('rxTestR').innerHTML=r.accept?'<b style="color:var(--good)">✅ 接受</b>':'<b style="color:var(--bad)">❌ 拒绝</b>'+(r.err?'（'+r.err+'）':'');
+    });
+  }catch(e){out.innerHTML='<div class="notice">⚠️ 正规式有误：'+e.message+'</div>';}
+}
+runRx();
+
+/* ---- 最小化动画 ---- */
+const dfa2={states:['0','1','2','3','4','5','6'].map(n=>({name:n})),start:0,finals:[3,4,5,6],alpha:['a','b'],
+  trans:{0:{a:1,b:2},1:{a:3,b:2},2:{a:1,b:5},3:{a:3,b:4},4:{a:6,b:5},5:{a:6,b:4},6:{a:3,b:5}}};
+BYUI.drawFA('dfaFig2',{states:dfa2.states,start:0,finals:[3,4,5,6],
+  edges:Object.entries(dfa2.trans).flatMap(([f,m])=>Object.entries(m).map(([sym,t])=>({from:+f,sym,to:+t})))});
+(function(){
+  const {dfa:min,steps}=BYQ.minimizeDFA(dfa2);
+  BYUI.stepPlayer('minSteps',['分割过程'],steps.map(s=>({cells:['<div style="text-align:left">'+s.desc+(s.partition?'<br><b>当前分割：</b>'+s.partition.map(p=>'{'+p.join(',')+'}').join('，'):'')+'</div>']})));
+  let html='<div class="notice good">🎯 合并等价状态后，得到最小 DFA（'+min.states.length+' 个状态）。对比上图：7 个状态 → '+min.states.length+' 个。</div><div id="minFig"></div>';
+  html+='<p>合并对应关系：'+min.states.map(s=>s.name).join('，')+'（括号里是被合并的等价状态）</p>';
+  document.getElementById('minResult').innerHTML=html;
+  BYUI.drawFA('minFig',{states:min.states.map(s=>({name:s.name.replace(/\(.*\)/,''),label:s.name.includes('(')?s.name:''})),start:min.start,finals:min.finals,
+    edges:Object.entries(min.trans).flatMap(([f,m])=>Object.entries(m).map(([sym,t])=>({from:+f,sym,to:+t})))});
+})();
+
+/* ---- 测验 ---- */
+BYUI.quiz.render('quiz2',{
+  id:'level2',title:'第2关·词法分析',
+  questions:[
+   {type:'single',q:'词法分析器的输入、输出分别是：',options:['单词符号、源程序','源程序字符流、单词符号序列','语法单位、单词符号','源程序、四元式'],answer:1,
+    explain:'词法分析从左至右逐字符扫描源程序，输出单词符号（二元式）序列。'},
+   {type:'multi',q:'单词符号通常分为哪几类？',options:['基本字（关键字）','标识符','常数','运算符和界符'],answer:[0,1,2,3],
+    explain:'5类：基本字、标识符、常数、运算符、界符（运算符和界符在选项中合在一起，全选）。'},
+   {type:'single',q:'PL/0 编译程序中词法分析器与语法分析器的接口方式是：',options:['独立一遍扫描','作为语法分析器的子程序（被调用式）','并行执行','由操作系统调度'],answer:1,
+    explain:'PL/0 采用"作为语法分析器子程序"方式：语法分析器需要一个单词时就调用一次词法分析器，节省内存。'},
+   {type:'single',q:'词法分析器输出的二元式是：',options:['（行号,列号）','（种别码,属性值）','（单词,类型）','（地址,值）'],answer:1,
+    explain:'每个单词输出（单词种别,单词符号的属性值）二元式，如(标识符码, 指向符号表条目)。'},
+   {type:'single',q:'正规式 (a|b)* 表示的正规集是：',options:['{a,b}','所有由 a、b 组成的串（含 ε）','{aⁿbⁿ|n≥0}','以 a 开头 b 结尾的串'],answer:1,
+    explain:'(a|b)* = {a,b}* = Σ*，含空串 ε。'},
+   {type:'single',q:'正规式的三个运算符，优先级从高到低是：',options:['| ＞ 连接 ＞ *','连接 ＞ | ＞ *','* ＞ 连接 ＞ |','| ＞ * ＞ 连接'],answer:2,
+    explain:'闭包*最高，连接次之，或|最低。'},
+   {type:'single',q:'与正规式 b(ab)* 等价的正规式是：',options:['(ba)*b','(ab)*b','b(ab)+','a(ba)*'],answer:0,
+    explain:'b(ab)*=(ba)*b，两者正规集相同（一个b开头、ab循环；一个ba循环、b收尾），是课件强调的经典等价式。'},
+   {type:'single',q:'DFA 与 NFA 的区别，错误的是：',options:['DFA 初态唯一，NFA 初态是一个非空集合','DFA 的 f 是单值映射，NFA 的 f 映射到状态子集','DFA 不允许 ε 弧，NFA 可以有','NFA 的识别能力强于 DFA'],answer:3,
+    explain:'两者识别能力相同：对任何 NFA 都存在等价的 DFA（L相等）。DFA 是 NFA 的特例。'},
+   {type:'single',q:'ε-closure(I) 的含义是：',options:['I 经一条 a 弧到达的状态全体','从 I 中任一状态出发经任意条 ε 弧能到达的状态全体（含 I 自身）','I 经一条 ε 弧到达的状态','I 中所有终态的集合'],answer:1,
+    explain:'ε-闭包：走任意条ε弧（0条也行），所以 I 中的每个状态都属于它。'},
+   {type:'single',q:'子集法中，DFA 的一个状态对应 NFA 的：',options:['一个状态','一条边','一个状态集合（子集）','终态集合'],answer:2,
+    explain:'DFA状态=NFA状态子集；含NFA终态的子集构成DFA终态。'},
+   {type:'single',q:'子集法求 Iₐ 的正确公式是：',options:['Iₐ=Move(I,a)','Iₐ=ε-closure(Move(I,a))','Iₐ=Move(ε-closure(I),a) 再去 ε-closure(I)','Iₐ=I∪Move(I,a)'],answer:1,
+    explain:'先经一条a弧（Move），再做ε-闭包。注意选项C少了对结果的闭包。'},
+   {type:'single',q:'DFA 最小化中，两个状态等价需满足一致性条件和蔓延性条件。"蔓延性"指：',options:['两个状态同时为终态或非终态','对所有输入符号，两状态必须转换到等价状态里','两状态的入边数量相同','两状态编号相邻'],answer:1,
+    explain:'一致性=终态性相同；蔓延性=经任何符号都转到等价状态。'},
+   {type:'single',q:'DFA 最小化的初始分割是：',options:['按状态编号奇偶分','终态集和非终态集','按出边数分','初态和非初态'],answer:1,
+    explain:'第一步总是把状态集分成终态集合与非终态集合，再逐轮细分。'},
+   {type:'single',q:'下列不属于 DFA 化简要消除的"多余状态"的是：',options:['从初态出发永远到达不了的状态','到不了终态的状态','既可达又可终止但与另一状态等价的状态','不可到达、不可终止都算多余'],answer:2,
+    explain:'与另一状态等价的状态靠"合并等价状态"处理；多余状态特指不可到达、不可终止两类。'},
+   {type:'single',q:'正规文法→自动机转换时，规则 A→aB 对应的转换函数是：',options:['f(A,a)=B','f(B,a)=A','f(A,B)=a','f(a,A)=B'],answer:0,
+    explain:'A→aB：状态A读入a转到状态B；A→a 则 f(A,a)=Z（新增终态Z）。开始符号对应初态。'},
+   {type:'single',q:'正规式、正规文法、NFA、DFA、最简DFA 之间的关系是：',options:['只有正规式和NFA等价','它们在接收语言的能力上相互等价','DFA能力最强','最简DFA能力最弱'],answer:1,
+    explain:'五者识别能力等价，可互相转换——这正是 Lex 这类工具的原理。'}
+  ]
+});
+BYUI.bigQuestions('bigq2',{
+  id:'level2',title:'第2关·大题',
+  questions:[
+   {q:'设 NFA M：状态集 {0,1,2,3,4,5}，初态 {0}，终态 {5}，转换：f(0,ε)={1,2}，f(1,a)={3}，f(2,b)={4}，f(3,a)={3,5}，f(4,b)={4,5}。用子集法将 M 确定化为 DFA（写出全部子集与转换表，标注终态）。',
+    hint:'从 I₀=ε-closure({0})={0,1,2} 开始，对 a、b 分别求 Iₐ=ε-closure(Move(I,a))，直到不产生新子集。含 5 的子集是终态。'},
+   {q:'将正规式 (a|b)*a(a|b) 转换为 NFA（可用 Thompson 构造），再说明如何得到等价 DFA。',
+    hint:'Thompson：整体= (a|b)* 连接 a 连接 (a|b)；确定化用子集法，与第1问流程相同。'},
+   {q:'已知 DFA：状态 {0,1,2,3,4}，初态0，终态{4}；f(0,a)=1, f(0,b)=2, f(1,a)=3, f(1,b)=2, f(2,a)=1, f(2,b)=2, f(3,a)=1, f(3,b)=4, f(4,a)=1, f(4,b)=2。用分割法最小化该 DFA，写出每轮分割过程。',
+    hint:'初始分割 {0,1,2,3}/{4}；观察 b 转移：δ(3,b)=4 落在终态块，其余落在 {0,1,2,3}，先分裂出 {3}……逐轮做下去。'}
+  ]
+});
+</script>
+</body>
+</html>

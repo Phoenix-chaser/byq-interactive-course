@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏁 终极综合测验 | 编译原理闯关</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+<div class="hero">
+  <h1>🏁 终极综合测验</h1>
+  <div class="sub">覆盖全部 6 关 28 题 ｜ 模拟期末卷 ｜ 建议限时 60 分钟一次性做完再交卷</div>
+</div>
+
+<div class="card tip"><span class="emoji">📜</span>考试策略：单选约1分钟/题，先把会的做完；大题先写框架（如 LR 题先写"拓广文法→项目集→分析表"三步标题）再填内容。子集法、三大集合、LR 构造是历年大题三大金刚。</div>
+
+<h2 class="section">📝 卷一 · 客观题（28题，每题1分）</h2>
+<div id="quizF"></div>
+
+<h2 class="section">✍️ 卷二 · 大题（模拟期末压轴，做完复制发给 AI 老师批改）</h2>
+<div id="bigqF"></div>
+
+<div class="footer">🏁 终极测验 ｜ <a href="index.html">返回闯关地图</a> ｜ 考前别忘了看 <a href="cheatsheet.html">考前速查表</a></div>
+</div>
+
+<script src="js/engine.js"></script>
+<script src="js/ui.js"></script>
+<script>
+BYUI.nav('final.html');
+BYUI.quiz.render('quizF',{
+ id:'final',title:'终极综合测验',
+ questions:[
+  // 第1章
+  {type:'single',q:'【第1章】下列语言中，典型"解释型"的是：',options:['C 语言','C++','Shell/JavaScript/SQL','Pascal'],answer:2,
+   explain:'Shell、JavaScript、SQL 边解释边执行、不生成目标程序；C/C++/Pascal 编译执行。'},
+  {type:'single',q:'【第1章】编译器"前端"与什么有关？',options:['目标机器','源语言','操作系统','内存大小'],answer:1,
+   explain:'前端与源语言有关、与目标机无关；后端相反。'},
+  {type:'single',q:'【第1章】编译过程中发现"括号不匹配"错误的是：',options:['词法分析阶段','语法分析阶段','语义分析阶段','代码优化阶段'],answer:1,
+   explain:'括号不匹配是语法错误，在语法分析阶段检查；非法字符在词法阶段；类型错误在语义阶段。'},
+  // 第2章
+  {type:'single',q:'【第2章】符号串 ab 的所有前缀是：',options:['a, ab','ε, a, ab','ε, b, ab','ab'],answer:1,
+   explain:'前缀=移走尾部0个或多个符号：ε、a、ab（移0个也算）。'},
+  {type:'single',q:'【第2章】{a,b}* 与 {a,b}+ 的差别是：',options:['没有差别','前者多含 ε','后者多含 ε','前者是有限集'],answer:1,
+   explain:'*=⁰∪⁺，克林闭包比正闭包多一个空串 ε。'},
+  {type:'single',q:'【第2章】文法 S→aA, A→bA|b 产生的语言是：',options:['{aⁿbⁿ}','{abⁿ|n≥1}','{aⁿb|m≥0}','{ab}'],answer:1,
+   explain:'先出一个a（S→aA 只能一步），A 自复制出至少一个 b：{abⁿ|n≥1}。'},
+  {type:'single',q:'【第2章】句型的"句柄"是指：',options:['任意短语','最左直接短语','最右直接短语','整个句型'],answer:1,
+   explain:'句柄=最左直接短语，规范归约每一步归约它。'},
+  {type:'single',q:'【第2章】规则 U→U 属于：',options:['有害规则','多余规则','ε规则','正常规则'],answer:0,
+   explain:'U→U 自己推自己，除引发二义外毫无用处，禁止出现。'},
+  // 第3章
+  {type:'single',q:'【第3章】DFA M=(K,Σ,f,S,Z) 中 S 和 Z 分别是：',options:['终态集、初态','唯一的初态、终态集','状态集、字母表','字母表、状态集'],answer:1,
+   explain:'DFA初态S唯一；Z⊆K是终态集（可接受状态）。'},
+  {type:'single',q:'【第3章】NFA 允许而 DFA 不允许的是：',options:['多个初态、ε弧、同一字符多条出边','接受空串','有终态','有状态'],answer:0,
+   explain:'这三条正是NFA"不确定"的来源；DFA三者都不允许。注意DFA初态同时是终态时也能接受ε。'},
+  {type:'single',q:'【第3章】子集法确定化后，DFA 的终态是：',options:['编号最大的子集','含原NFA终态的所有子集','只含一个终态的子集','原NFA初态所在子集'],answer:1,
+   explain:'凡包含 NFA 任一终态的子集都是 DFA 终态。'},
+  {type:'single',q:'【第3章】最小化 DFA 用的是：',options:['子集法','分割法（等价类划分）','提取公因子','拓广文法'],answer:1,
+   explain:'分割法：按一致性/蔓延性条件不断细分等价类，再合并每类代表。子集法是NFA→DFA用的。'},
+  // 第4章
+  {type:'single',q:'【第4章】FIRST、FOLLOW、SELECT 分别针对：',options:['非终结符、符号串、产生式','符号串、非终结符、产生式','产生式、符号串、非终结符','都是非终结符'],answer:1,
+   explain:'FIRST(符号串)、FOLLOW(非终结符)、SELECT(产生式)。'},
+  {type:'single',q:'【第4章】A→α 且 α ⇒* ε 时 SELECT(A→α) =',options:['FIRST(α)','(FIRST(α)−{ε})∪FOLLOW(A)','FOLLOW(A)−FIRST(α)','FIRST(A)'],answer:1,
+   explain:'右部可空：FIRST去ε并加上A的FOLLOW。'},
+  {type:'single',q:'【第4章】消除 S→Sc|Sabc|abc|bc|c 的左递归得：',options:['S→abcS\'|bcS\'|cS\'，S\'→cS\'|abcS\'|ε','S→cS|abcS|ε','S→S\'abc，S\'→c|abc','不可消除'],answer:0,
+   explain:'一般式：β=abc,bc,c 放前面，α=c,abc 挂到 S\' 右递归。'},
+  {type:'single',q:'【第4章】LL(1) 分析中，产生式右部逆序进栈的原因：',options:['节省空间','栈是后进先出，最左符号须最后进栈才能先出栈匹配','老师规定的','防止死循环'],answer:1,
+   explain:'推导从左到右匹配，最左符号必须最先出栈，所以最后压栈。'},
+  // 第6章
+  {type:'single',q:'【第6章】LR(k) 的 R 指：',options:['Right: 最右推导的逆（规范归约）','递归 Recursive','正规式 Regular','右结合'],answer:0,
+   explain:'L左扫描、R最右推导之逆、k向前看k个符号。'},
+  {type:'single',q:'【第6章】LR(0) 项目集规范族的构造依赖两个函数：',options:['FIRST 和 FOLLOW','CLOSURE 和 GO','Move 和 ε-closure','移进和归约'],answer:1,
+   explain:'CLOSURE(I)闭包扩张待约项目；GO(I,X)=CLOSURE(核)移点转移。'},
+  {type:'single',q:'【第6章】LR(0)、SLR(1)、LR(1)、LALR(1) 中分析能力最强与状态数最多的是：',options:['LR(0)','SLR(1)','LR(1)','LALR(1)'],answer:2,
+   explain:'LR(1)能力最强但搜索符分裂导致状态数最多；LALR(1)合并同心集是其折衷。'},
+  {type:'single',q:'【第6章】SLR(1)、LR(1) 归约时机的区别源于：',options:['SLR用FOLLOW(A)全局跟班，LR(1)用项目自带的向前搜索符（局部跟班）','LR(1)不归约','SLR不用FOLLOW','没有区别'],answer:0,
+   explain:'FOLLOW是大杂烩可能过宽产生无效归约；LR(1)按FIRST(βa)逐位置精确制导。'},
+  {type:'single',q:'【第6章】LALR(1) 通过________缩小 LR(1) 的规模。',options:['删除归约项目','合并同心集（LR(0)部分相同、搜索符取并集）','减少产生式','忽略搜索符'],answer:1,
+   explain:'合并后状态数与LR(0)/SLR相同；可能产生新归约-归约冲突、错误发现推迟。'},
+  // 第7、8章
+  {type:'single',q:'【第7章】属性文法在上下文无关文法上增加了：',options:['终结符和产生式','属性及相应的语义规则','状态和转移','优先级'],answer:1,
+   explain:'为文法符号关联属性、为产生式关联语义规则，三元组A=(G,V,F)。'},
+  {type:'single',q:'【第8章】符号表中"名字栏"又称：',options:['主栏（内容为关键字）','属性栏','地址栏','索引'],answer:0,
+   explain:'名字栏=主栏，内容称关键字；信息栏存各类属性。'},
+  {type:'single',q:'【第8章】以下不属于中间代码形式的是：',options:['四元式（三地址码）','Bytecode','SSA','机器码'],answer:3,
+   explain:'机器码是目标代码；中间代码还包括AST、P-code。'},
+  // 第9、10章
+  {type:'single',q:'【第9章】PL/0 的运行时存储组织是：',options:['静态分配','以过程为单位的栈式动态分配','堆式分配','混合分配'],answer:1,
+   explain:'过程每调用一次栈顶分配数据区、返回即释放；递归各层独立。'},
+  {type:'single',q:'【第9章】传地址调用的效果是：',options:['实参不受影响','形参的修改直接影响实参','形参是实参的副本','必须有返回值'],answer:1,
+   explain:'传地址共享存储；传值是拷贝互不影响。'},
+  {type:'single',q:'【第10章】基本块的特性是：',options:['可递归调用','单入口单出口的顺序执行程序段','至少含一个循环','必须以转移语句结尾'],answer:1,
+   explain:'只能从第一条进入、最后一条离开；是局部优化的单位。'},
+  {type:'single',q:'【第10章】外提循环不变表达式、合并常量运算、消减运算强度按顺序对应：',options:['把与循环无关的算式搬出循环；编译时算常量；乘法改加法','乘法改加法；搬出循环；算常量','算常量；乘改加；搬出循环','三者相同'],answer:0,
+   explain:'三大优化技术，注意区分"外提"与"强度消减"。'}
+ ]
+});
+BYUI.bigQuestions('bigqF',{
+ id:'final',title:'终极测验·卷二大题',
+ questions:[
+  {q:'（词法·15分）将正规式 (a|b)*ab 转换成 NFA（画出状态图或列出转换函数），再用子集法确定化为 DFA（写出全部子集与转移），最后给出识别 ab、aab、ba 的结果。',
+   hint:'可用第2关的"子集法全流程实验室"输入 (a|b)*ab 对照验证自己的手算！'},
+  {q:'（LL(1)·15分）对文法 G[S]: S→AB, A→bh|e, B→cS|cD|d, D→ab | ε：求各产生式的 SELECT 集，判断是否 LL(1) 文法；若不是，说明冲突在哪。',
+   hint:'B→cS 与 B→cD 有左公因子 c！先提取左公因子再判。别忘了 D 可空时 FOLLOW 相关规则。'},
+  {q:'（LR·20分）文法 G: S→aAd|bAc|aec|bed, A→e：(1) 构造 LR(0) 项目集规范族；(2) 指出哪两个项目集存在 SLR(1) 无法解决的移进-归约冲突并说明原因；(3) 构造 LR(1) 项目集族证明它是 LR(1) 文法。',
+   hint:'冲突在 I={S→ae·c, A→e·} 与 I={S→be·d, A→e·}；FOLLOW(A)={c,d} 都撞。LR(1) 中搜索符分别只有 d 和 c，冲突化解。可用第4关计算器验证。'},
+  {q:'（综合·10分）简述编译程序的六个逻辑阶段及各阶段功能（每阶段一句话），并说明"前四个阶段"与"后两个阶段"分别完成了什么。',hint:''}
+ ]
+});
+</script>
+</body>
+</html>

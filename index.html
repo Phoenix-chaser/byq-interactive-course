@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>编译原理互动闯关课堂</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+<div class="hero">
+  <h1>⚙️ 编译原理 · 互动闯关课堂</h1>
+  <div class="sub">把 10 章课件变成 6 关挑战 + 终极测验 ｜ 讲人话 · 可操作 · 自动判分 ｜ 期末考试导向</div>
+</div>
+
+<div class="card def">
+<h3>📖 怎么用这套东西（30秒看完）</h3>
+<ol>
+<li><b>按顺序闯关</b>：关卡从易到难，后面的关卡会用到前面的知识（尤其第1关的文法基础是全课地基）。</li>
+<li>每关三步走：<b>讲解卡片</b>（生活类比先上、定义后上）→ <b>互动演示器</b>（算法一步一步走给你看，还能自己输入文法/正规式玩）→ <b>关末测验</b>（即时判分+解析，60%及格点亮关卡，80%两星，满分三星）。</li>
+<li>关末的<b>大题演练</b>：在网页里写出完整解题过程 → 点"<b>复制全部答案</b>" → 粘贴发给 AI 老师批改，老师会逐题讲评、指出薄弱点。</li>
+<li>进度自动保存在浏览器里（localStorage），下次打开继续。<b>考前</b>看一眼 📜 考前速查。</li>
+</ol>
+</div>
+
+<div class="card tip"><span class="emoji">🧭</span><b>全课一张图</b>：源程序 → <b>词法分析</b>（第2关·正规式/自动机）→ <b>语法分析</b>（第3关 LL(1) 自顶向下 / 第4关 LR 自底向上）→ <b>语义分析与中间代码</b>（第5关·属性文法/符号表/四元式）→ <b>优化与目标代码</b>（第6关）→ 目标程序；运行时怎么放数据也在第6关。表格管理与出错处理贯穿全程。</div>
+
+<h2 class="section">🗺️ 选择你的关卡</h2>
+<div class="levelgrid" id="grid"></div>
+
+<div class="card" style="margin-top:26px">
+<h3>🧹 进度管理</h3>
+<div id="pstats"></div>
+<button class="btn ghost" id="resetBtn">重置全部进度</button>
+</div>
+
+<div class="card def">
+<h3>📚 配套资料</h3>
+<ul>
+<li>原始课件：`/home/chaser/study/编译课件/完善后/`（10 章 PPT，本站所有知识点均逐页对照过）</li>
+<li>本站也内置了真实的<b>编译原理算法引擎</b>（FIRST/FOLLOW/SELECT、子集法、LR 四兄弟全部真算，不是贴图演示），你做题后可以自己输入文法验证答案。</li>
+</ul>
+</div>
+
+<div class="footer">编译原理互动课堂 ｜ 数据仅保存在你自己的浏览器里 ｜ 学完记得去 🏁 终极测验 检验成果</div>
+</div>
+
+<script src="js/engine.js"></script>
+<script src="js/ui.js"></script>
+<script>
+BYUI.nav('index.html');
+const LEVELS_META=[
+ {f:'level1.html',lv:'第 1 关',name:'编译全景与文法基础',ch:'课件第1、2章',diff:'★★☆☆☆',desc:'编译器六阶段全景图；文法四元组、推导与归约、语法树、句柄——全课地基。含文法推导模拟器。',hot:false},
+ {f:'level2.html',lv:'第 2 关',name:'词法分析',ch:'课件第3章',diff:'★★★☆☆',desc:'正规式→NFA→子集法→DFA最小化 全流程实验室；DFA识别模拟器。考试大题重灾区。',hot:true},
+ {f:'level3.html',lv:'第 3 关',name:'自顶向下 LL(1)',ch:'课件第4章',diff:'★★★★☆',desc:'FIRST/FOLLOW/SELECT 三大集合计算器；消除左递归；预测分析表+栈分析动画。必考大题。',hot:true},
+ {f:'level4.html',lv:'第 4 关',name:'LR 分析',ch:'课件第5、6章',desc:'LR(0)/SLR(1)/LR(1)/LALR(1) 四合一计算器：项目集DFA、分析表、移进归约动画。全课最难分值最高。',diff:'★★★★★',hot:true},
+ {f:'level5.html',lv:'第 5 关',name:'语法制导与中间代码',ch:'课件第7、8章',diff:'★★☆☆☆',desc:'属性文法求值动画（3*(5+4)）；符号表"户口本"；四元式生成器。概念为主。',hot:false},
+ {f:'level6.html',lv:'第 6 关',name:'运行存储与代码优化',ch:'课件第9、10章',desc:'活动记录栈动画（亲眼看递归压栈）；三大优化技术前后对比。收官之关。',diff:'★★☆☆☆',hot:false},
+ {f:'final.html',lv:'终极挑战',name:'期末综合测验',ch:'全部章节',diff:'★★★★☆',desc:'全题型混合大卷，检验整门课掌握程度，成绩单可发给AI老师。',hot:false},
+ {f:'cheatsheet.html',lv:'附赠',name:'考前速查表',ch:'浓缩全书',diff:'—',desc:'全部定义、公式、算法步骤、易混对比浓缩成一张可打印的表。考前必看。',hot:false}
+];
+function render(){
+  document.getElementById('grid').innerHTML=LEVELS_META.map(l=>{
+    const stars=l.f==='cheatsheet.html'?0:BYUI.progress.stars(l.f.replace('.html',''));
+    return `<a class="levelcard" href="${l.f}">
+      <span class="stars">${l.f==='cheatsheet.html'?'':BYUI.progress.starStr(stars)}</span>
+      <div class="lv">${l.lv} · ${l.ch}</div>
+      <div class="name">${l.name} ${l.hot?'<span class="badge hot">考试重点</span>':''}</div>
+      <div class="desc">${l.desc}</div>
+      <div class="diff">难度 ${l.diff}</div></a>`;
+  }).join('');
+  const p=BYUI.progress.all();
+  const done=Object.values(p).filter(x=>x.done).length;
+  const best=Object.values(p).reduce((a,x)=>a+(x.bestScore||0),0), tot=Object.values(p).reduce((a,x)=>a+(x.total||0),0);
+  document.getElementById('pstats').innerHTML=`已点亮 <b style="color:var(--gold)">${done}/7</b> 个关卡（含终极测验），累计最佳成绩 <b>${tot?best+'/'+tot:'—'}</b>`;
+}
+render();
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  if(confirm('确定清空全部测验进度吗？')){BYUI.progress.reset();render();}
+});
+</script>
+</body>
+</html>

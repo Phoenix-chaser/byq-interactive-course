@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第6关 · 运行时存储与代码优化 | 编译原理闯关</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+<div class="hero">
+  <h1>第 6 关 · 运行时存储组织与代码优化（第9、10章）</h1>
+  <div class="sub">活动记录 · 静态/动态分配 · 基本块 · 三大优化技术 ｜ 收官之关</div>
+</div>
+
+<!-- ============ 9章 ============ -->
+<h2 class="section">📦 1. 运行时存储组织（第9章）</h2>
+
+<div class="card tip"><span class="emoji">🎯</span><b>比喻</b>：编译完的程序跑起来，变量、常量总得有地方"住"。编译器就是<b>房产分配员</b>：谁住哪儿、住多大的房、搬进搬出的规矩，都是它定的。</div>
+
+<div class="notice">📦 <b>要为谁分房（课件原话）</b>：编译程序的功能是把源程序翻译成等价的目标程序，故还应负责为源程序中的量分配运行时存储空间——包括<b>用户定义的常量、变量</b>，以及<b>参与运算的寄存器</b>等；本章主要讲如何为用户定义的量分配空间。</div>
+
+<div class="card def">
+<h3>两大分配方案</h3>
+<div class="card tip"><span class="emoji">🏠</span><b>人话版</b>：<b>静态分配</b>=老单位分房——编译时门牌就刻死，谁住哪间、住多大永远不变，简单但死板（所以<b>不许递归</b>：递归几次编译时根本不知道，没法提前刻牌）。<b>动态分配</b>=住酒店随到随住——运行时来一次开一间：函数调用用<b>栈式</b>（后开的先退房），malloc/new 用<b>堆式</b>（自由申请归还）。</div>
+<table class="gt">
+<tr><th>方案</th><th>时机</th><th>适用</th></tr>
+<tr><td><b>静态存储分配</b></td><td>编译时确定每个量的地址</td><td>须满足两个条件（缺一不可）：数据对象大小已知 + 不允许递归/动态结构（FORTRAN 时代）</td></tr>
+<tr><td><b>动态存储分配</b></td><td>运行时按需分配</td><td><b>栈式</b>（过程调用，PL/0、C 局部变量）与<b>堆式</b>（malloc/new 自由申请）</td></tr>
+</table>
+<h3>活动记录（Activation Record）</h3>
+<div class="card tip" style="margin:8px 0"><span class="emoji">🏨</span><b>人话版</b>：活动记录就是<b>过程开的一间旅馆房间</b>——<b>每调用一次开一间</b>（房里放着这趟的参数、局部变量和"房卡"返回地址），<b>退房即腾空</b>（调用结束弹出，房间还给别人用）。递归=同一位客人在店里<b>同时开着好几间房</b>（f(3) 没退房 f(2) 又来开房），各间的被褥互不混用——所以每层递归的 n 互不干扰。</div>
+<p><b>过程的一次执行</b> = 该过程的一个<b>活动</b>（每执行一次过程体就产生一个活动）。管理一次执行所需信息的<b>连续存储块</b>就叫<b>活动记录</b>——里面装着：返回地址、形式参数、局部变量、临时单元等过程/参数相关信息。</p>
+<div class="notice good">🧠 <b>关键理解</b>：过程每被调用一次，就在栈顶<b>新压入一张活动记录</b>；调用结束就弹出。所以<b>递归调用会同时存在多张同名过程的活动记录</b>（每次调用的参数、局部变量各占各的房）。</div>
+<h3>参数传递：传值 vs 传地址</h3>
+<div class="card tip" style="margin:8px 0"><span class="emoji">📄</span><b>人话版</b>：<b>传值=给复印件</b>——把实参的值复印一份给形参，形参在复印件上随便涂，原件毫发无损；<b>传地址=给原件</b>——形参拿到的是实参的存放地址，动笔就是直接改原件，函数返回后你的变量已经被改了。想"通过函数改我的变量"就得给地址，只"借值一用"给复印件就够。</div>
+<table class="gt">
+<tr><th></th><th>传值 call-by-value</th><th>传地址 call-by-reference</th></tr>
+<tr><td>传什么</td><td>实参的<b>值</b>拷贝给形参</td><td>实参的<b>地址</b>给形参</td></tr>
+<tr><td>对实参的影响</td><td class="ok">形参怎么改都不影响实参</td><td class="no">对形参的操作会影响实参</td></tr>
+</table>
+<p>类似 C 语言：默认传值，指针/引用实现"传地址"的效果。</p>
+<h3>PL/0 的运行时组织</h3>
+<p><b>以过程为单位的栈式动态存储分配</b>：设一个数据空间栈，每调用一次过程，就按该过程的说明在<b>栈顶分配</b>一块数据区；调用完毕<b>释放</b>；递归调用则按调用深度<b>先后设置多个不同数据区</b>。</p>
+</div>
+
+<div class="card">
+<h3>🎬 活动记录栈动画：亲眼看递归怎么"压栈"</h3>
+<p>模拟过程 <code>P(n)</code>：若 n&gt;0 就递归调用 P(n−1)，否则返回。每层调用的活动记录独立存放自己的参数 n：</p>
+<div class="stepper">
+<button class="btn small" id="arCall">📞 调用 P(3)</button>
+<button class="btn small" id="arStep">▶ 单步执行</button>
+<button class="btn small ghost" id="arReset">↺ 复位</button>
+</div>
+<div id="arOut"></div>
+<h3>✍️ 静态手算版：f(3) 压栈/出栈时间线</h3>
+<table class="gt">
+<tr><th>时刻</th><th>事件</th><th>栈内（左底→右顶）</th><th>【旁注】</th></tr>
+<tr><td>1</td><td>调用 f(3)</td><td>[f(3)]</td><td>开第 1 间房：n=3、返回地址都是<b>自己那份</b></td></tr>
+<tr><td>2</td><td>n&gt;0，调 f(2)</td><td>[f(3), f(2)]</td><td>f(3) 没退房，新的压在它上面</td></tr>
+<tr><td>3</td><td>调 f(1)</td><td>[f(3), f(2), f(1)]</td><td>继续深入，每层各一间</td></tr>
+<tr><td>4</td><td>调 f(0)</td><td>[f(3), f(2), f(1), f(0)]</td><td><b>最深处：4 间房同时存在</b>——静态分配只有一间房，这就是递归必须动态分配的原因</td></tr>
+<tr><td>5</td><td>f(0) 返回 1</td><td>[f(3), f(2), f(1)]</td><td>退房永远从<b>最顶上那间</b>退（栈顶弹出）</td></tr>
+<tr><td>6~8</td><td>逐层算 n*f(n−1) 并返回</td><td>… → [ ]</td><td>f(1)、f(2)、f(3) 依次出栈，最后栈空 ✅</td></tr>
+</table>
+<p style="color:var(--muted)">最深时刻的栈（4 个盒子，最右是栈顶）：</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+<div style="border:2px solid var(--accent);border-radius:8px;padding:5px 12px;background:rgba(124,108,255,.12)">f(3) n=3 ｜ 栈底</div>
+<div style="border:2px solid var(--accent);border-radius:8px;padding:5px 12px;background:rgba(124,108,255,.12)">f(2) n=2</div>
+<div style="border:2px solid var(--accent);border-radius:8px;padding:5px 12px;background:rgba(124,108,255,.12)">f(1) n=1</div>
+<div style="border:2px solid var(--warn);border-radius:8px;padding:5px 12px;background:rgba(255,184,77,.15)">f(0) n=0 ｜ 栈顶 ⬆ 出栈口</div>
+</div>
+</div>
+
+<!-- ============ 10章 ============ -->
+<h2 class="section">🚀 2. 代码优化与目标代码生成（第10章）</h2>
+
+<div class="card def">
+<h3>优化的目标与原则</h3>
+<p><b>目标</b>：提高目标程序质量——减少<b>存储空间</b>和<b>运行时间</b>。<b>手段</b>：<b>等价变换</b>（变换前后程序结果必须一样）。<b>原则</b>：优化可在编译任何阶段进行，但会延长编译时间，应<b>有选择地</b>进行（Debug/Release 之别）。目标代码生成是编译的<b>最终目的</b>，涉及具体机器；本章重点是<b>与机器无关</b>的优化。</p>
+<h3>基本块</h3>
+<div class="card tip" style="margin:8px 0"><span class="emoji">🧱</span><b>人话版</b>：基本块=一段<b>一口气跑到底、中间不打岔</b>的代码：只能从第一句进（单入口）、从最后一句出（单出口），中间没有岔路口（跳进/跳出）。像高铁直达区间：一站上车、终点下车、中途不开门。切出这样的小块，优化才能一块一块放心地做。</div>
+<div class="formula"><b>基本块</b> = 顺序执行的程序段，只有<b>一个入口语句、一个出口语句</b>（进去只能从开头进，出来只能从结尾出）。<br>基于基本块可做各种<b>局部优化</b>。<br>
+<span style="color:var(--muted)">课件两个例子：赋值语句序列 a:=20; b:=a+20; c:=a*b 是一个基本块；IF 语句序列 k:=1; if k≥10 then x:=x+1 else y:=y+1 中，k:=1 单独成块，then/else 分支各自成块。</span></div>
+<h3>✍️ 手算示范：4 行小代码划分基本块（逐行旁注）</h3>
+<table class="gt">
+<tr><th>行</th><th>代码</th><th>【旁注】为什么在这切</th></tr>
+<tr><td>1</td><td>k := 1</td><td>程序第一句，天然是<b>入口</b> → 从这里起一个新块</td></tr>
+<tr><td>2</td><td>if k≥10 goto L</td><td><b>转移语句是"出口"</b>：它属于块1，块1 到此封口</td></tr>
+<tr><td>3</td><td>x := x+1</td><td>紧跟在转移语句<b>之后</b> → 又一个入口，起块2</td></tr>
+<tr><td>4</td><td>L: y := y+1</td><td>带标号 L，是<b>跳转目标</b> → 入口，起块3</td></tr>
+</table>
+<p>结果共 3 块：{行1, 行2}、{行3}、{行4}。<b>口诀：入口三来源——第一句、跳转目标、转移语句的下一句。</b></p>
+<h3>优化分类（两个维度，选择题常考）</h3>
+<table class="gt">
+<tr><th>维度</th><th>分类</th></tr>
+<tr><td>与机器的关系</td><td>与机器<b>无关</b>的优化 / 与机器<b>有关</b>的优化</td></tr>
+<tr><td>与源程序的范围</td><td><b>局部</b>优化（基本块内）/ <b>循环</b>优化（循环内）/ <b>全局</b>优化（整个源程序）</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>🎮 三大优化技术实验室（点一个看前后对比）</h3>
+<div class="card tip" style="margin:8px 0"><span class="emoji">🗣️</span><b>人话版</b>：①<b>合并常量</b>——能在编译时算的（3.14*2）绝不留到运行时再算；②<b>外提不变式</b>——循环里每次都重算同一个值太亏，搬到循环外只算一次；③<b>消减强度</b>——乘法比加法"贵"，i*4 改成"在上一趟结果上 +4"。一句话：<b>能提前算的提前算，能少算的少算，能用便宜运算就不用贵的</b>——但结果必须一模一样（等价变换）。</div>
+<div class="stepper">
+<button class="btn small" data-opt="0">合并常量运算</button>
+<button class="btn small" data-opt="1">外提循环不变表达式</button>
+<button class="btn small" data-opt="2">消减运算强度</button>
+</div>
+<div id="optOut"></div>
+</div>
+
+<!-- ============ 测验 ============ -->
+<h2 class="section">📝 3. 第 6 关 · 关末测验</h2>
+<div id="quiz6"></div>
+
+<h2 class="section">✍️ 4. 大题演练</h2>
+<div id="bigq6"></div>
+
+<div class="footer">编译原理互动课堂 · 第6关 ｜ 对应课件第9、10章 ｜ <a href="level5.html">← 上一关</a> ｜ <a href="index.html">闯关地图</a> ｜ <a href="final.html">终极测验 →</a></div>
+</div>
+
+<script src="js/engine.js"></script>
+<script src="js/ui.js"></script>
+<script>
+BYUI.nav('level6.html');
+
+/* ---- 活动记录栈动画 ---- */
+(function(){
+  let stack=[],phase=[],log=[];
+  const el=document.getElementById('arOut');
+  document.getElementById('arCall').addEventListener('click',()=>{ if(stack.length===0){push(3);} });
+  document.getElementById('arReset').addEventListener('click',()=>{stack=[];phase=[];log=[];render('复位');});
+  document.getElementById('arStep').addEventListener('click',step);
+  function push(n){stack.push({n,ret:false});phase.push('call');log.push('调用 P('+n+')：压入一张新活动记录（含参数 n='+n+'、局部空间、返回地址）');render();}
+  function step(){
+    if(!stack.length){log.push('当前栈空。先点"调用 P(3)"');render();return;}
+    const top=stack[stack.length-1];
+    if(phase[phase.length-1]==='call'){
+      if(top.n>0){push(top.n-1);}
+      else{phase[phase.length-1]='ret';log.push('P(0) 到达终点 n=0，开始逐层返回');render();}
+    } else {
+      const f=stack.pop();phase.pop();
+      log.push('P('+f.n+') 返回：它的活动记录出栈（释放）');
+      if(stack.length){phase[phase.length-1]='ret';}
+      render();
+    }
+  }
+  function render(msg){
+    if(msg)log.push(msg);
+    let html='<div style="display:flex;gap:14px;align-items:flex-end;min-height:190px;flex-wrap:wrap">';
+    if(stack.length===0)html+='<div style="color:var(--muted)">（栈空）</div>';
+    stack.forEach((f,i)=>{
+      html+=`<div style="border:2px solid ${i===stack.length-1?'var(--warn)':'var(--accent)'};border-radius:10px;padding:10px 16px;background:rgba(124,108,255,${i===stack.length-1?'.3':'.12'})">
+        <b>活动记录 #${i+1}</b><br>过程 P（第${i+1}层调用）<br>参数 n = <b style="color:var(--gold)">${f.n}</b><br>局部变量空间…</div>
+        ${i<stack.length-1?'<div style="align-self:center;color:var(--muted)">⬆返回地址</div>':''}`;
+    });
+    html+='</div>';
+    html+='<div class="stepbox" style="margin-top:10px"><pre>'+log.slice(-10).join('\n')+'</pre></div>';
+    if(stack.length===0&&log.length>1)html+='<div class="notice good">✅ 全部返回，栈清空。看到了吗？递归最深时 4 张活动记录共存，每层的 n 都是自己那份——这就是"每次调用一个数据区"。</div>';
+    el.innerHTML=html;
+  }
+  render();
+})();
+
+/* ---- 优化对比实验室 ---- */
+(function(){
+  const opts=[
+   {name:'合并常量运算（编译时就算掉）',
+    before:'a := 20;\nb := a + 20;\nc := a * b;',
+    after:'a := 20;\nb := 40;\nc := 800;',
+    why:'a 是常量20 ⇒ a+20、20*40 都是编译时可算出的常量。思想：能在编译时算的绝不留到运行时。'},
+   {name:'外提循环不变表达式（搬到循环外）',
+    before:'for i := 1 to 100 do\n    x := (a*b) + i;',
+    after:'t := a*b;   {外提!}\nfor i := 1 to 100 do\n    x := t + i;',
+    why:'a*b 与循环变量 i 无关，循环100次就白算99次。思想：与循环变量无关的表达式拿到循环外只算一次。'},
+   {name:'消减运算强度（大炮换手枪）',
+    before:'for i := 1 to 100 do\n    t := i * 4;',
+    after:'k := 4;\nfor i := 1 to 100 do begin\n    t := k;\n    k := k + 4;  {加法替代乘法}\nend',
+    why:'乘法比加法"强度大"（慢）。i*4 每次可用"上次结果+4"得到。思想：把强度大的运算改为强度小的运算。'}
+  ];
+  const out=document.getElementById('optOut');
+  document.querySelectorAll('[data-opt]').forEach(b=>b.addEventListener('click',show.bind(null,+b.dataset.opt)));
+  function show(i){
+    const o=opts[i];
+    out.innerHTML=`<h3 style="margin-top:8px">${o.name}</h3>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:260px"><b>优化前</b><div class="stepbox"><pre>${o.before}</pre></div></div>
+      <div style="align-self:center;font-size:26px">➜</div>
+      <div style="flex:1;min-width:260px"><b style="color:var(--good)">优化后</b><div class="stepbox" style="border-color:var(--good)"><pre>${o.after}</pre></div></div>
+    </div><div class="notice good">💡 ${o.why}</div>`;
+  }
+  show(0);
+})();
+
+/* ---- 测验 ---- */
+BYUI.quiz.render('quiz6',{
+  id:'level6',title:'第6关·运行存储与优化',
+  questions:[
+   {type:'single',q:'编译程序应为源程序中的哪些量分配运行时存储空间？',options:['只有变量','用户定义的常量、变量以及参与运算的寄存器等','只有常量','不需要分配'],answer:1,
+    explain:'编译器负责为源程序中的量（常量、变量、寄存器）分配运行时空间——这是第9章的主题。'},
+   {type:'single',q:'静态存储分配需要满足的两个条件是：',options:['大小已知+不允许递归','大小已知+允许递归','大小任意+有垃圾回收','单遍编译+无指针'],answer:0,
+    explain:'编译时就要定死地址：数据对象大小必须已知、且不允许递归（递归需要运行时才知道要几份数据区），缺一不可。'},
+   {type:'single',q:'PL/0 编译程序采用的存储分配方案是：',options:['静态分配','以过程为单位的栈式动态分配','堆式分配','不分配'],answer:1,
+    explain:'数据空间栈：每调用一次过程在栈顶分配数据区、结束释放；递归时按深度各设数据区。'},
+   {type:'single',q:'"过程的一个活动"指的是：',options:['过程的一次执行','过程的定义','过程名','一个源文件'],answer:0,
+    explain:'每执行一次过程体就产生一个活动；每个活动对应一张活动记录。'},
+   {type:'single',q:'活动记录中不包含：',options:['返回地址','形式参数','局部变量','目标程序的全部代码'],answer:3,
+    explain:'活动记录装"一次执行的管理信息"：返回地址、参数、局部变量、临时单元等；代码另存。'},
+   {type:'single',q:'递归调用时，同名过程的各次调用：',options:['共用一张活动记录','按调用深度先后设置不同的数据区（各自独立的活动记录）','不占内存','编译报错'],answer:1,
+    explain:'每层调用压入自己的活动记录，参数局部变量互不干扰——这正是递归能工作的原因。'},
+   {type:'single',q:'传值调用(call-by-value)的特点是：',options:['对形参的操作会影响实参','把实参的值拷贝给形参，形参操作不影响实参','把实参地址传给形参','必须有返回值'],answer:1,
+    explain:'传值=拷贝一份；传地址才影响实参。'},
+   {type:'single',q:'传地址调用时，被调过程修改形参：',options:['实参随之改变','实参不变','编译错误','只影响局部'],answer:0,
+    explain:'形参拿到的是实参的地址，通过地址写的就是实参本尊。'},
+   {type:'single',q:'代码优化的目标是：',options:['让源代码更短','提高目标程序质量：减少存储空间和运行时间','让编译更快','消除所有变量'],answer:1,
+    explain:'优化面向目标程序的质量（空间/时间）；注意优化会延长编译时间，所以要有选择地进行。'},
+   {type:'single',q:'代码优化采用的手段是：',options:['等价变换（变换前后程序语义不变）','随机改写','删除变量','改变计算结果'],answer:0,
+    explain:'等价变换：无论怎么优化，程序运行结果必须一致。'},
+   {type:'single',q:'基本块是：',options:['一个函数','只有一个人口语句和一个出口语句的顺序执行程序段','一个循环','一个文件'],answer:1,
+    explain:'单入口单出口的顺序程序段；基本块内可做局部优化。'},
+   {type:'single',q:'按优化与源程序的关系分类，不包括：',options:['局部优化（基本块内）','循环优化','全局优化','字符串优化'],answer:3,
+    explain:'三类：局部/循环/全局。另一维度是按与机器有关/无关分类。'},
+   {type:'single',q:'"编译时直接把 3.14*2 算成 6.28"属于哪种优化？',options:['合并常量运算','外提循环不变表达式','消减运算强度','基本块划分'],answer:0,
+    explain:'常量运算在编译时就算掉——合并已知量。'},
+   {type:'single',q:'把循环中与循环变量无关的表达式搬到循环外面计算，属于：',options:['合并常量','外提循环不变表达式','消减运算强度','代码生成'],answer:1,
+    explain:'不变表达式外提：避免每次循环重复计算。'},
+   {type:'single',q:'把循环中的 i*8 改为用加法递增实现，属于：',options:['合并常量','外提不变式','消减运算强度','强度提升'],answer:2,
+    explain:'用强度小的运算（加法）替代强度大的运算（乘法）。'}
+  ]
+});
+BYUI.bigQuestions('bigq6',{
+  id:'level6',title:'第6关·大题',
+  questions:[
+   {q:'设有函数 f(n)：if n≤0 then return 1 else return n*f(n-1)。画出调用 f(3) 时运行栈中活动记录的变化过程（何时压入、何时释放，每张记录里有什么），并说明为什么递归必须用栈式（动态）存储分配而静态分配不行。',
+    hint:'f(3)→f(2)→f(1)→f(0) 四张记录先后压栈；返回时逐层弹出。静态分配编译时定死地址，只有一份数据区，无法同时容纳多层的n和返回地址。'},
+   {q:'对如下代码：i:=1; while i<=100 do begin x:=2*3.14*r; y:=x+i; i:=i+4*0.25 end。指出可进行的优化并写出优化后的代码。',
+    hint:'① 2*3.14 合并常量；② 6.28*r 与 i 无关可外提；③ i:=i+4*0.25 中 4*0.25=1 合并常量（进而 i:=i+1）。'},
+   {q:'把下列四元式序列划分为基本块（遇转移语句/入口结束块）：\n(1) i:=1 (2) if i>100 goto (8) (3) t1:=a*b (4) x:=t1+i (5) i:=i+1 (6) goto (2) (7) y:=x (8) …，并指出哪些优化可做。',
+    hint:'入口语句=第一语句(1)、转移目标(2)(8)、转移语句之后(3)(7)——入口集 {(1),(2),(3),(7),(8)}：(2) 是 if 的转移目标，(8) 是它的跳转目的地，(3) 紧跟 if 之后，(7) 紧跟 goto 之后。t1:=a*b 在循环内不变可外提。'}
+  ]
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第3关 · LL(1) 自顶向下分析 | 编译原理闯关</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+<div class="hero">
+  <h1>第 3 关 · 自顶向下语法分析 LL(1)（第4章）</h1>
+  <div class="sub">FIRST · FOLLOW · SELECT · 预测分析法 ｜ <b style="color:var(--warn)">⭐ 考试重点关，三大计算必考大题</b></div>
+</div>
+
+<!-- ============ 4.1 ============ -->
+<h2 class="section">🌳 1. 自顶向下：从树根往下长</h2>
+
+<div class="card tip"><span class="emoji">🎯</span><b>比喻</b>：语法分析器拿到单词串，像拼乐高说明书一样，从"开始符号"这个总标题出发，不断套用语法规则向下展开，试图让整棵树的叶子恰好拼成输入串。语法分析分两大流派：<span class="hl">自顶向下（本关，推导）</span>和<span class="hl">自底向上（下一关，归约）</span>。</div>
+
+<div class="card def">
+<p><b>主旨</b>：从开始符号（根）出发，反复使用产生式推导，自上而下建立语法树，使末端结点串 = 输入串。<br>
+<b>核心难题</b>：每一步"<b>选哪条产生式</b>？"选错了就得回溯。课件例：G: S→cAd, A→ab|a 识别 <code>cabd</code>：先猜 A→a 接着 d≠b 失败，回头换 A→ab 才成功——<b>带回溯=不确定的分析，效率低不实用</b>（4.4节）。</p>
+<div class="formula"><b>确定分析的条件</b>：能根据<b>当前输入符号</b>唯一确定选用哪条产生式 ⇒ 无回溯。三类文法情景：<br>
+① 右部都以不同<b>终结符</b>开头（如 S→pA|qB）→ 看一眼输入就知道选谁；<br>
+② 右部以<b>非终结符</b>开头 → 需要算 <b>FIRST</b>（右部能推出什么开头）；<br>
+③ 含<b>空产生式</b> A→ε → A"消失"后跟什么？需要 <b>FOLLOW</b>。</div>
+</div>
+
+<!-- ============ 三个集合 ============ -->
+<h2 class="section">🧰 2. 三把钥匙：FIRST / FOLLOW / SELECT</h2>
+
+<div class="card def">
+<h3>定义对照（针对谁？能含什么？必考辨析）</h3>
+<p>🗣️ <b>人话版（先记住三个问题）</b>：<b>FIRST</b> 回答"它<b>能以什么打头</b>？"；<b>FOLLOW</b> 回答"它<b>后面能跟什么</b>？"；<b>SELECT</b> 回答"眼前这个输入符号，<b>该用哪条产生式</b>？"。前两个是情报员，第三个是决策官——SELECT 拿着 FIRST/FOLLOW 的情报，拼出每条规则的"使用时机表"。</p>
+<table class="gt">
+<tr><th></th><th>针对</th><th>定义</th><th>可含 ε？可含 #？</th></tr>
+<tr><td><b>FIRST(α)</b></td><td>符号串 α</td><td>{a | α ⇒* a…}；若 α ⇒* ε 则 ε∈FIRST(α)</td><td>✅可含ε；❌不含#</td></tr>
+<tr><td><b>FOLLOW(A)</b></td><td>非终结符 A</td><td>{a | S ⇒* …Aa…}；A 是开始符号或跟在句尾则 # ∈ FOLLOW(A)</td><td>❌绝不含ε；✅可含#</td></tr>
+<tr><td><b>SELECT(A→α)</b></td><td>产生式</td><td>α⇏ε 时 = FIRST(α)；α 可推出 ε 时 = (FIRST(α)−{ε}) ∪ FOLLOW(A)</td><td><b>可含 #</b>（α⇒ε 时并入 FOLLOW(A)）、绝不含 ε（是选产生式的"时机"集合）</td></tr>
+</table>
+<h3>FOLLOW(A) 计算三规则（反复使用直到不再增大）</h3>
+<ol>
+<li>A 是开始符号 ⇒ <b>#</b> ∈ FOLLOW(A)（# 是输入串结束符）。</li>
+<li>有规则 B→αAβ ⇒ <b>FIRST(β)−{ε} ⊆ FOLLOW(A)</b>（A 后面跟的东西）。</li>
+<li>有规则 B→αA，或 β ⇒* ε（A 实际在末尾）⇒ <b>FOLLOW(B) ⊆ FOLLOW(A)</b>（A 在哪 B 就在哪结束，B 的跟班也是 A 的跟班）。</li>
+</ol>
+<div class="notice good">🧠 <b>记忆</b>：FIRST 是"我能以什么<b>开头</b>"；FOLLOW 是"别人后面能跟<b>我</b>什么"；SELECT 是"<b>什么时候</b>该用这条规则"。</div>
+</div>
+
+<div class="card">
+<h3>🔬 迷你例：3 条产生式手算三大集合（每步旁注"为什么"）</h3>
+<p>玩具文法 G[S]：<b>① S→aAd　② A→bAS　③ A→ε</b>（它能推出的最短句子是 <code>ad</code>：A 直接消失）。先算 FIRST：</p>
+<table class="gt">
+<tr><th>算什么</th><th>用哪条</th><th>得到</th><th>【旁注】为什么加这个符号</th></tr>
+<tr><td>FIRST(S)</td><td>①</td><td>a</td><td>右部 aAd 的第一个符号就是终结符 a——打头看得见，直接抄进集合</td></tr>
+<tr><td>FIRST(A)</td><td>②</td><td>b</td><td>右部 bAS 以终结符 b 打头，同理抄 b</td></tr>
+<tr><td>FIRST(A)</td><td>③</td><td>ε</td><td>这条右部整个就是 ε——A 能"凭空消失"，空串也算一种开头</td></tr>
+</table>
+<p>结论：FIRST(S)={a}，FIRST(A)={b, ε}。</p>
+</div>
+
+<div class="card">
+<h3>🔬 还是这个 G：手算 FOLLOW（三规则各露一手）</h3>
+<table class="gt">
+<tr><th>算什么</th><th>用哪条规则</th><th>得到</th><th>【旁注】为什么加这个符号</th></tr>
+<tr><td>FOLLOW(S)</td><td>规则1：S 是开始符号</td><td>#</td><td>S 顶在最外层，输入读完的结束符 # 就跟在它后面</td></tr>
+<tr><td>FOLLOW(A)</td><td>规则2：在①里 A 后面跟着 d</td><td>d</td><td>A 出现在 aAd 中间，紧挨着它的 d 自然是 A 的"跟班"</td></tr>
+<tr><td>FOLLOW(A)</td><td>规则2：在②里 A 后面跟着 S</td><td>a</td><td>A 后面跟的是 S ⇒ 把 FIRST(S)−{ε}={a} 搬进 FOLLOW(A)</td></tr>
+<tr><td>FOLLOW(S)</td><td>规则3：在②里 S 待在末尾</td><td>{a,d}</td><td>S 在右部末尾 ⇒ "A 在哪收场，S 也可能跟着在那收场"，把 FOLLOW(A) 整包并入</td></tr>
+</table>
+<p>结论：FOLLOW(A)={a,d}，FOLLOW(S)={#,a,d}。规则要反复套，直到集合不再变大。</p>
+</div>
+
+<div class="card">
+<h3>🔬 还是这个 G：手算 SELECT ＋ 填分析表的一格</h3>
+<table class="gt">
+<tr><th>产生式</th><th>用哪个公式</th><th>结果</th><th>【旁注】为什么</th></tr>
+<tr><td>SELECT(S→aAd)</td><td>右部推不出 ε ⇒＝FIRST(右部)</td><td>{a}</td><td>右部不空，看它能以什么打头就够</td></tr>
+<tr><td>SELECT(A→bAS)</td><td>同上</td><td>{b}</td><td>打头是 b</td></tr>
+<tr><td>SELECT(A→ε)</td><td>右部可空 ⇒＝(FIRST−{ε})∪FOLLOW(A)</td><td>{a,d}</td><td>A 一消失，接棒的就是它后面能跟的东西 ⇒ 借 FOLLOW(A) 当"使用时机"</td></tr>
+</table>
+<p><b>填一格 M[A,d] 的完整推理</b>：A 有两条产生式，逐条查——② 的 SELECT={b}，d 不在其中，跳过；③ 的 SELECT={a,d}，d 在其中，命中 ⇒ <b>M[A,d]=A→ε</b>。这就是"ε 产生式靠 FOLLOW 填表"的现场：A 自己不出场，让后面的 d 来点名。顺带：A 的两条 SELECT {b} 与 {a,d} 不相交 ⇒ 无冲突。</p>
+</div>
+
+<div class="card">
+<h3>🎮 三大集合计算器（输入任意文法，自动算 + LL(1) 判定）</h3>
+<p>语法：<code>大写字母</code>(可带撇号如 E')=非终结符，其他单字符=终结符，<code>@</code> 或 <code>ε</code>=空产生式，每行一条，<code>|</code> 分隔多个右部。第一行左部为开始符号。</p>
+<select id="gSel" style="max-width:100%;margin-bottom:6px">
+  <option value="S->aA|d&#10;A->bAS|@">G3: S→aA|d, A→bAS|ε （课件4.2节例）</option>
+  <option value="S->AB|bC&#10;A->b|@&#10;B->aD|@&#10;C->AD|b&#10;D->aS|c">判别大例题: S→AB|bC,A→b|ε,B→aD|ε,C→AD|b,D→aS|c （非LL(1)）</option>
+  <option value="E->TE'&#10;E'->+TE'|@&#10;T->FT'&#10;T'->*FT'|@&#10;F->i|(E)">表达式文法(消除左递归后): E→TE' 等 （LL(1)）</option>
+  <option value="S->aAS|b&#10;A->bA|@">S→aAS|b, A→bA|ε （非LL(1)：A冲突）</option>
+</select>
+<textarea id="gIn" rows="4" style="font-family:monospace"></textarea>
+<button class="btn" id="gGo">🧮 计算</button>
+<div id="gOut"></div>
+</div>
+
+<div class="card def">
+<h3>LL(1) 文法：定义与判别五步</h3>
+<p>🗣️ <b>人话版</b>：LL(1) 就是"<b>瞄一眼就能下单</b>"的好文法：只看当前 <b>1</b> 个输入符号，就能百分之百确定用哪条产生式，绝不犹豫、绝不回头（无回溯）。名字拆开：第 1 个 L＝<b>从左到右</b>读输入，第 2 个 L＝<b>最左</b>推导，(1)＝<b>向前看 1 个</b>符号。判别一句话：同一个非终结符各条产生式的"使用时机"（SELECT）两两不重叠。</p>
+<div class="formula"><b>充要条件</b>：对每个非终结符 A 的任两条产生式 A→α、A→β，都有 SELECT(A→α) ∩ SELECT(A→β) = ∅</div>
+<p><b>LL(1) 名字含义</b>：第1个 L = 从<b>L</b>eft 到右扫描输入；第2个 L = 用<b>L</b>eftmost（最左）推导；(1) = 只需向前看 <b>1</b> 个符号就能定产生式（LL(k) 看k个）。</p>
+<p><b>判别五步</b>（大题标准答题格式）：① 求能推出 ε 的非终结符集 → ② 各右部 FIRST(β) → ③ 各非终结符 FOLLOW(A) → ④ 各产生式 SELECT → ⑤ 按定义逐对检验交集。<b>凡是 LL(1) 文法均可确定地自顶向下分析。</b></p>
+<div class="notice">⚠️ <b>LL(1) 的明显性质（必要非充分）</b>：无左公共因子、无左递归、无二义性。反过来：不含左因子/左递归 <b>不一定</b> 就是 LL(1)！</div>
+</div>
+
+<!-- ============ 变换 ============ -->
+<h2 class="section">🔧 3. 非 LL(1) → LL(1) 等价变换</h2>
+
+<div class="card def">
+<h3>招式一：提取左公因子</h3>
+<p>🗣️ <b>人话版</b>：这两招都是把"让人犹豫的规则"改写成"一眼看清的规则"，<b>只改写法、不改语言</b>。<b>提左公因子</b>＝两条规则开头相同的部分先一起走完，把选择推迟到看清分歧之后（先上相同的头盘，吃完再选主菜）。<b>消左递归</b>：左递归 P→Pα 就像<b>查字典循环</b>——查"P"的释义写着"见 P 条"，永远翻不到底；程序照它写就会无限递归。改写成"先放不递归的 β，再让新帮手 P' 去接尾巴 α"，环就断开了。</p>
+<div class="formula">A→αβ₁ | αγ（都从 α 开头 ⇒ SELECT 必相交）　⇒　<b>A→αA'，A'→β₁|γ</b>（把决定推迟到读完 α 之后）<br>一般式：A→δβ₁|…|δβₙ|γ₁|…|γₘ ⇒ A→δA'|γ₁|…|γₘ，A'→β₁|…|βₙ</div>
+<p>例（课件例4.6）：S→aSb|aS|<b>ε</b> ⇒ S→aSS'、S'→b|ε、<b>S→ε</b>（ε 产生式要保留，别弄丢！）。<b>隐含左公因子</b>要先把非终结符代入展开（A→ad|Bc, B→aA|bB ⇒ A→ad|aAc|bBc 再提取）。注意：提取后<b>可能仍不是 LL(1)</b>、可能产生多余规则须删、个别文法有限步提不完；<b>消除左递归/提公因子后的文法形式上可能不同，但互相等价（语言不变）</b>。</p>
+<h3>招式二：消除左递归（重点公式，背！）</h3>
+<div class="formula">直接左递归 P→Pα|β（α≠ε，β 不以 P 开头）　⇒　<b>P→βP'，P'→αP'|ε</b><br>一般式：P→Pα₁|…|Pαₘ|β₁|…|βₙ ⇒ P→β₁P'|…|βₙP'，P'→α₁P'|…|αₘP'|ε</div>
+<table class="gt">
+<tr><th>变换前</th><th>变换后</th></tr>
+<tr><td>S→Sa|b</td><td>S→bS'，S'→aS'|ε</td></tr>
+<tr><td>S→Sc|Sabc|abc|bc|c</td><td>S→abcS'|bcS'|cS'，S'→cS'|abcS'|ε</td></tr>
+<tr><td>E→E+T|T, T→T*F|F, F→(E)|i</td><td>E→TE'，E'→+TE'|ε，T→FT'，T'→*FT'|ε，F→(E)|i</td></tr>
+</table>
+<p><b>间接左递归</b>（A→Bβ, B→Aα 使 A ⇒⁺ A…）：先<span class="hl">代入展开成直接左递归</span>再消除。例：A→aB|Bb, B→Ac|d ⇒ 把 A 代入 B：B→aBc|Bbc|d，再对 B 消除左递归。<br>
+⚠️ 为什么必须消？左递归使 SELECT 相交（非LL(1)），还会让递归下降程序<b>无限循环</b>。消除后仍需检查多余规则、重判 LL(1)。</p>
+</div>
+
+<div class="card">
+<h3>🎯 快问快答：变换套路训练（点卡片看答案）</h3>
+<div id="drill"></div>
+</div>
+
+<!-- ============ 实现 ============ -->
+<h2 class="section">⚙️ 4. LL(1) 分析的两种实现</h2>
+
+<div class="card def">
+<p>🗣️ <b>人话版</b>：两种实现是同一思路的"手动挡／自动挡"——都拿预测分析表当攻略。<b>递归下降</b>：每个非终结符写一个函数，函数里按当前输入符号选分支（手动挡）；<b>表驱动</b>：一张 M[A,a] 表＋一个栈＋一个总控循环（自动挡）。表 M[A,a] 怎么读：<b>行＝正要展开的非终结符 A，列＝眼前的输入符号 a，格子＝此刻该用的产生式</b>；空白格＝这种组合不该出现，报错。</p>
+<h3>① 递归下降程序</h3>
+<p>每个非终结符写一个子程序；遇到多候选时按"当前输入符号 ∈ 谁的 SELECT"选产生式；遇到终结符就匹配并读下一个单词；遇到非终结符就递归调用它的子程序。<b>优点</b>：简单直观易构造；<b>缺点</b>：要求 LL(1)、递归调用多（慢、占空间）。Pascal、C 等编译器常用。</p>
+<h3>② 表驱动 LL(1) 预测分析程序（考试重点）</h3>
+<p><b>构造预测分析表 M</b>：行=非终结符，列=终结符及 #。若 a ∈ SELECT(A→α) 则填 M[A,a]=A→α；填不进的空白格 = 出错入口（非 LL(1) 文法的表格会出现<b>多重定义</b>）。</p>
+<p><b>总控程序</b>（用分析栈 #E 开局）：栈顶 X，当前输入 a——</p>
+<ul>
+<li>X 是非终结符：查 M[X,a] 取产生式，<b>弹出 X，产生式右部逆序进栈</b>（保证最左先匹配）；</li>
+<li>X 是终结符：与 a 匹配则双双前进（弹栈+读下一个），否则报错；</li>
+<li>栈顶与输入同时到 #：<b>接受</b>！</li>
+</ul>
+<div class="notice good">📢 <b>总控口诀</b>：<b>栈顶是非终结符 → 查表展开</b>（弹栈＋右部逆序进栈，输入不动）；<b>栈顶是终结符 → 比对</b>（相同才弹栈＋读下一个，不同就报错）；<b>栈顶与输入同时到 # → 接受</b>。</div>
+<div class="notice">💡 <b>为何逆序进栈？</b>栈是后进先出的，最左符号必须最后进栈才能最先出栈匹配。</div>
+</div>
+
+<div class="card">
+<h3>🔬 迷你例：用栈"走"句子 ad#（前 3 步逐格旁注；栈底 # 在左，<b>加粗描边的是栈顶</b>）</h3>
+<p style="margin:6px 0">开局：栈压入 # 和 S，输入指针指着 a。文法就用上面那个 G：S→aAd，A→bAS|ε。</p>
+<p style="margin:6px 0">第1步｜栈顶 <b>S（非终结符）</b>，读 a → 查 M[S,a]＝S→aAd，弹出 S、d A a <b>逆序</b>压栈 ⇒ 栈变 <span style="display:inline-flex;gap:2px;vertical-align:middle"><span style="border:1px solid var(--muted);padding:0 6px">#</span><span style="border:1px solid var(--muted);padding:0 6px">d</span><span style="border:1px solid var(--muted);padding:0 6px">A</span><span style="border:2px solid var(--warn);padding:0 6px"><b>a</b></span></span>　<b>【旁注】非终结符只"展开"、不消耗输入；a 最先要匹配，所以最后进栈</b></p>
+<p style="margin:6px 0">第2步｜栈顶 <b>a（终结符）</b>，读 a → 对上暗号：弹 a、读下一个 ⇒ 栈 <span style="display:inline-flex;gap:2px;vertical-align:middle"><span style="border:1px solid var(--muted);padding:0 6px">#</span><span style="border:1px solid var(--muted);padding:0 6px">d</span><span style="border:2px solid var(--warn);padding:0 6px"><b>A</b></span></span>，剩输入 d #　<b>【旁注】终结符靠"比对"：一样才双前进，不一样立即报错</b></p>
+<p style="margin:6px 0">第3步｜栈顶 <b>A（非终结符）</b>，读 d → 查 M[A,d]＝A→ε（上面刚手算过！），弹 A、ε 不进栈 ⇒ 栈 <span style="display:inline-flex;gap:2px;vertical-align:middle"><span style="border:1px solid var(--muted);padding:0 6px">#</span><span style="border:2px solid var(--warn);padding:0 6px"><b>d</b></span></span>　<b>【旁注】按 ε 展开＝把 A 空手弹出；A 敢不敢消失看 FOLLOW——d∈FOLLOW(A)，此时可以隐身</b></p>
+<p style="margin:6px 0">收尾：d 对 d 比对成功 → 栈剩 #，输入也剩 # → 两 # 碰面，<b>接受</b>！ad 是 G 的句子。</p>
+</div>
+
+<div class="card">
+<h3>🎮 预测分析动画（输入串 → 逐步分析表）</h3>
+<p>文法：消除左递归后的表达式文法 G'[E]（可切换上面的文法计算器）。输入串试试 <code>i+i*i</code>、<code>(i)</code>、<code>i+</code>：</p>
+<input type="text" id="llIn" value="i+i*i" style="max-width:240px;display:inline-block">
+<button class="btn small" id="llGo">▶ 分析</button>
+<div id="llOut"></div>
+</div>
+
+<div class="card def">
+<h3>预测分析法完整实现步骤（简答题模板）</h3>
+<p>🗣️ <b>人话版</b>：六步口诀——先治病（消左递归、提公因子），再体检（算三大集合、判 LL(1)），最后上岗（造表、写程序）。</p>
+<p>① 构造文法 → ② 消除左递归、提取左公因子（消除回溯）→ ③ 求 FIRST、FOLLOW，进而求各产生式 SELECT → ④ 检查是否 LL(1) 文法 → ⑤ 是则构造预测分析表 → ⑥ 实现：递归子程序法 / 表驱动预测分析法。</p>
+</div>
+
+<!-- ============ 测验 ============ -->
+<h2 class="section">📝 5. 第 3 关 · 关末测验</h2>
+<div id="quiz3"></div>
+
+<h2 class="section">✍️ 6. 大题演练</h2>
+<div id="bigq3"></div>
+
+<div class="footer">编译原理互动课堂 · 第3关 ｜ 对应课件第4章 ｜ <a href="level2.html">← 上一关</a> ｜ <a href="index.html">闯关地图</a> ｜ <a href="level4.html">下一关：LR分析 →</a></div>
+</div>
+
+<script src="js/engine.js"></script>
+<script src="js/ui.js"></script>
+<script>
+BYUI.nav('level3.html');
+
+/* ---- 三大集合计算器 ---- */
+document.getElementById('gSel').addEventListener('change',e=>{document.getElementById('gIn').value=e.target.value;calc();});
+document.getElementById('gIn').value=document.getElementById('gSel').value;
+document.getElementById('gGo').addEventListener('click',calc);
+function calc(){
+  const out=document.getElementById('gOut');
+  let g;
+  try{ g=BYQ.parseGrammar(document.getElementById('gIn').value); }
+  catch(e){ out.innerHTML='<div class="notice">⚠️ '+e.message+'</div>'; return; }
+  const {select,first,follow,nullable}=BYQ.computeSelect(g);
+  const {table,terms,multiple}=BYQ.buildPredictTable(g);
+  const r=BYQ.checkLL1(g);
+  let html='<h3>文法符号</h3><p>非终结符 V<sub>N</sub> = { '+g.vn.join(', ')+' }　终结符 V<sub>T</sub> = { '+g.vt.join(', ')+' }　开始符号 S = '+g.start+'</p>';
+  html+='<h3>① 能否推出 ε？</h3>'+BYUI.gt(['非终结符','可推出ε?'],g.vn.map(A=>[A,nullable[A]?'<b style="color:var(--good)">是</b>':'否']));
+  html+='<h3>② FIRST 集（各非终结符 / 各右部）</h3>'+BYUI.gt(['符号','FIRST'],g.vn.map(A=>['FIRST('+A+')','{'+first[A].join(', ')+'}'])
+    .concat(g.prods.map(p=>['FIRST('+(p.rhs.join('')||'ε')+')','{'+BYQ.firstOfSeq(g,p.rhs).join(', ')+'}'])));
+  html+='<h3>③ FOLLOW 集</h3>'+BYUI.gt(['非终结符','FOLLOW'],g.vn.map(A=>['FOLLOW('+A+')','{'+follow[A].join(', ')+'}']));
+  html+='<h3>④ SELECT 集</h3>'+BYUI.gt(['产生式','SELECT'],g.prods.map(p=>[p.lhs+'→'+(p.rhs.join('')||'ε'),'{'+select[p.no].join(', ')+'}']));
+  html+='<h3>⑤ 判别结论</h3>';
+  if(r.isLL1){
+    html+='<div class="notice good">✅ <b>是 LL(1) 文法</b>——每个非终结符各产生式的 SELECT 两两不交，可构造预测分析表做确定分析。</div>';
+    html+='<h3>预测分析表 M[A, a]</h3><table class="gt"><tr><th></th>'+terms.map(t=>'<th>'+t+'</th>').join('')+'</tr>';
+    g.vn.forEach(A=>{
+      html+='<tr><th>'+A+'</th>'+terms.map(t=>{
+        const c=table[A][t];
+        if(!c)return'<td style="color:var(--muted)">err</td>';
+        if(c.multi)return'<td class="no">'+c.prods.map(p=>p.lhs+'→'+(p.rhs.join('')||'ε')).join(' / ')+'</td>';
+        return'<td>'+(c.rhs.length?c.lhs+'→'+c.rhs.join(''):'<b>'+c.lhs+'→ε</b>')+'</td>';
+      }).join('')+'</tr>';
+    });
+    html+='</table><p style="color:var(--muted)">err=空白格（出错入口）。考试画表时留空并注明"空白处为出错"即可。</p>';
+  } else {
+    html+='<div class="notice">❌ <b>不是 LL(1) 文法</b>。冲突如下：'+r.conflicts.map(c=>'SELECT('+c.p1.lhs+'→'+(c.p1.rhs.join('')||'ε')+') ∩ SELECT('+c.p2.lhs+'→'+(c.p2.rhs.join('')||'ε')+') = {'+c.inter.join(',')+'} ≠ ∅').join('；')+'</div>';
+  }
+  out.innerHTML=html;
+}
+calc();
+
+/* ---- 变换训练 ---- */
+(function(){
+  const drills=[
+   {q:'消除 S→Sa|b 的左递归',a:"S→bS'，S'→aS'|ε"},
+   {q:'消除 E→E+T|T 的左递归',a:"E→TE'，E'→+TE'|ε"},
+   {q:'提取 S→aSb|aS 的左公因子（原式还有 ε 产生式 S→aSb|aS|ε 时呢？）',a:"S→aSS'，S'→b|ε；若原式为 S→aSb|aS|ε，则结果为 S→aSS'、S'→b|ε、S→ε（ε 产生式保留）（提取后还需重判是否 LL(1)）"},
+   {q:'文法 A→aB|Bb, B→Ac|d 有什么递归？怎么处理？',a:"间接左递归（A⇒Bb⇒Acb）。先把 A 代入 B 得 B→aBc|Bbc|d，再消除 B 的直接左递归：B→aBcB'|dB'，B'→bcB'|ε"},
+   {q:'文法无 ε 产生式时，同一非终结符各右部的 FIRST 有何性质？',a:'无 ε 产生式 ⇒ 各右部 FIRST 互不相交 ⇒ 见首符即可确定选哪条产生式（这也是"无左公因子"能确定分析的根本原因）'},
+   {q:'（课件练习）S→Sa|b|ε：求 FIRST(S)，并判断是否 LL(1)',a:"FIRST(S)={a,b,ε}（因 S⇒Sa 且 S⇒ε，故 a 也在 FIRST(S) 中）；FOLLOW(S)={#,a}；SELECT(S→Sa)={a,b,#}、SELECT(S→b)={b}、SELECT(S→ε)={#,a}——SELECT(S→Sa)∩SELECT(S→b)={b}≠∅，不是 LL(1)（根子在有左递归）"},
+   {q:'（课件练习）S→AB, A→a|ε, B→b|ε：求 FIRST(AB)',a:"FIRST(A)={a,ε}，FIRST(B)={b,ε}；A 可推出 ε，所以 FIRST(AB)=FIRST(A)∪FIRST(B)={a,b,ε}"},
+   {q:'（课件练习）S→a|b|ε：是 LL(1) 文法吗？',a:"是。SELECT(S→a)={a}、SELECT(S→b)={b}、SELECT(S→ε)=FOLLOW(S)={#}，两两不相交"},
+   {q:'含左递归的文法为什么不能用自顶向下确定分析？',a:"SELECT(A→Aα) 与 SELECT(A→β) 必相交（都含 β 能推出的开头），且递归下降会无限循环"},
+   {q:'FOLLOW 集 three 规则中，什么时候把 FOLLOW(B) 加进 FOLLOW(A)？',a:"有规则 B→αA（A 在末尾），或 B→αAβ 且 β ⇒* ε（A 实际处于末尾）"}
+  ];
+  document.getElementById('drill').innerHTML=drills.map((d,i)=>`<details class="fold"><summary>${i+1}. ${d.q}</summary><div class="mono" style="margin-top:6px">${d.a}</div></details>`).join('');
+})();
+
+/* ---- 预测分析动画 ---- */
+document.getElementById('llGo').addEventListener('click',()=>{
+  const g=BYQ.parseGrammar("E->TE'\nE'->+TE'|@\nT->FT'\nT'->*FT'|@\nF->i|(E)");
+  const inp=document.getElementById('llIn').value;
+  const {accept,steps,err}=BYQ.llParse(g,inp);
+  const rows=steps.map(s=>({cells:[
+    '<span class="mono">'+(s.stack.join(''))+'</span>',
+    '<span class="mono">'+s.rest.join('')+'</span>',
+    s.action]}));
+  let html='<h3>预测分析表 M[A,a]</h3>';
+  const {table,terms}=BYQ.buildPredictTable(g);
+  html+='<table class="gt"><tr><th></th>'+terms.map(t=>'<th>'+t+'</th>').join('')+'</tr>';
+  g.vn.forEach(A=>{html+='<tr><th>'+A+'</th>'+terms.map(t=>{
+    const c=table[A][t];
+    if(!c)return'<td></td>';
+    return'<td>'+c.lhs+'→'+(c.rhs.join('')||'ε')+'</td>';
+  }).join('')+'</tr>';});
+  html+='</table>';
+  html+='<h3>分析过程（'+(accept?'✅ 接受，'+inp+' 是该文法的句子':'❌ 出错'+(err?'：'+err:''))+'）</h3><div id="llSteps"></div>';
+  document.getElementById('llOut').innerHTML=html;
+  BYUI.stepPlayer('llSteps',['步骤','分析栈(顶在右)','剩余输入','动作/所用产生式'],rows);
+});
+document.getElementById('llGo').click();
+
+/* ---- 测验 ---- */
+BYUI.quiz.render('quiz3',{
+  id:'level3',title:'第3关·LL(1)自顶向下',
+  questions:[
+   {type:'single',q:'自顶向下语法分析的核心问题是：',options:['如何选择产生式进行推导','如何归约句柄','如何消除空白','如何分配内存'],answer:0,
+    explain:'自顶向下从开始符号推导，难点在每步选哪条产生式；自底向上的难点才是找可归约串。'},
+   {type:'single',q:'FIRST 集针对的对象是：',options:['非终结符','终结符','符号串','产生式'],answer:2,
+    explain:'FIRST(α) 针对符号串（可以是非终结符本身）；FOLLOW针对非终结符；SELECT针对产生式。'},
+   {type:'single',q:'下列哪个符号可能出现在 FOLLOW(A) 中但绝不出现在 FIRST(α) 中？',options:['ε','#','a','+'],answer:1,
+    explain:'FOLLOW可含#（输入结束符）；FIRST可含ε但#绝不属于FIRST。'},
+   {type:'single',q:'SELECT(A→α) 的计算：当 α ⇒* ε 时，',options:['SELECT=FIRST(α)','SELECT=(FIRST(α)−{ε})∪FOLLOW(A)','SELECT=FOLLOW(A)−FIRST(α)','SELECT=∅'],answer:1,
+    explain:'可空时：FIRST(α)去掉ε，再加上A的跟班FOLLOW(A)。'},
+   {type:'single',q:'文法 G3: S→aA|d, A→bAS|ε 的 FOLLOW(A) 是：',options:['{a,d}','{#}','{#,a,d}','{b}'],answer:2,
+    explain:'课件原题：S→aA 中 A 在末尾→FOLLOW(S)进 来；A→bAS 中 A 后跟 S→FIRST(S)={a,d}；S是开始符号含#。得{#,a,d}。'},
+   {type:'single',q:'LL(1) 的两个 L 和一个 1 分别表示：',options:['左递归、左公因子、1遍扫描','从左到右扫描、最左推导、向前看1个符号','最左归约、左到右、1个栈','左结合、左推导、1步回溯'],answer:1,
+    explain:'Left-to-right扫描、Leftmost推导、向前看1个输入符号即可确定产生式。'},
+   {type:'single',q:'文法 G[S]: S→AB|bC, A→b|ε, B→aD|ε, C→AD|b, D→aS|c 中，SELECT(S→AB)∩SELECT(S→bC) = ',options:['∅','{b}','{a,b}','{#,a,b}'],answer:1,
+    explain:'课件大例题：SELECT(S→AB)={b,a,#}，SELECT(S→bC)={b}，交集{b}≠∅，故不是LL(1)文法。'},
+   {type:'single',q:'同一非终结符的两个产生式 SELECT 集相交，说明：',options:['文法是LL(1)的','遇到相交符号时无法唯一确定产生式','必须删除其中一条产生式','文法有左递归'],answer:1,
+    explain:'SELECT相交=面临该输入符号时两条规则都想用，确定分析失败（这是非LL(1)的直接原因，但根源可能是左公因子或左递归）。'},
+   {type:'single',q:'含有左递归的文法：',options:['一定是LL(1)文法','不是LL(1)文法','无法消除左递归','只能用LR分析'],answer:1,
+    explain:'左递归使同一非终结符各产生式SELECT相交（且递归下降会死循环），故非LL(1)；但可通过等价变换消除左递归。'},
+   {type:'single',q:'消除直接左递归 P→Pα|β 的结果是：',options:['P→αP, P→β','P→βP\', P\'→αP\'|ε','P→P\'β, P\'→Pα|ε','P→αβ'],answer:1,
+    explain:'标准变换：β放前面提出来，α挂到新非终结符P\'上右递归，P\'最后要有ε收尾。'},
+   {type:'single',q:'消除 E→E+T|T 的左递归后得到：',options:['E→T+E, E→T','E→TE\', E\'→+TE\'|ε','E→ET\', E\'→T+|ε','E→+TE|T'],answer:1,
+    explain:'P→Pα|β（α=+T, β=T）⇒ E→TE\', E\'→+TE\'|ε。这是表达式文法的标准改写，第6关LR分析还会用到它。'},
+   {type:'single',q:'提取左公因子后，文法：',options:['一定变成LL(1)文法','一定不是LL(1)文法','不一定成为LL(1)文法（不含左公因子只是必要条件）','会改变语言'],answer:2,
+    explain:'课件强调：不含左公因子只是LL(1)的必要条件；如S→aSb|aS提公因子后仍非LL(1)。等价变换不改变语言。'},
+   {type:'single',q:'表驱动预测分析器中，查表 M[X,a] 得到产生式 X→Y₁Y₂Y₃ 后，进栈顺序是：',options:['Y₁,Y₂,Y₃（顺序进栈）','Y₃,Y₂,Y₁（逆序进栈）','只进Y₁','随机进栈'],answer:1,
+    explain:'栈后进先出，Y₁要最先匹配，所以必须最后压栈——逆序进栈。'},
+   {type:'single',q:'预测分析表中，空白单元表示：',options:['自动跳过','出错入口（报错）','填ε','接受'],answer:1,
+    explain:'空白格即报错标志；只有栈顶和输入同时为#时才接受。'},
+   {type:'single',q:'分析器栈顶为终结符 a、当前输入也是 a 时，动作是：',options:['用产生式展开','弹出a并读入下一输入符号','报错','接受'],answer:1,
+    explain:'终结符匹配：弹栈+前进输入指针。不匹配才是出错。'},
+   {type:'single',q:'不确定（带回溯）的自顶向下分析：',options:['效率高被广泛使用','效率低、代价高，不实用','即表驱动预测分析','不需要文法'],answer:1,
+    explain:'回溯要不断推翻重来，代价高不实用，所以才要研究LL(1)条件做确定分析。'}
+  ]
+});
+BYUI.bigQuestions('bigq3',{
+  id:'level3',title:'第3关·大题',
+  questions:[
+   {q:'判断文法 G[S]: S→aH, H→aMd|d, M→Ab|ε, A→aM|e 是否为 LL(1) 文法。要求写出五大步（能否推出ε、FIRST、FOLLOW、SELECT、判别）全过程。',
+    hint:'M→Ab 中 A 不空（A→aM|e 首符都是终结符），M 可空。逐个算 FOLLOW：FOLLOW(S)含#，H后的d…按三规则反复计算。最后检查 SELECT(H→aMd) 与 SELECT(H→d) 等交集。'},
+   {q:'消除下列文法的左递归并判断结果是否 LL(1)：S→a|∧|(T)，T→T,S|S。',
+    hint:'T→T,S|S 是直接左递归（P→Pα|β，α=",S"，β="S"）⇒ T→ST\'，T\'→,ST\'|ε。之后求SELECT判别（课件原题）。'},
+   {q:'对消除左递归后的表达式文法 G\'[E]（E→TE\' 等），利用预测分析表写出输入串 (i)# 的完整分析过程（步骤/分析栈/剩余输入/产生式），并说明 i)# 为何在第7步左右报错。',
+    hint:'照"分析栈、剩余输入、所用产生式"三列表格逐步走；第7步报错的原因是：栈顶为非终结符 E、当前输入为 ) 时查预测分析表 M[E,)] 是空白格（SELECT(E→TE\')={(,i} 不含 )）——空白格即出错入口。'}
+  ]
+});
+</script>
+</body>
+</html>
