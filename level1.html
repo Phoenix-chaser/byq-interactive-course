@@ -404,7 +404,9 @@ BYUI.quiz.render('quiz1',{
    {type:'single',q:'文法 G[S]: S→cAd, A→ab|a 的句型 cabd 中，句柄是：',options:['c','ab','a','abd'],answer:1,
     explain:'句柄=最左直接短语。S⇒cAd⇒cabd，A⇒ab 一步得 ab，ab 是直接短语（也是唯一直接短语；cabd 整体也是短语），即句柄。'},
    {type:'single',q:'若文法中存在某个句子对应两棵不同的语法树，则该文法：',options:['是二义性文法','是正规文法','存在多余规则','无法用于编译'],answer:0,
-    explain:'这正是二义性文法的定义。等价说法：该句子存在两个不同的最左推导。'}
+    explain:'这正是二义性文法的定义。等价说法：该句子存在两个不同的最左推导。'},
+   {type:'single',q:'BNF 范式中，元符号 { } 的含义是：',options:['重复 0 或多次','可选（出现 0 或 1 次）','定义为','或'],answer:0,
+    explain:'BNF 元符号：&lt; &gt; 括非终结符、::= 定义为、| 或、{ } 重复0或多次、[ ] 可选。'}
   ]
 });
 BYUI.bigQuestions('bigq1',{
@@ -413,9 +415,9 @@ BYUI.bigQuestions('bigq1',{
    {q:'文法 G[S]: S→aAS | a，A→SbA | SS | ba。求句型 aabbaa 的短语、直接短语和句柄。<br><span style="color:var(--muted)">（课件第2章练习题；提示：先画出语法树，短语=子树叶子串）</span>',
     hint:'从 S 出发：S→aAS→aSbAS→…多试几种推导，找到能推出 aabbaa 的那棵树，再在树上找子树。'},
    {q:'已知语言 L={ aⁿbⁿcᵐ | n≥1, m≥0 }，请构造满足 L(G)=L 的文法 G。<br><span style="color:var(--muted)">（提示：a、b 必须配对，c 独立出现；配对部分用递归 S→aSb 思路）</span>',
-    hint:'顶层用两个独立非终结符：S→AC；A→aAb|ab 保证 aⁿbⁿ(n≥1)；C→cC|ε 保证 cᵐ(m≥0)。注意 aⁿbⁿ 的配对和 c 的重复要交给不同非终结符分管，不能都压在 S 身上。'},
+    hint:'先想清楚两段谁是"配对递归"、谁是"独立重复"：a、b 个数相等必须由同一个非终结符自嵌套保证；c 可有可无且与 a、b 无关，交给另一个非终结符，最后用一条产生式把两段接起来。'},
    {q:'给出文法 G[E]: E→i | E+E | E*E | (E)，分别写出句子 i*i+i 的最左推导和最右推导。',
-    hint:'最左推导（每步替换最左非终结符）：E⇒E*E⇒i*E⇒i*E+E⇒i*i+E⇒i*i+i。最右推导/规范推导（每步替换最右非终结符）：E⇒E*E⇒E*E+E⇒E*E+i⇒E*i+i⇒i*i+i。注意 i*i+i 要先出现 E*E：对照句子 i+i*i 则是 E⇒E+E⇒…先加后乘。'}
+    hint:'最左推导：每步只替换句型中最左边那个 E，注意 i*i+i 应先让 E*E 出现在外层。最右推导：每步替换最右边的 E，先展开不影响后续的右侧部分。各自 5 步完成。做完可用上方"推导模拟器"对照验证。'}
   ]
 });
 </script>
