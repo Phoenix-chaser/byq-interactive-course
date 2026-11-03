@@ -15,11 +15,7 @@
 <div class="hero"><h1>📖 第 7 章 · 语法制导的语义计算（全书精讲）</h1>
 <div class="sub">课件逐页精讲 ｜ 每个定义、例子、练习都在 ｜ 预计 45 分钟</div></div>
 
-<div class="card">
-<h3>🖼️ 课件原页对照</h3>
-<p style="color:var(--muted);font-size:13.5px;margin:4px 0 0">本章 PPT 每一页原图（共 12 页），与下方精讲一一对应——点缩略图放大，放大后 ← → 翻页、Esc 关闭。复习不用再开 PPT。</p>
-<div class="slidegal" data-dir="ch7" data-from="1" data-to="12"></div>
-</div>
+<details class="fold" style="margin:14px 0"><summary>🗺️ 本章课件原页总览（点击展开缩略图索引）</summary><p style="color:var(--muted);font-size:13.5px;margin:4px 0 0">本章 PPT 每一页原图（共 12 页），与下方精讲一一对应——点缩略图放大，放大后 ← → 翻页、Esc 关闭。复习不用再开 PPT。</p><div class="slidegal" data-dir="ch7" data-from="1" data-to="12"></div></details>
 
 
 <div class="card tip"><span class="emoji">🎯</span><b>这一章讲什么</b>：在<b>词法分析、语法分析</b>的基础上，还需要进行<b>语义分析</b>——前两章管"认单词、认结构"，本章管"这句话<b>讲不讲得通、值是多少</b>"。本章主要介绍两个工具：<b>属性文法</b>（7.1）和<b>翻译模式</b>（7.2），最后认识自动生成分析器的工具 <b>YACC</b>（7.3）。一句话：让编译器"边分析语法、边把语义算出来"，这就是<b>语法制导的语义计算</b>。</div>
@@ -40,6 +36,8 @@
 <tr><td>第11页</td><td>7.3 YACC ⭐</td><td>7</td></tr>
 <tr><td>第12页</td><td>本章作业：二进制小数转十进制（含完整解答）</td><td>8</td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P8–12（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch7" data-pages="8,9,10,11,12"></div></details>
 </div>
 
 <h2 class="section">1. 导引回顾：词法分析 vs 语法分析 <span class="badge hot">🔥 考点</span></h2>
@@ -94,6 +92,8 @@
 <tr><td><b>V</b></td><td>属性的有穷集合</td><td>所有"便签"的集合</td></tr>
 <tr><td><b>F</b></td><td>关于属性的断言的有穷集合</td><td>便签怎么算/怎么检查的规则</td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P4（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch7" data-pages="4"></div></details>
 </div>
 
 <div class="card def">
@@ -101,6 +101,8 @@
 <p><b>属性（Attribute）</b>：可用来刻画一个文法符号的<b>任何我们所关心的特性</b>。课件列举的例子（都可能在选择题里出现）：</p>
 <div class="formula">符号的<b>值</b>（如 E.val=27）｜ 符号的<b>名字串</b>｜ 符号的<b>类型</b>（int/real…）｜ 符号的<b>偏移地址</b>｜ 符号被赋予的<b>寄存器</b>｜ <b>代码片断</b>，等等…</div>
 <p><b>记号</b>：文法符号 X 关联属性 a 的属性值，通过 <code>X.a</code> 访问——读作"X 身上那张便签 a 上写的值"。<code>E.val</code> 就是"E 的值"，<code>d.lexval</code> 就是"单词 d 由词法分析给出的值"。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P5（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch7" data-pages="5"></div></details>
 </div>
 
 <div class="card def">
@@ -112,6 +114,8 @@
 <tr><td><b>② 基于语义函数的规则</b></td><td><code>b := f(c₁, c₂, …, cₖ)</code><br>或 <code>f(c₁, c₂, …, cₖ)</code></td><td>"加工"：把孩子/自己的属性算一算得到 b；后一种没有左部，是纯<b>动作</b>（如 print）</td></tr>
 </table>
 <p>其中 b、c₁、c₂、…、cₖ 都是<b>该产生式中文法符号的属性</b>。课件特别注明：<b>实践中，语义函数的形式可以更灵活</b>（不必拘泥于严格的一元/多元函数写法）。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P6（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch7" data-pages="6"></div></details>
 </div>
 
 <h2 class="section">4. 属性文法举例：P190 第3题完整表 <span class="badge hot">🔥 考点</span></h2>
@@ -129,6 +133,8 @@
 <tr><td><code>F → d</code></td><td><code>{ F.val := d.lexval }</code></td><td>叶子：从词法分析给的值起步</td></tr>
 </table>
 <p>课件注释两条：<b>① E、T、F 均有属性 val</b>；<b>② d.lexval 是词法分析程序确定的属性值</b>（数字单词的值在词法阶段就知道了，语义阶段直接取用——这体现了"编译各阶段接力"）。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P7（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch7" data-pages="7"></div></details>
 </div>
 
 <h2 class="section">5. 综合属性与 3*(5+4) 求值全过程 <span class="badge hot">🔥 考点</span></h2>
@@ -175,6 +181,8 @@
 </table>
 <div class="notice">📌 <b>规律</b>：值总是"叶子先有（d.lexval 来自词法分析）→ 每上一层算一次（或照抄一次）→ 到根 S 处 print"。左下角 3 那条链是 3 次照抄（复写规则），右边括号里是 5+4=9，最后 3×9=27——<b>整棵树的计算顺序就是后序遍历顺序</b>。</div>
 <p>🎮 想看这棵树<b>一步步点亮</b>的动画版？<a href="level5.html">到第 5 关玩属性求值动画演示器</a>（输入 3*(5+4) 单步执行，和上表逐步对照）。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P9（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch7" data-pages="9"></div></details>
 </div>
 
 <h2 class="section">6. 7.2 翻译模式 与 语法制导翻译 <span class="badge hot">🔥 考点</span></h2>
@@ -209,6 +217,8 @@
 <p>给如下文法加上语义规则，使其能将任意一个<b>二进制小数</b>转换为<b>十进制小数</b>。如 <code>(101.101)B = (5.625)D</code>。</p>
 <div class="formula">N → S₁ . S₂<br>S → S₁ B<br>S → B<br>B → 0<br>B → 1</div>
 <p>（约定：N 是"整数部分.小数部分"；S 推出一串二进制位 B，且<b>左边的 B 权重高</b>——S→S₁B 是左递归写法。）</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P12（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch7" data-pages="12"></div></details>
 </div>
 
 <details class="fold"><summary>✍️ 先自己设计语义规则，再展开看完整解答（强烈建议先动手）</summary>

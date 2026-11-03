@@ -15,11 +15,7 @@
 <div class="hero"><h1>📖 第 6 章 · LR 分析（全书精讲·最重要）</h1>
 <div class="sub">课件逐页精讲 ｜ 全部项目集/分析表/分析过程 ｜ 预计 90 分钟</div></div>
 
-<div class="card">
-<h3>🖼️ 课件原页对照</h3>
-<p style="color:var(--muted);font-size:13.5px;margin:4px 0 0">本章 PPT 每一页原图（共 120 页）（本文件第 1 页是第 5 章概述，见第 5 章页面；本章从第 2 页起），与下方精讲一一对应——点缩略图放大，放大后 ← → 翻页、Esc 关闭。复习不用再开 PPT。</p>
-<div class="slidegal" data-dir="ch56" data-from="2" data-to="121"></div>
-</div>
+<details class="fold" style="margin:14px 0"><summary>🗺️ 本章课件原页总览（点击展开缩略图索引）</summary><p style="color:var(--muted);font-size:13.5px;margin:4px 0 0">本章 PPT 每一页原图（共 120 页）（本文件第 1 页是第 5 章概述，见第 5 章页面；本章从第 2 页起），与下方精讲一一对应——点缩略图放大，放大后 ← → 翻页、Esc 关闭。复习不用再开 PPT。</p><div class="slidegal" data-dir="ch56" data-from="2" data-to="121"></div></details>
 
 
 <!-- ================= 使用说明 ================= -->
@@ -30,6 +26,8 @@
 <div class="card def">
 <h3>📄 第 6 章课件目录（p2）</h3>
 <p><b>6.1 LR 分析概述 → 6.2 LR(0) 分析 → 6.3 SLR(1) 分析 → 6.4 LR(1) 分析 → 6.5 LALR(1) 分析 → 6.6 二义性文法在 LR 分析中的作用</b>。开篇页提问：What's 'L'? What's 'R'?——答案马上揭晓。⭐【了解】6.6 只在目录中出现，本章课件文字材料未展开其内容页，考试以 6.1–6.5 为主。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P2（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="2"></div></details>
 </div>
 
 <!-- ================= 1. 自底向上回顾 ================= -->
@@ -42,6 +40,8 @@
 <li><b>规范归约</b>：每一步都归约<b>当前句型最左直接短语（句柄）</b>——它恰好是<b>最右推导（规范推导）的逆过程</b>，所以也叫最左归约。</li>
 <li><b>优先分析</b>（第 5 章）：靠符号两两之间的优先关系找句柄，适用范围小（<a href="chapter5.html">详见第 5 章概述页</a>）；<b>LR 分析</b>（本章）：靠"识别活前缀的 DFA＋分析表"全局定位句柄，是目前最一般、最强的方案。</li>
 </ul>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P118（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="118"></div></details>
 </div>
 
 <!-- ================= 2. LR 概述 ================= -->
@@ -66,6 +66,8 @@
 <tr><td><b>LALR(1)</b></td><td>称为向前看 LR 分析表，分析表能力介于 SLR(1) 和 LR(1) 之间，适用于大多数程序设计语言的结构，并且可以比较有效地实现</td></tr>
 </table>
 <p>说明：四种分析表对应四类文法（判定顺序见本章第 14 节）。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P5–6（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="5,6"></div></details>
 </div>
 <div class="card tip"><span class="emoji">🥤</span><b>比喻 · 总控＝自动售货机</b>：LR 分析程序（总控）自己完全不思考，全部家当是"两根栈＋一张表＋只看一个字的读头"。聪明全在提前算好的<b>表</b>里，总控蠢得像售货机——正因为蠢，才可靠、才能被 YACC 自动生成。这个比喻与第 4 关一致，本章会反复用到。</div>
 
@@ -83,6 +85,8 @@
 状态栈: s0 s1 … sm      符号栈: # x1 x2 … xm
           │ 查表 ACTION[sm,ai] / GOTO[sm,A] │
 LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终结符列) ──► 输出</pre></div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P120（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="120"></div></details>
 </div>
 
 <!-- ================= 3. 活前缀 ================= -->
@@ -96,6 +100,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <li><b>可归前缀</b>：规范句型中<b>句柄之前包括句柄在内</b>的串。</li>
 </ul>
 <p>🗣️ <b>人话版</b>：活前缀是"这半程没走错"的凭证——栈里只要还是活前缀，前面的移进/归约就全干对了；一旦栈里攒齐了整个句柄（＝可归前缀），就是"该归约了"的信号。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P9（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="9"></div></details>
 </div>
 <div class="card">
 <h3>引入可归前缀的例：编号文法 + abbcde 的推导与归约（p10–p11）</h3>
@@ -104,6 +110,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <p>对输入串 abbcde 推导时把序号也带入，<b>最右推导</b>过程为：S ⇒ aAcBe[1] ⇒ aAcd[4]e[1] ⇒ aAb[3]cd[4]e[1] ⇒ ab[2]b[3]cd[4]e[1]。它的逆过程即<b>最左归约（规范归约）</b>：</p>
 <div class="formula mono">ab[2]b[3]cd[4]e[1] —用规则(2)归约→ aAb[3]cd[4]e[1] —用规则(3)归约→ aAcd[4]e[1] —用规则(4)归约→ aAcBe[1] —用规则(1)归约→ S</div>
 <p>每次归约前和归约后的已归约部分＋剩余部分合起来构成文法的规范句型，而<b>用哪个规则归约仅取决于当前句型的前部分内容</b>——这正是后面"用状态记住前缀"的动机。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P10–11（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="10,11"></div></details>
 </div>
 <div class="card">
 <h3>🔥 可归前缀＝每次归约前符号栈的内容（p12，完整 11 步）</h3>
@@ -122,10 +130,14 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <tr class="me"><td>10</td><td class="mono">#aAcBe</td><td class="mono">#</td><td>归约 S→aAcBe</td></tr>
 <tr><td>11</td><td class="mono">#S</td><td class="mono">#</td><td>接受</td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P12（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="12"></div></details>
 </div>
 <div class="card">
 <h3>活前缀再分析（p13）</h3>
 <p>列出各规范句型的全部前缀（按四次归约分层）：<code>ε,a,ab</code>；<code>ε,a,aA,aAb</code>；<code>ε,a,aA,aAc,aAcd</code>；<code>ε,a,aA,aAc,aAcB,aAcBe</code>。不难发现前缀 <code>a、aA、aAc</code> 都<b>不只是某一个</b>规范句型的前缀。所以：<b>形成可归前缀之前、包括可归前缀在内的所有规范句型的前缀都称为活前缀</b>；活前缀可以是一个或若干规范句型的前缀。在规范归约过程中的任何时刻，只要已分析过的部分（符号栈中的符号串）均为规范句型的活前缀，就表明输入串已被分析过的部分是该文法某规范句型的一个正确部分。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P13（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="13"></div></details>
 </div>
 
 <!-- ================= 4. 拓广文法与识别活前缀的FA ================= -->
@@ -135,6 +147,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <p>若原文法 G 的开始符号为 S，在 G 中加产生式 <b>S'→S</b> 后得新文法 G′，称 G′ 为原文法 G 的<b>拓广文法</b>，S′ 为拓广后文法 G′ 的开始符号。<b>目的</b>：对某些右部含有开始符号的文法，在归约过程中能分清是否已归约到文法的最初开始符，还是文法右部出现的开始符号——拓广后 S′ 只在左部出现，确保不会混淆。</p>
 <div class="formula mono">例：G[S]: S→(S), S→a　　拓广→　　G'[S']: S'→S, S→(S), S→a　　（p14 例）<br>例：G[S]: S→aAcBe, A→b|Ab, B→d　　拓广→　　G'[S']: S'→S, S→aAcBe, A→b|Ab, B→d　　（p15 例）</div>
 <div class="card tip" style="margin:6px 0"><span class="emoji">🏁</span><b>终点线比喻</b>：原文法里 S 身兼两职——既是赛道（开始符号）又是赛道上的零件（右部里可能出现 S）。加 S'→S 等于在 S 外圈画一条<b>终点线</b>：S' 只在左部出现，所以归约项目 <b>S'→S·</b> 一亮，铁定是整场分析结束（acc）。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P14（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="14"></div></details>
 </div>
 <div class="card">
 <h3>构造识别活前缀 FA 的基本想法（p16）</h3>
@@ -149,6 +163,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <li>对任何上下文无关文法，只要能构造出识别活前缀及可归前缀的 FA，就能构造状态转换表，进而构造 LR 分析表。但复杂文法的可归前缀并不容易这样算出——理论上虽有严格的计算方法（教材 6.2.3 节内容），实现复杂、实际很难应用，<b>课件不作介绍</b>；</li>
 <li>6.2.4 节介绍<b>由文法的产生式直接构造</b>识别活前缀和可归前缀的有限自动机的<b>实用方法（一般方法）</b>——即下面第 5 节起的"项目"路线。</li>
 </ul>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P16–18、P20–21（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="16,17,18,20,21"></div></details>
 </div>
 
 <!-- ================= 5. LR(0)项目 ================= -->
@@ -174,6 +190,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <tr><td class="mono">[4] S→aAcB·e</td><td>已归约出 B，希望遇到 e</td></tr>
 <tr><td class="mono">[5] S→aAcBe·</td><td>S 的右部都已分析完毕，句柄已形成，可以进行归约</td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P23–26（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="23,24,25,26"></div></details>
 </div>
 <div class="card">
 <h3>🔥 LR(0) 项目的四类（p27）</h3>
@@ -185,6 +203,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <tr><td>接受项目</td><td class="mono">S'→S·</td><td>S' 是拓广文法开始符、以 S' 为左部的规则只有一个，是特殊的归约项目：整个句子已分析完毕，可以接受</td></tr>
 </table>
 <p>LR(0) 项目的直观意义：指明了对文法规范句型活前缀的不同<b>识别状态</b>。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P27（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="27"></div></details>
 </div>
 
 <!-- ================= 6. NFA/规范族 ================= -->
@@ -204,12 +224,16 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 ε 弧 10 条：  1⇢3  1⇢11  4⇢6  4⇢9  7⇢6  7⇢9  12⇢14  12⇢17  15⇢14  15⇢17
 初态＝1（S'→·E）；终态＝7 个归约项目：2*, 5, 8, 10, 13, 16, 18（*＝句子识别态）</pre></div>
 <p>确定化后（p31 图）<b>每个状态是一个项目集，称作 LR(0) 项目集；整个状态集称为 LR(0) 项目集规范族</b>。<b>两种方法对比（p32、p37）</b>：方法一"先 NFA 再确定化"确定化工作量较大、容易出错，实际应用中并不使用，介绍它只是为了便于理解；方法二（下面）通过闭包函数和转换函数<b>直接求 LR(0) 项目集规范族</b>，构造较简单不易出错，是实用方法。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P28–32（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="28,29,30,31,32"></div></details>
 </div>
 <div class="card def">
 <h3>🔥 两个函数（p33–p34）</h3>
 <div class="formula"><b>闭包函数 CLOSURE(I)</b>：① I 的任何项目都属于 CLOSURE(I)；② 若 A→α·Bβ 属于 CLOSURE(I)，则对任何关于 B 的规则 B→γ，项目 B→·γ 也属于 CLOSURE(I)；③ 重复执行上述两步骤，直到 CLOSURE(I) 不再增大为止。<br>例：I={S'→·E} ⇒ CLOSURE(I) = {S'→·E, E→·aA, E→·bB}　（"在等谁，就把谁的开工准备也摆上桌"）</div>
 <div class="formula"><b>状态转换函数 GO(I,X) = CLOSURE(J)</b>，其中 J = { A→αX·β │ A→α·Xβ ∈ I }。圆点移动后的项目（新状态的初始项目）称为<b>核</b>（J 称为核）。<br>例：I = {S'→·E, E→·aA, E→·bB} ⇒ GO(I,a) = {E→a·A, A→·cA, A→·d} = K　（E→a·A 为核心项目；A→·cA、A→·d 为非核心项目，通过对核心项目求闭包获得）</div>
 <p><b>用 GO 把规范族连成识别活前缀 DFA 的步骤（p35）</b>：a) 置项目 S'→·S 为初态集的核，求 CLOSURE({S'→·S}) 得初态项目集；b) 对初态集或其它已构造的项目集应用 GO(I,X)=CLOSURE(J)；c) 重复 b) 直到不出现新的项目为止；d) 用 GO(I,X) 建立项目集之间的连接关系。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P33–34（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="33,34"></div></details>
 </div>
 <div class="card">
 <h3>🔥 完整例：G': S'→E, E→aA|bB, A→cA|d, B→cB|d 的 LR(0) 项目集规范族（p36，12 个状态逐个列出）</h3>
@@ -243,6 +267,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 </table>
 <div class="notice">⚠️ 去第4关 LR 计算器验证本文法时：<b>状态数（12）与"无冲突"结论一致</b>，但表内号码是 BFS 序（如第 2 行显示 c 列 s5、d 列 s6，而本页/课件分析表为 s4/s10）——请按"项目集内容"对号入座，不要按数字硬对。</div>
 <div class="notice">🎮 造完规范族可到 <a href="level4.html">第4关 LR 计算器</a> 选"课件6.2例: E→aA|bB, A→cA|d, B→cB|d"+LR(0) 自动验证（应得 12 状态、无冲突）。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P36（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="36"></div></details>
 </div>
 
 <!-- ================= 7. LR(0)分析表 ================= -->
@@ -265,6 +291,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 </ol>
 <p>⭐【了解】p41 给出等价的另一表述：① 项目 A→α·xβ∈Ik 且 GO(Ik,x)=Ij：x∈V_T 置 Action[k,x]=Sj，x∈V_N 置 Goto[k,x]=j；② S'→S·∈Ik 置 Action[k,#]=acc；③ A→α·∈Ik 对所有 a 置 Action[k,a]=rj；④ 其它为报错。p42 重放了 DFA 图供填表对照。</p>
 <p>🗣️ <b>人话版</b>：LR(0) 填表口诀——<b>移进项目填 sj、待约项目填 GOTO、归约项目整行全填 rj（连 # 列也不放过）、接受项目只在 # 填 acc、剩下全空白报错</b>。"整行全填"就是它局限大的根源：万一同行还有个移进项目，两个动作抢格子——冲突。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P38–40（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="38,39,40"></div></details>
 </div>
 <div class="card">
 <h3>🔥 上例的 LR(0) 分析表（p43，完整 12 行）</h3>
@@ -300,6 +328,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <tr><td>9</td><td class="mono">0 1</td><td class="mono">#E</td><td class="mono">#</td><td>acc</td><td></td></tr>
 </table>
 <p>【旁注】每步读头只看当前输入符号；归约时弹出句柄长度个状态与符号，压入 GOTO 指定的新状态——正是第 4 节"FA 倒带"的表格化操作。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P43–44（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="43,44"></div></details>
 </div>
 
 <!-- ================= 8. 冲突与LR(0)文法 ================= -->
@@ -312,6 +342,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 </ul>
 <h3>🔥 LR(0) 文法的定义（p47）</h3>
 <p>假若一个文法 G 的拓广文法 G' 的活前缀识别自动机中的每个状态（项目集）不存在下述情况——既含移进项目又含归约项目，或者含有多个归约项目——则称 G 是一个 <b>LR(0) 文法</b>。等价说法：LR(0) 文法项目集规范族的每个项目集不包含任何冲突项目（对应 LR(0) 分析表中不含多重定义条目）。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P46–47（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="46,47"></div></details>
 </div>
 <div class="card">
 <h3>🔥 课堂练习（p45、p49）：S'→S, S→rD, D→D,i, D→i —— 不是 LR(0)</h3>
@@ -339,6 +371,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <tr><td>6</td><td>r2</td><td>r2</td><td>r2</td><td>r2</td><td></td><td></td></tr>
 </table>
 <p>结论（p49 原文）：该文法<b>不是 LR(0)</b> 的。那冲突怎么办？课件 p48 提问"Do not worry!"——下一节 SLR(1) 出场。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P45、P49（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="45,49"></div></details>
 </div>
 
 <!-- ================= 9. SLR(1) ================= -->
@@ -356,6 +390,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <li>不能填入的空白格均置报错标志。</li>
 </ol>
 <div class="card tip" style="margin:6px 0"><span class="emoji">🎯</span><b>比喻</b>：冲突双方各亮"管辖范围"——移进方亮点后面的终结符集合，归约方亮 FOLLOW 集；范围不重叠就各管各的输入，井水不犯河水。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P50–52、P68（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="50,51,52,68"></div></details>
 </div>
 <div class="card">
 <h3>🔥 大例：表达式文法的 SLR(1) 分析表（p53–p70）</h3>
@@ -420,6 +456,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <div class="notice">🎮 该文法（含左递归！）可在 <a href="level4.html">第4关 LR 计算器</a> 选"表达式文法"+SLR(1) 自动复现 12 状态与上表；移进-归约动画可逐步播放 i+i*i。</div>
 <h3>SLR(1) 分析总结（p72）</h3>
 <p>① 求识别文法活前缀的 DFA（LR(0) 项目集规范族）；② 若规范族中不存在冲突项目集，则为 LR(0) 文法、也是 SLR(1) 文法；若存在冲突但可用 SLR(1) 方法解决，则是 SLR(1) 文法、可构造 SLR(1) 分析表；③ 基于 SLR(1) 分析表可对任意输入串进行 SLR(1) 分析。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P53–72（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72"></div></details>
 </div>
 
 <!-- ================= 10. 课堂练习 ================= -->
@@ -545,6 +583,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 </table>
 <p>【旁注】I9 行是精华：a 列归约 A→aSb、b/c/# 列归约 S→Sb——归约-归约冲突被两个 FOLLOW 集完美切开。</p>
 <div class="notice">🎮 以上每题都可到 <a href="level4.html">第4关 LR 计算器</a> 输入文法、选 SLR(1) 自动验证项目集与表格（练习 D 直接有预置选项）。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P75–79（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="75,76,77,78,79"></div></details>
 </div>
 
 <!-- ================= 11. SLR 局限 ================= -->
@@ -572,6 +612,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <div class="formula mono">S'⇒S⇒aAd⇒aed　（合法句型：ae 后面是 d）<br>S'⇒S⇒aec　　　（合法句型：ae 后面是 c）</div>
 <p>对于活前缀 ae，面临 d 应该<b>归约</b>（A→e，继续走 aAd 路线），面临 c 应该<b>移进</b>（走 aec 路线）；可 FOLLOW(A)={c,d} 把两个都批准了。对于 aec 若使用 A→e 进行归约，归约后符号栈中是 aAc，但文法不存在 aAc 句型（S'⇒S 无法推出 aAc）——<b>有些归约是无效的</b>，所以需要再限制归约的条件：给项目配上"向前搜索符号串（展望）"，形如 [A→α·β, a₁a₂…aₖ]，且展望信息<b>只在归约时有效</b>。</p>
 <p>⭐ p83 同时总结：SLR(1) 简单实用、构造分析表算法简单、状态数目少，且大部分程序设计语言都可以用 SLR(1) 文法来定义；但确实存在项目集冲突不能用 SLR(1) 方法解决的文法。p87 补充：SLR(1) 用 FOLLOW 信息作为展望信息，缩小了归约范围、消除了一些无效归约、解决了项目集中的一些简单冲突；但 FOLLOW(A) 包含了所有含 A 句型中 A 后的可能终结符，而并不是每个含有 A 的句型中 A 的后面都可以出现 FOLLOW(A) 中的每一个符号，所以 SLR(1) 未能从根本上消除所有无效归约。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P80–82、P86（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="80,81,82,86"></div></details>
 </div>
 
 <!-- ================= 12. LR(1) ================= -->
@@ -579,12 +621,16 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <div class="card def">
 <h3>LR(1) 的基本思想（p88–p90）🔥</h3>
 <p><b>对策（p88）</b>：给每个 LR(0) 项目添加展望信息——添加句柄之后可能跟的终结符，因为这些终结符<b>确实是规范句型中跟在句柄之后的</b>。若 [A→α·Bβ] 属于项目集 I，则 [B→·γ] 也属于 I；把 <b>FIRST(βa)</b> 作为用产生式 B→γ 归约的搜索符（称为向前搜索符），代替 SLR(1) 分析中的 FOLLOW(B) 集，并把此搜索符号的集合放在相应项目的后面——这种处理方法即为 LR(1) 方法。</p>
-<div class="card tip" style="margin:6px 0"><span class="emoji">📌</span><b>对一下课件原文</b>：p88 原话是"把 <b>FIRST(β)</b> 作为搜索符"，到 p92 闭包规则才升级为"<b>b∈FIRST(βa)</b>"。β 推不出 ε 时两种写法结果相同；β 可空时必须用 FIRST(βa)（把后面的 a 也请进视野）。答题写 FIRST(βa) 最稳；看到课件写 FIRST(β) 不要慌，是一回事的粗细版。</div>
+<div class="card tip" style="margin:6px 0"><span class="emoji">📌</span><b>对一下课件原文</b>：p88 原话是"把 <b>FIRST(β)</b> 作为搜索符"，到 p92 闭包规则才升级为"<b>b∈FIRST(βa)</b>"。β 推不出 ε 时两种写法结果相同；β 可空时必须用 FIRST(βa)（把后面的 a 也请进视野）。答题写 FIRST(βa) 最稳；看到课件写 FIRST(β) 不要慌，是一回事的粗细版。
+<details class="slidefold"><summary>🖼️ 原页对照：P88、P92（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="88,92"></div></details>
+</div>
 <p><b>基本思想（p89）</b>：在分析过程中，当试图用规则 A→α 彄约栈顶的符号串 α 时，不仅应该查看栈中符号串 δα，还应向前扫描一个输入符号 a，<b>只有当 δAa 的确构成文法某一句型的前缀时</b>，才能用此规则进行归约。</p>
 <p><b>按每个具体句型设展望（p90）</b>：若存在句型 …αAa…、…βAb…、…γAc…，则 FOLLOW(A)={a,b,c}；但 LR(1) 做到——处理到句型 …αA 时<b>只当输入符号为 a 归约</b>，处理到 …βA 时只当输入为 b 归约，处理到 …γA 时只当输入为 c 归约。<b>LR(1) 的基本思想是对非终结符的每个不同出现求其后继符号，而不是给每个非终结符求其统一的后继符集。</b></p>
 <div class="card tip" style="margin:6px 0"><span class="emoji">🔭</span><b>比喻</b>：SLR 打听的是"A 在全世界范围后面能跟啥"（FOLLOW，全局大杂烩）；LR(1) 给每个项目配一台<b>专属望远镜</b>（搜索符 a），只有下一输入恰好落进视野才允许按这条规则归约——局部跟班，精确制导。代价：同一个项目因位置不同被复制成几份，状态数暴涨。</div>
 <h3>LR(1) 项目的定义（p91）🔥</h3>
 <p>形如 <b>[A→α·β, a]</b> 的二元式称为 LR(1) 项目，其中 A→αβ 是文法的一个产生式，a 是终结符，称为<b>向前搜索符</b>。LR(1) 项目 = LR(0) 项目 + 向前搜索符。含义：预期当栈顶句柄 αβ 形成后，待输入的符号为 a（此时 α 在栈内，β 还未入栈，即它展望了句柄后的一个符号）。[S'→·S, #] 的含义：若将 γ 规约为 S，必须面临输入符号为 # 才可以。对于多数程序设计语言，向前展望一个符号就足以决定归约与否，所以只研究 LR(1)。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P88–91（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="88,89,90,91"></div></details>
 </div>
 <div class="card">
 <h3>LR(1) 项目集族的构造（p92、p94）🔥</h3>
@@ -614,6 +660,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 [A→·BE, #]   [A→·E, #]
 [B→·aE, a/b/c/#]  [B→·b, a/b/c/#]  [B→·c, a/b/c/#]
 [E→·B, #]     ← βa="#" ⇒ 搜索符仍是 #，又引出 [B→·aE, #] 等（已并入上一行）</pre></div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P92–94（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="92,93,94"></div></details>
 </div>
 <div class="card">
 <h3>🔥 大例一（p95–p99）：S→aAd|bAc|aec|bed, A→e 的 LR(1) 项目集族与分析表</h3>
@@ -664,6 +712,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <tr><td>5</td><td class="mono">0 1</td><td class="mono">#S</td><td class="mono">#</td><td>acc</td><td></td></tr>
 </table>
 <p>【旁注】第 3 步栈顶状态 5 面临 c：查表 ACTION[5,c]=s9 走移进——SLR 在这里翻车（r5 与 s9 打架），LR(1) 的望远镜说"c 不在我的归约视野（只有 d），放心移进"。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P95–99（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="95,96,97,98,99"></div></details>
 </div>
 <div class="card">
 <h3>🔥 大例二（p102–p105）：S→BB, B→aB|b 的 LR(1) 项目集族（10 状态）与分析表</h3>
@@ -696,6 +746,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <tr><td>8</td><td>r2</td><td>r2</td><td></td><td></td><td></td></tr>
 <tr><td>9</td><td></td><td></td><td>r2</td><td></td><td></td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P102–105（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="102,103,104,105"></div></details>
 </div>
 <div class="card">
 <h3>🔥 课堂练习（p106）：S'→S, S→rD, D→D,i, D→i 的 LR(1) 版</h3>
@@ -722,6 +774,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <tr><td>5</td><td></td><td></td><td>s6</td><td></td><td></td><td></td></tr>
 <tr><td>6</td><td></td><td>r2</td><td></td><td>r2</td><td></td><td></td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P106（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="106"></div></details>
 </div>
 <div class="card def">
 <h3>LR(1) 文法定义与三法区别（p100–p101）🔥</h3>
@@ -734,6 +788,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <tr><td><b>LR(1)</b></td><td>明确指出了当 α 后跟终结符 a（即存在规范句型其前缀为 βAa）时，才容许把 α 归约为 A</td></tr>
 </table>
 <p>因此 LR(1) 比 SLR(1) 更精确，解决的冲突也多于 SLR(1)。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P100–101（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="100,101"></div></details>
 </div>
 
 <!-- ================= 13. LALR ================= -->
@@ -750,6 +806,8 @@ LR分析程序(总控) ──► 分析表 = ACTION(终结符列) + GOTO(非终�
 <li>寻找 LR(1) 项目集规范族中同心的项目集，用它们的<b>并集</b>代替它们；</li>
 <li>按构造规范的 LR(1) 分析表的方式进行构造（或将 LR(1) 分析表合并）。</li>
 </ol>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P107–110（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="107,108,109,110"></div></details>
 </div>
 <div class="card">
 <h3>🔥 对 S→BB, B→aB|b 合并同心集（p111 官方推导）</h3>
@@ -790,6 +848,8 @@ I8,9 = { B→aB· }                   搜索符 a/b/#</pre></div>
 </table>
 <p>🗣️ <b>人话版</b>：合并把"胸牌"变宽，一些本来立刻撞墙的错误输入会被多做几次<b>无效归约</b>之后才撞墙——报错变慢，但绝不会把错误串误判为"接受"，正确性不受影响。</p>
 <div class="notice">🎮 到 <a href="level4.html">第4关 LR 计算器</a> 选"课件6.4/6.5例: S→BB, B→aB|b"，分别用 LR(1) 与 LALR(1) 构造，可看到 10 状态→7 状态、同心集合并提示；"SLR反例"文法用 SLR 报冲突、用 LR(1) 成功——本页第 11、12 节全程可复现。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P111、P113–114（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="111,113,114"></div></details>
 </div>
 
 <!-- ================= 14. 总结 ================= -->
@@ -826,6 +886,8 @@ I8,9 = { B→aB· }                   搜索符 a/b/#</pre></div>
 <h3>课后练习（p121）</h3>
 <p>教材 <b>P156 第 1、7、9、11 题</b>。做题流程即本页反复演示的：拓广 → 项目集（规范）族 → 判冲突 → 选方法填表 → 分析输入串。</p>
 <div class="notice good">🎮 全章手算内容（12 状态例、表达式文法、S→BB、SLR 反例、S→rD 练习）都可在 <a href="level4.html">第4关 LR 计算器</a> 选对应文法+方法自动构造验证；关末还有移进-归约动画、测验与大题演练。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P115–121（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch56" data-pages="115,116,117,118,119,120,121"></div></details>
 </div>
 
 <div class="footer">📖 全书精讲 ｜ <a href="chapter5.html">← 上一章</a> ｜ <a href="textbook.html">目录</a> ｜ <a href="chapter7.html">下一章 →</a> ｜ <a href="level4.html">🎮 配套第4关</a></div>

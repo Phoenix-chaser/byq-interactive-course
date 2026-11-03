@@ -404,6 +404,17 @@ text.nodehl { fill: var(--gold) !important; }
 .slidelb-prev { left: 18px; } .slidelb-next { right: 18px; }
 .slidelb-x:hover, .slidelb-prev:hover, .slidelb-next:hover { background: rgba(124, 108, 255, .45); }
 
+/* 卡片内嵌原页对照折叠块 */
+details.slidefold {
+  border: 1px dashed var(--line); border-radius: 10px; padding: 8px 14px; margin: 12px 0 2px;
+  background: rgba(11, 14, 34, .45);
+}
+details.slidefold summary { cursor: pointer; font-weight: 700; color: var(--gold); font-size: 14px; user-select: none; }
+details.slidefold summary::marker { color: var(--gold); }
+details.slidefold[open] summary { margin-bottom: 8px; }
+.slidegal.mini { grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; margin: 6px 0 2px; }
+.slidegal.mini .slidecap { font-size: 10px; padding: 0 6px; }
+
 /* 动效减弱偏好 */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

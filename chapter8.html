@@ -15,11 +15,7 @@
 <div class="hero"><h1>📖 第 8 章 · 静态语义分析和中间代码生成（全书精讲）</h1>
 <div class="sub">课件逐页精讲 ｜ 每个定义、例子、练习都在 ｜ 预计 45 分钟</div></div>
 
-<div class="card">
-<h3>🖼️ 课件原页对照</h3>
-<p style="color:var(--muted);font-size:13.5px;margin:4px 0 0">本章 PPT 每一页原图（共 13 页），与下方精讲一一对应——点缩略图放大，放大后 ← → 翻页、Esc 关闭。复习不用再开 PPT。</p>
-<div class="slidegal" data-dir="ch8" data-from="1" data-to="13"></div>
-</div>
+<details class="fold" style="margin:14px 0"><summary>🗺️ 本章课件原页总览（点击展开缩略图索引）</summary><p style="color:var(--muted);font-size:13.5px;margin:4px 0 0">本章 PPT 每一页原图（共 13 页），与下方精讲一一对应——点缩略图放大，放大后 ← → 翻页、Esc 关闭。复习不用再开 PPT。</p><div class="slidegal" data-dir="ch8" data-from="1" data-to="13"></div></details>
 
 
 <div class="card tip"><span class="emoji">🎯</span><b>这一章讲什么</b>：三件事——<b>8.1 符号表</b>（编译器的"户口本"）、<b>8.2 静态语义分析</b>（编译期能查的语义错误都查掉）、<b>8.3 中间代码生成</b>（先翻译成与机器无关的"世界语"四元式）。本章是第 7 章"语义分析"的落地：查错靠符号表，翻译落成中间代码。</div>
@@ -43,6 +39,8 @@
 <tr><td>第13页</td><td>中间代码的五种形式</td><td>3</td></tr>
 <tr><td>补充</td><td>四元式精讲 + 课件 inttoreal 例子（第1章 P23 原例）</td><td>4</td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P10–13（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch8" data-pages="10,11,12,13"></div></details>
 </div>
 
 <h2 class="section">1. 8.1 符号表：编译器的"户口本" <span class="badge hot">🔥 考点</span></h2>
@@ -61,6 +59,8 @@
   </ul>
   （人话：语言越复杂、对编译速度/内存要求越高，符号表结构就得越讲究——所以有后面 4 种实现结构之分。）</li>
 </ul>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P2（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch8" data-pages="2"></div></details>
 </div>
 
 <div class="card def">
@@ -79,6 +79,8 @@
 <tr><td>②</td><td><b>作为上下文语义的合法性检查的依据</b></td><td>课件例：<code>a := b + c</code>——a、b、c 的类型查表才知道能不能这样算、要不要转换</td></tr>
 <tr><td>③</td><td><b>作为目标代码生成阶段地址分配的依据</b></td><td>课件注：<b>看类型</b>——类型决定占几个存储单元，地址才分得下去</td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P3（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch8" data-pages="3"></div></details>
 </div>
 
 <div class="card def">
@@ -89,6 +91,8 @@
 <li><b>信息栏</b>：包含<b>许多子栏和标志位</b>，用来记录相应名字的各种属性。</li>
 </ul>
 <div class="formula">符号表一行 = 名字栏（主栏/关键字） ｜ 信息栏（多列：类型栏、作用域栏、…… ）</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P4（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch8" data-pages="4"></div></details>
 </div>
 
 <div class="card def">
@@ -104,6 +108,8 @@
 <tr><td>⑥</td><td><b>其它属性</b></td><td>数组内情向量（维数、上下界等）、记录结构型的成员信息、函数及过程的形参</td></tr>
 </table>
 <div class="notice">📌 课件落点一句：<b>宗旨——便于编译各阶段的工作！</b>（属性不是为记而记，每个属性都对应某个阶段的某项工作：类型给语义检查用、地址给代码生成用、内情向量给数组元素地址计算用。）</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P5（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch8" data-pages="5"></div></details>
 </div>
 
 <div class="card def">
@@ -117,6 +123,8 @@
 <li><b>删</b>：<b>删除一个或一组无用的项</b>（如出了作用域的名字）。</li>
 </ol>
 <p>（人话口诀：<b>查、插、取、写、删</b>——登记户口的全流程。）</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P6（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch8" data-pages="6"></div></details>
 </div>
 
 <div class="card def">
@@ -129,6 +137,8 @@
 <tr><td><b>Hash 表</b></td><td>散列函数定位</td><td class="ok">实用编译器主流，快</td></tr>
 </table>
 <p>课件举例：P200 的 PL/0 程序段（以下为站方展开）：PL/0 用无序线性表——遇到新声明就顺次填一行，查名字就从表头线性往下找（程序短，扛得住；这也是 PL/0 "简单"哲学的一部分）。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P7（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch8" data-pages="7"></div></details>
 </div>
 
 <h2 class="section">2. 8.2 静态语义分析：编译期把能查的都查掉 <span class="badge hot">🔥 考点</span></h2>
@@ -143,6 +153,8 @@
 <tr><td colspan="2">为<b>代码生成等后续阶段</b>收集程序的语义信息；<b>有些内容合并到"中间代码生成"部分讨论</b>（如<b>过程、数组声明</b>的语义处理）</td></tr>
 </table>
 <p>（人话：<b>静态</b>=开卷考试时就能批出来的错；<b>动态</b>=只有跑起来才暴露的错（÷0）。收集信息则是"为查错和后端备料"。）</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P8（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch8" data-pages="8"></div></details>
 </div>
 
 <div class="card def">
@@ -154,6 +166,8 @@
             │ 静态语义分析 → 语义处理 │   （静态语义分析在语法分析之后把关，
             └──────────────────────┘    语义处理一路送入中间代码生成）</pre></div>
 <p>读图要点：六个编译步骤从左到右排开；<b>静态语义分析</b>紧跟在语法分析之后、<b>中间代码生成</b>之前——只有过了静态语义检查的程序才被送去做语义处理（翻译成中间代码）。这正是第 7 章"先检查、后翻译"的图形版。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P9（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch8" data-pages="9"></div></details>
 </div>
 
 <div class="card def">
@@ -167,6 +181,8 @@
 <tr><td><b>类型检查</b><br>(type checks)</td><td>检查<b>每个操作是否遵守语言类型系统的定义</b></td><td>int 与 real 相加要不要转换（见第 4 节 inttoreal）</td></tr>
 </table>
 <p>课件表末尾带"……"——以上四种是重点代表，不是穷举。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P10（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch8" data-pages="10"></div></details>
 </div>
 
 <div class="card def">
@@ -178,6 +194,8 @@
 <tr class="me"><td>遇到<b>标识符的使用</b></td><td><b>查符号表</b></td><td>没有找到 → <b class="no">该标识符没有声明</b>；否则 → 得到该标识符的属性，<b class="ok">进行进一步分析</b>（类型检查等）</td></tr>
 </table>
 <div class="card tip" style="margin:8px 0"><span class="emoji">💡</span><b>记忆钩子</b>：<b>声明时查重、使用时查有</b>。两种错误、两个方向，都只靠"查符号表"这一个动作——这也回应了 1.3 的功能②"合法性检查的依据"。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P11（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch8" data-pages="11"></div></details>
 </div>
 
 <h2 class="section">3. 8.3 中间代码生成：先译成"世界语" <span class="badge hot">🔥 考点</span></h2>
@@ -191,6 +209,8 @@
 <tr><td>① 中间代码<b>与机器无关，便于移植</b>（换个目标机只需换后端）<br>② 对中间代码的<b>优化比源、目标代码优化容易</b></td><td><b>多了一级翻译</b>（多一道工序，多花编译时间）</td></tr>
 </table>
 <div class="notice good">✅ 课件结论：<b>总体而言，优大于缺</b>。课件注：<b>PL/0 无中间代码生成阶段</b>（PL/0 直接从语法分析/语义处理跳到目标代码——教学语言一切从简）。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P12（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch8" data-pages="12"></div></details>
 </div>
 
 <div class="card def">
@@ -204,6 +224,8 @@
 <tr><td><b>Bytecode</b></td><td>—</td><td><b>Java 编译器的输出、Java 虚拟机的输入</b>（"一次编译、到处运行"的底气）</td></tr>
 <tr><td><b>SSA</b></td><td>Static Single Assignment form，静态单赋值形式</td><td>每个名字只赋值一次，现代优化器（LLVM 等）的基础</td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P13（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch8" data-pages="13"></div></details>
 </div>
 
 <h2 class="section">4. 四元式精讲（含课件 inttoreal 例子）<span class="badge hot">🔥 考点</span></h2>

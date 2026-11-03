@@ -6,15 +6,22 @@
 (function () {
   function buildGallery(el) {
     var dir = el.getAttribute('data-dir');
-    var from = +el.getAttribute('data-from') || 1;
-    var to = +el.getAttribute('data-to') || 1;
-    if (!dir) return;
+    var pages;
+    if (el.getAttribute('data-pages')) {
+      pages = el.getAttribute('data-pages').split(',').map(Number);
+    } else {
+      var from = +el.getAttribute('data-from') || 1;
+      var to = +el.getAttribute('data-to') || 1;
+      pages = [];
+      for (var p = from; p <= to; p++) pages.push(p);
+    }
+    if (!dir || !pages.length) return;
     var html = '';
-    for (var p = from; p <= to; p++) {
+    pages.forEach(function (p) {
       html += '<div class="slidethumb" data-p="' + p + '" data-dir="' + dir + '">' +
         '<img loading="lazy" src="slides/' + dir + '/p' + p + '.png" alt="课件第' + p + '页">' +
         '<span class="slidecap">P' + p + '</span></div>';
-    }
+    });
     el.innerHTML = html;
     // 统计缺图；全部缺失时给出提示（公网版未含原图）
     var errs = 0, total = 0;

@@ -15,11 +15,7 @@
 <div class="hero"><h1>📖 第 4 章 · 自顶向下语法分析 LL(1)（全书精讲）</h1>
 <div class="sub">课件逐页精讲 ｜ 每个定义、例子、练习都在 ｜ 预计 70 分钟</div></div>
 
-<div class="card">
-<h3>🖼️ 课件原页对照</h3>
-<p style="color:var(--muted);font-size:13.5px;margin:4px 0 0">本章 PPT 每一页原图（共 72 页），与下方精讲一一对应——点缩略图放大，放大后 ← → 翻页、Esc 关闭。复习不用再开 PPT。</p>
-<div class="slidegal" data-dir="ch4" data-from="1" data-to="72"></div>
-</div>
+<details class="fold" style="margin:14px 0"><summary>🗺️ 本章课件原页总览（点击展开缩略图索引）</summary><p style="color:var(--muted);font-size:13.5px;margin:4px 0 0">本章 PPT 每一页原图（共 72 页），与下方精讲一一对应——点缩略图放大，放大后 ← → 翻页、Esc 关闭。复习不用再开 PPT。</p><div class="slidegal" data-dir="ch4" data-from="1" data-to="72"></div></details>
 
 
 <!-- ==================== 本章地图（课件第1页） ==================== -->
@@ -126,6 +122,8 @@
 <div class="formula"><b>FIRST(β) = { a | a∈V<sub>T</sub> 且 β ⇒* a…… }</b>；若 β ⇒* ε，则规定 <b>ε ∈ FIRST(β)</b>。</div>
 <p>直观地说：文法符号串 β 的开始符号集，是由 β 推导出的<b>所有的终结符开头</b>和<b>可能的 ε</b> 组成。</p>
 <p>🗣️ <b>人话版（三问题之一）</b>：FIRST 回答——"这个串<b>能以什么打头</b>？"打头的若是非终结符，就顺着它的产生式一路看下去，直到看见终结符为止；如果整个串能"蒸发"成空串，ε 也算一种打头方式。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P10（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="10"></div></details>
 </div>
 
 <div class="card">
@@ -142,6 +140,8 @@
 </table>
 <p>对比同一非终结符的各右部：FIRST(Ap)∩FIRST(Bq)={a,c}∩{b,d}=∅；FIRST(a)∩FIRST(cA)={a}∩{c}=∅；FIRST(b)∩FIRST(dB)=∅——所以例2 里分析 ccap 时每步都唯一确定。</p>
 <div class="formula"><b>结论（课件第12页）</b>：针对<b>无空产生式</b>的文法 G，同一非终结符的任两个产生式的右部串的 <b>FIRST 集无交集</b>，即可采用确定的自顶向下分析。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P11–12（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="11,12"></div></details>
 </div>
 
 <!-- ==================== 4.2 FOLLOW ==================== -->
@@ -154,6 +154,8 @@
 注：'#' 做为输入串的<b>结束符</b>。</div>
 <p>直观地说：非终结符 A 的后跟符号集，是由句型中<b>紧跟 A 后的那些终结符（包括 #）</b>组成。</p>
 <p>🗣️ <b>人话版（三问题之二）</b>：FOLLOW 回答——"A 站在句子里时，<b>谁可能站在它后面</b>？"它跟 A 自己的产生式无关，只跟"A 在别人的产生式里被安排在什么位置"有关。为什么需要它？当 A→ε 让 A 凭空消失时，分析器必须确认"消失后紧跟的输入符号"合不合法——消失后的世界由 FOLLOW 描述。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P13（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="13"></div></details>
 </div>
 
 <div class="card">
@@ -168,6 +170,8 @@
 <tr><td>… ⇒* abA<b>d</b>（S 换成 d 后 A 后面站着 d）</td><td>d ∈ FOLLOW(A)</td></tr>
 </table>
 <div class="formula"><b>FOLLOW(S) = FOLLOW(A) = { #, a, d }</b></div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P14（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="14"></div></details>
 </div>
 
 <div class="card def">
@@ -178,6 +182,8 @@
 <li>如果 <b>β ⇒* ε</b>，或者有形如 <b>B→αA</b> 的规则（A 在右部末尾），则把 <b>FOLLOW(B) 加入 FOLLOW(A)</b>。</li>
 </ol>
 <p><b>反复使用上述规则，直到每个非终结符的 FOLLOW 集不再增大为止</b>（不动点）。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P15（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="15"></div></details>
 </div>
 
 <div class="card">
@@ -189,6 +195,8 @@
 </table>
 <p>两轮后不再增大，与第14页"找句型"的结果完全一致。<b>FOLLOW 里永远没有 ε</b>（后跟符号是看得见的终结符或 #）。</p>
 <div class="notice">🎮 算完可用 <a href="level3.html">第3关"三大集合计算器"</a> 自动验证 FIRST / FOLLOW / SELECT，答案不一致时先查自己哪条规则漏用了。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P16（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="16"></div></details>
 </div>
 
 <!-- ==================== 4.2 SELECT ==================== -->
@@ -200,6 +208,8 @@
 <div class="formula">若 β <b>不能</b> ⇒* ε，则 <b>SELECT(A→β) = FIRST(β)</b>；<br>
 若 β <b>能</b> ⇒* ε，则 <b>SELECT(A→β) = (FIRST(β) − {ε}) ∪ FOLLOW(A)</b>。</div>
 <p>🗣️ <b>人话版（三问题之三）</b>：SELECT 回答——"<b>眼前这个输入符号，轮到它时该不该用这条产生式？</b>"右部推不出空：看它能以什么打头（FIRST）；右部能推出空：除了打头符号，还要算上"A 消失后允许跟谁"（FOLLOW 兜底）。SELECT 是站在产生式（规则）身上的集合——FIRST 站在符号串身上，FOLLOW 站在非终结符身上，三者针对对象不同，必考辨析。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P17（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="17"></div></details>
 </div>
 
 <div class="card">
@@ -212,11 +222,15 @@
 <tr><td>A→ε</td><td><b>是</b></td><td>(FIRST(ε)−{ε}) ∪ FOLLOW(A) = ∅ ∪ {#,a,d}</td><td class="ok">{#, a, d}</td></tr>
 </table>
 <p>检验"确定分析"：SELECT(S→aA)∩SELECT(S→d)=∅；SELECT(A→bAS)∩SELECT(A→ε)={b}∩{#,a,d}=∅——所以 G3 能做确定的自顶向下分析（例3 中 abd 每步都唯一确定，正与此吻合）。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P18（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="18"></div></details>
 </div>
 
 <div class="card def">
 <h3>结论（课件第19页）<span class="ka">🔥【考点】</span></h3>
 <div class="formula">同一非终结符的不同产生式 A→α 与 A→β，若 <b>SELECT(A→α) ∩ SELECT(A→β) = ∅</b>，则<b>一定可以进行确定的自顶向下分析</b>。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P19（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="19"></div></details>
 </div>
 
 <!-- ==================== 4.2 LL(1) 定义与判别 ==================== -->
@@ -232,6 +246,8 @@
 <tr><td>第二个 L</td><td>分析过程用<b>最左推导</b></td></tr>
 <tr><td>(1)</td><td>只需<b>向前看 1 个</b>输入符号便可决定选哪个产生式（类似地，LL(k) 文法需要向前看 k 个输入符号）</td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P20（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="20"></div></details>
 </div>
 
 <div class="card">
@@ -245,6 +261,8 @@
 </table>
 <div class="formula">SELECT(A→bA) ∩ SELECT(A→ε) = {b} ∩ {a,b} = <b>{b} ≠ ∅</b></div>
 <p>所以 G[S] <b>不是 LL(1) 文法</b>——当 A 遇到输入符 b 时，不能确定选 A→bA 还是 A→ε 去推导（课件原文）。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P21（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="21"></div></details>
 </div>
 
 <div class="card def">
@@ -256,6 +274,8 @@
 <li>计算<b>每个产生式 A→β 的 SELECT(A→β)</b> 集；</li>
 <li>按 LL(1) 文法的定义<b>判别</b>（同一非终结符的各 SELECT 两两求交）。</li>
 </ol>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P22（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="22"></div></details>
 </div>
 
 <div class="card">
@@ -303,6 +323,8 @@
 <tr><td>D</td><td>{a}∩{c} = ∅</td><td class="ok">通过</td></tr>
 </table>
 <div class="formula"><b>由于 SELECT(S→AB)∩SELECT(S→bC)={b}≠∅ 且 SELECT(C→AD)∩SELECT(C→b)={b}≠∅，所以文法 G[S] 不是 LL(1) 文法。</b></div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P23（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="23"></div></details>
 </div>
 
 <div class="card def">
@@ -314,6 +336,8 @@
 <tr><td>SELECT 集</td><td>规则 / 产生式</td><td>不含（ε 已被减掉）</td><td class="ok">可含（经 FOLLOW 并入）</td></tr>
 </table>
 <p><b>LL(1) 文法定义和判断</b>：同一非终结符任两产生式 SELECT 两两不交。<b>凡是 LL(1) 文法均可用确定的自顶向下分析。</b></p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P25（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="25"></div></details>
 </div>
 
 <div class="card warn">
@@ -354,17 +378,23 @@
 <div class="card tip">
 <span class="emoji">🎯</span><b>4.3 引子（课件第27页）</b>：确定的自顶向下分析要求给定语言的文法是 LL(1) 文法；<b>某些</b>非 LL(1) 文法可以等价变换为 LL(1) 文法。两种方法：<b>提取左公因子、消除左递归</b>。🗣️ 人话：这两招都是把"让人犹豫的规则"改写成"一眼看清的规则"，<b>只改写法、不改语言</b>。
 <div class="notice">🎮 第3关"三大集合计算器 / 预测分析动画"（<a href="level3.html">level3.html</a>）可自动验证变换前后三大集合与 LL(1) 判别结果。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P27（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="27"></div></details>
 </div>
 
 <div class="card">
 <h3>引例（课件第28页）：例 4.6 文法 G[S]：S→aSb|aS|ε，是否为 LL(1) 文法？</h3>
 <p>先判别：SELECT(S→aSb)=FIRST(aSb)={a}，SELECT(S→aS)=FIRST(aS)={a}，两条 SELECT 都是 {a}，交集 {a}≠∅ ⇒ <b>该文法不是 LL(1) 文法</b>（两条右部同以 aS 开头，正是"左公共因子"）。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P28（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="28"></div></details>
 </div>
 
 <div class="card def">
 <h3>1. 含左公共因子的文法（课件第29页）</h3>
 <div class="formula">若文法中含有形如 <b>A→αβ|αγ</b> 的产生式，称文法含有<b>左公共因子</b>。显然 SELECT(A→αβ) ∩ SELECT(A→αγ) ≠ ∅，文法不是 LL(1) 文法（两条右部同以 α 打头，FIRST 必相交）。</div>
 <p><b>提取左公因子基本思想（课件原文）</b>：通过改写产生式来<b>推迟决定</b>——读入足够多的输入、获得足够的信息之后，再做出正确判断。🗣️ 比喻：先上相同的头盘（公共前缀 α），吃完看清分歧点，再选主菜（β 还是 γ）。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P29（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="29"></div></details>
 </div>
 
 <div class="card def">
@@ -372,6 +402,8 @@
 <div class="formula">有左因子的文法：<b>A→δβ₁|δβ₂|…|δβₙ|γ₁|γ₂|…|γₘ</b>（每个 γᵢ 不以 δ 开头）<br>
 可改写为：<b>A→δA'|γ₁|γ₂|…|γₘ</b>，　<b>A'→β₁|β₂|…|βₙ</b><br>
 （两条的特例：A→δβ₁|δβ₂ 提为 A→δA'，A'→β₁|β₂，等价于 A→δ(β₁|β₂)）</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P30（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="30"></div></details>
 </div>
 
 <div class="card">
@@ -385,6 +417,8 @@
 </table>
 <p>提取后再查 S'：SELECT(S'→b)=FIRST(b)={b}；SELECT(S'→ε)=(FIRST(ε)−{ε})∪FOLLOW(S')，S' 只出现在 S→aSS' 末尾 ⇒ FOLLOW(S')⊇FOLLOW(S)，而 FOLLOW(S)={#,b}（S 是开始符号得 #；S→aSb 中 S 后跟 b 得 b）：</p>
 <div class="formula">SELECT(S'→b) ∩ SELECT(S'→ε) = {b} ∩ {#,b} = <b>{b} ≠ ∅</b> ⇒ 提取左公因子之后<b>仍不是 LL(1) 文法</b>。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P31（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="31"></div></details>
 </div>
 
 <div class="card">
@@ -396,6 +430,8 @@
 <tr><td>提公因子</td><td><b>A→aA'|bBc，A'→d|Ac，B→aA|bB</b></td><td>A 的三条按公式提 δ=a：A→aA'|bBc，A'→d|Ac；B 的右部 a、b 打头不同，不用提</td></tr>
 <tr><td>判别</td><td>SELECT(A→aA')={a} ∩ SELECT(A→bBc)={b} = ∅；SELECT(A'→d)={d} ∩ SELECT(A'→Ac)={a,b} = ∅；SELECT(B→aA)={a} ∩ SELECT(B→bB)={b} = ∅</td><td class="ok">是 LL(1) 文法（课件答案：是）</td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P32（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="32"></div></details>
 </div>
 
 <div class="card def">
@@ -406,6 +442,8 @@
 <li>经过提取左公因子之后，有时会使某些规则变为<b>多余规则</b>（教材 P79 例 4.8），故必须检查提取后的文法，<b>去除多余规则</b>。</li>
 <li><span class="hl">⭐【了解】</span>个别文法<b>不能在有限步之内提取完左公因子</b>（教材 P80 例 4.9）。</li>
 </ol>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P33（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="33"></div></details>
 </div>
 
 <!-- ==================== 4.3 消除左递归 ==================== -->
@@ -416,6 +454,8 @@
 <div class="formula">a) <b>A→Aβ</b>（A∈V<sub>N</sub>，β∈V*）—— 称<b>直接左递归</b>；<br>
 b) <b>A→Bβ，B→Aα</b> —— 单看每条都不含 A→A…，但 A ⇒ Bβ ⇒ Aαβ，即 <b>A ⇒⁺ A…</b>，称为<b>间接左递归</b>。</div>
 <p>🗣️ <b>查字典循环比喻（呼应第3关）</b>：左递归就像查字典时"P 的释义：见 P 条"——永远翻不到底。自顶向下分析从 A 出发，第一步又推回 A，树根底下还是树根，<b>递归下降分析器照它写程序会陷入无限循环</b>。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P34（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="34"></div></details>
 </div>
 
 <div class="card def">
@@ -425,12 +465,16 @@ b) <b>A→Bβ，B→Aα</b> —— 单看每条都不含 A→A…，但 A ⇒ B�
 SELECT(A→β) = FIRST(β)。<br>
 ⇒ SELECT(A→Aα) ∩ SELECT(A→β) ⊇ FIRST(β) ≠ ∅</div>
 <p>由于 A→Aα 和 A→β 的 SELECT 集相交，故<b>含有左递归的文法不是 LL(1) 文法</b>。<b>结论：含有左递归的文法不能使用确定的自顶向下分析方法。</b></p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P35（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="35"></div></details>
 </div>
 
 <div class="card">
 <h3>3. 左递归导致分析瘫痪的例子（课件第36页）</h3>
 <div class="formula">G[S]：S→Sa|b，则 L(G[S]) = { ba<sup>n</sup> | n≥0 }</div>
 <p>对输入串 <code>baa</code> 分析时：若选择 S→b 推导，则推不出 baa（只剩一个 a 没着落）；若选择 S→Sa 推导，则不知何时使用 S→b——两难，无法确定地分析。（这条文法消除左递归后见下文公式例。）</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P36（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="36"></div></details>
 </div>
 
 <div class="card def">
@@ -445,6 +489,8 @@ SELECT(A→β) = FIRST(β)。<br>
 <tr><td>例2（P38）</td><td>E→E+T|T<br>T→T*F|F<br>F→(E)|i</td><td class="ok">E→TE'，E'→+TE'|ε<br>T→FT'，T'→*FT'|ε<br>F→(E)|i</td><td>E 式：P=E，α=+T，β=T；T 式同理；F 无左递归不动。这就是<b>表达式文法的标准改写</b>，4.5 节表驱动分析直接用它</td></tr>
 <tr><td>例3（P39）</td><td>S→Sc|Sabc|abc|bc|c</td><td class="ok">S→abcS'|bcS'|cS'<br>S'→cS'|abcS'|ε</td><td>左递归头 α₁=c、α₂=abc；非递归尾 β₁=abc、β₂=bc、β₃=c ⇒ S→β₁S'|β₂S'|β₃S'，S'→α₁S'|α₂S'|ε</td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P37–39（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="37,38,39"></div></details>
 </div>
 
 <div class="card warn">
@@ -453,6 +499,8 @@ SELECT(A→β) = FIRST(β)。<br>
 <li>利用这种方法可以把<b>直接左递归都消去</b>，即换成<b>右递归</b>。</li>
 <li>但是，这种方法<b>并没有消除整个文法的左递归性——间接左递归仍会存在</b>（所以还有下一小节的"代入法"）。</li>
 </ol>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P40（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="40"></div></details>
 </div>
 
 <div class="card">
@@ -467,6 +515,8 @@ SELECT(A→β) = FIRST(β)。<br>
 </table>
 <div class="formula"><b>最终结果：A→aB|Bb，B→aBcB'|dB'，B'→bcB'|ε</b></div>
 <p>复核：改写后 B 的右部以 a、d 打头，B 不再能绕回 A，A 的间接左递归链被剪断。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P41–42（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="41,42"></div></details>
 </div>
 
 <div class="card def">
@@ -476,6 +526,8 @@ SELECT(A→β) = FIRST(β)。<br>
 <li>消除左递归之后，有时会使某些规则变为<b>多余规则</b>，故必须检查消除左递归之后的文法，<b>去除多余规则</b>。</li>
 <li>消除左递归后的文法<b>在形式上可能不同，但均等价</b>（描述同一个语言）。</li>
 </ol>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P43（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="43"></div></details>
 </div>
 
 <div class="card def">
@@ -484,6 +536,8 @@ SELECT(A→β) = FIRST(β)。<br>
 ① FIRST(α) ∩ FIRST(β) = ∅（α、β 均不可空时的直观形式）；<br>
 ② 若 β ⇒* ε，那么 FIRST(α) ∩ FOLLOW(A) = ∅。</div>
 <p><b>LL(1) 文法有一些明显的性质：没有左公因子；不含左递归</b>（另：LL(1) 文法亦无二义性，见课件第 69 页）——反向不成立，二者只是必要条件。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P44（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="44"></div></details>
 </div>
 
 <div class="card warn">
@@ -500,6 +554,8 @@ SELECT(A→β) = FIRST(β)。<br>
 <div class="card def">
 <h3>定义（课件第46页原文）<span class="hl">⭐【了解】</span></h3>
 <p>不确定的自顶向下分析也称<b>带回溯的自顶向下分析</b>。<b>不确定</b>是指：某个非终结符有多条产生式，而面临当前输入符<b>无法唯一确定</b>选用哪条产生式进行推导，只好<b>逐个试探</b>。当分析不成功时，则<b>推翻分析、退回到适当位置</b>重新试探其余候选可能的推导，直到把<b>所有可能的推导序列都试完仍不成功</b>，才能确认输入串不是该文法的句子。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P46（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="46"></div></details>
 </div>
 
 <div class="card">
@@ -511,12 +567,16 @@ SELECT(A→β) = FIRST(β)。<br>
 </table>
 <p><b>原因（课件原文）</b>：A 的两条产生式 A→ab 和 A→a 的右部 FIRST 集交集不为空（都含 a），从而引起回溯——本质上就是<b>含有左公因子</b>。<br>
 <b>结论（课件原文）：效率低，代价高，不实用。</b>所以才要花大力气研究 LL(1) 条件，把"试探"变成"一次选对"。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P47（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="47"></div></details>
 </div>
 
 <!-- ==================== 4.5 递归下降 ==================== -->
 <h2 class="section">🧩 4.5 之一 · 递归下降 LL(1) 分析程序<span class="tag">课件 P48–P50</span></h2>
 
-<div class="card tip"><span class="emoji">🛠️</span><b>课件第48页</b>：确定的自顶向下分析有两种实现方法——<b>递归下降 LL(1) 分析程序</b> 和 <b>表驱动的 LL(1) 预测分析程序</b>。</div>
+<div class="card tip"><span class="emoji">🛠️</span><b>课件第48页</b>：确定的自顶向下分析有两种实现方法——<b>递归下降 LL(1) 分析程序</b> 和 <b>表驱动的 LL(1) 预测分析程序</b>。
+<details class="slidefold"><summary>🖼️ 原页对照：P48（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="48"></div></details>
+</div>
 
 <div class="card def">
 <h3>递归下降程序的实现思想（课件第49页）<span class="ka">🔥【考点·简答】</span></h3>
@@ -526,6 +586,8 @@ SELECT(A→β) = FIRST(β)。<br>
 <li>当识别到<b>终结符</b>时，与当前输入符号<b>匹配</b>，并<b>读取下一输入符</b>；</li>
 <li>当识别到<b>非终结符</b>时，则<b>调用</b>该非终结符相应的子程序（子程序名=非终结符名，递归由此而来）。</li>
 </ul>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P49（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="49"></div></details>
 </div>
 
 <div class="card">
@@ -536,6 +598,8 @@ SELECT(A→β) = FIRST(β)。<br>
 <tr><td class="no">缺点</td><td>对文法要求高，必须满足 LL(1) 文法；递归调用多，速度慢，占用空间多</td></tr>
 <tr><td>实用性</td><td>许多高级语言，如 <b>Pascal、C</b> 等编译系统常常采用此方法</td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P50（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="50"></div></details>
 </div>
 
 <!-- ==================== 4.5 表驱动 ==================== -->
@@ -549,6 +613,8 @@ SELECT(A→β) = FIRST(β)。<br>
 <li>依照 SELECT 集把产生式填入分析表：<b>列——终结符与 '#'</b>；<b>行——非终结符</b>；交点 M[A,a]：<b>a∈SELECT(A→β) 则 A→β 放入 M[A,a]</b>；<b>无产生式的 M[A,a]——标记出错</b>（表中空白即出错）。</li>
 </ol>
 <p>🗣️ <b>查字典比喻</b>：预测分析表就是一本"语法字典"——行是"词条"（非终结符），列是"检索字"（当前输入符），查 M[A,a] 直接翻到唯一答案（产生式）或翻到空白页（报错）。只要文法是 LL(1)，一查一个准，永不回溯。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P51（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="51"></div></details>
 </div>
 
 <div class="card">
@@ -570,6 +636,8 @@ SELECT(A→β) = FIRST(β)。<br>
 <tr><td>F→ i</td><td class="ok">{ i }</td><td>FIRST(i)={i}</td></tr>
 </table>
 <p>两两求交：E' 的 {+}∩{),#}=∅；T' 的 {*}∩{+,),#}=∅；其余行内仅一条非空 SELECT 或首符不同——<b>G'[E] 是 LL(1) 文法</b>。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P52（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="52"></div></details>
 </div>
 
 <div class="card">
@@ -583,6 +651,8 @@ SELECT(A→β) = FIRST(β)。<br>
 <tr><td><b>F</b></td><td>F→i</td><td></td><td></td><td>F→(E)</td><td></td><td></td></tr>
 </table>
 <p>填表核对：SELECT(E→TE')={(,i} ⇒ 填 i、( 两列；SELECT(E'→ε)={),#} ⇒ 填 )、# 两列；SELECT(T'→ε)={+,),#} ⇒ 填 +、)、# 三列……与上表逐格一致。每个格子至多一条产生式——这正是 LL(1) 的直观体现。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P54（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="54"></div></details>
 </div>
 
 <div class="card tip">
@@ -591,6 +661,8 @@ SELECT(A→β) = FIRST(β)。<br>
 <li><b>非 LL(1) 文法可否构造预测分析表？</b>——可以照流程造，但因为存在 SELECT 相交的冲突，<b>某个 M[A,a] 格子会被要求填入两条以上产生式（多重定义）</b>，查表不再唯一，分析器无从选择——这正是"非 LL(1)"在表上的特殊之处。</li>
 <li><b>利用预测分析表分析输入串 i+i*i 是否为文法的句子？</b>——这就是下面 4.5 之三的 17 步全过程。</li>
 </ul>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P55（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="55"></div></details>
 </div>
 
 <!-- ==================== 4.5 栈分析 ==================== -->
@@ -603,6 +675,8 @@ SELECT(A→β) = FIRST(β)。<br>
 <li><b>剩余输入串</b>：初始为 <code>i+i*i#</code>（结尾带 #）；</li>
 <li>总控循环：<b>栈顶是非终结符 X</b> → 查表 M[X,当前输入a] 得产生式 X→β，弹出 X，<b>β 逆序进栈</b>（ε 则什么都不压）；<b>栈顶是终结符 a</b> → 与当前输入比较：<b>相同则弹出且读入下一输入符</b>，不同则出错；<b>栈顶 # 且输入也是 #</b> → <b>接受</b>；查到<b>空白格</b> → 出错。</li>
 </ul>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P56（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="56"></div></details>
 </div>
 
 <div class="card">
@@ -628,11 +702,15 @@ SELECT(A→β) = FIRST(β)。<br>
 <tr><td>17</td><td>#</td><td>#</td><td class="ok">接受</td><td>栈顶 # 与输入 # 相遇——分析成功</td></tr>
 </table>
 <p><b>课件结论</b>：通过上述分析，i+i*i 是文法的句子，其所代表的源程序是语法上正确的源程序。该文法是一个表达式文法，该句子是语法上正确的表达式。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P56–67（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="56,57,58,59,60,61,62,63,64,65,66,67"></div></details>
 </div>
 
 <div class="card tip">
 <h3>请思考（课件第68页）：为何要将规则逆序放入分析栈中？<span class="ka">🔥【考点】</span></h3>
 <p>产生式 X→Y₁Y₂Y₃ 中，<b>Y₁ 必须最先与输入匹配</b>；而栈是<b>后进先出</b>的——谁在栈顶谁先被处理。所以必须按 Y₃、Y₂、Y₁ 的顺序压栈，让 Y₁ 最后进、处于栈顶最先被展开/匹配。顺序进栈会让 Y₃ 抢先出栈，分析立刻乱套。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P68（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="68"></div></details>
 </div>
 
 <!-- ==================== 4.5 练习栈分析 ==================== -->
@@ -691,6 +769,8 @@ SELECT(A→β) = FIRST(β)。<br>
 <tr><td>⑤</td><td>若是则构造预测分析表</td><td>4.5 之二 填表规则</td></tr>
 <tr><td>⑥</td><td>对于递归的预测分析，为每一个非终结符编写一个子过程；对于非递归（表驱动）的预测分析，实现表驱动的预测分析算法</td><td>4.5 之一 / 之三</td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P69–70（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="69,70"></div></details>
 </div>
 
 <div class="card">
@@ -700,6 +780,8 @@ SELECT(A→β) = FIRST(β)。<br>
 <li>栈顶终结符与当前输入<b>不匹配</b>、或栈底 # 与非 # 输入相遇（如上面 i)# 第 7 步），同样进入出错处理；</li>
 <li>排查思路：出错位置 = 出错步的"分析栈 + 剩余输入"，可据此定位源程序的行列号并调用出错恢复子程序后继续分析（表里也可预先在空白格登记恢复子程序）。</li>
 </ul>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P54（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="54"></div></details>
 </div>
 
 <!-- ==================== 全章总结 ==================== -->
@@ -714,11 +796,15 @@ SELECT(A→β) = FIRST(β)。<br>
 <li>两种实现：<b>递归下降分析程序</b>（每个非终结符一个子程序）与<b>预测分析程序（非递归）</b>；</li>
 <li>表驱动预测分析器结构：<b>总控程序 + 预测分析表 + 栈 + 输入串（…a…#）→ 输出</b>——正是 4.5 之三那 17 步的机器原型。</li>
 </ul>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P71（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="71"></div></details>
 </div>
 
 <div class="card tip">
 <h3>本章练习（课件第72页）</h3>
 <p>教材 <b>P99–P101 第 1、2、3、6、7 题</b>。类型与本页精讲完全对应：求三大集合、判 LL(1)、消左递归/提左公因子、构造预测分析表并分析输入串。做完先自己按五步流程复查，再用下方工具交叉验证。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P72（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch4" data-pages="72"></div></details>
 </div>
 
 <div class="card warn">

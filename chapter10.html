@@ -15,11 +15,7 @@
 <div class="hero"><h1>📖 第 10 章 · 代码优化和目标代码生成（全书精讲）</h1>
 <div class="sub">课件逐页精讲 ｜ 每个定义、例子、练习都在 ｜ 预计 40 分钟</div></div>
 
-<div class="card">
-<h3>🖼️ 课件原页对照</h3>
-<p style="color:var(--muted);font-size:13.5px;margin:4px 0 0">本章 PPT 每一页原图（共 4 页），与下方精讲一一对应——点缩略图放大，放大后 ← → 翻页、Esc 关闭。复习不用再开 PPT。</p>
-<div class="slidegal" data-dir="ch10" data-from="1" data-to="4"></div>
-</div>
+<details class="fold" style="margin:14px 0"><summary>🗺️ 本章课件原页总览（点击展开缩略图索引）</summary><p style="color:var(--muted);font-size:13.5px;margin:4px 0 0">本章 PPT 每一页原图（共 4 页），与下方精讲一一对应——点缩略图放大，放大后 ← → 翻页、Esc 关闭。复习不用再开 PPT。</p><div class="slidegal" data-dir="ch10" data-from="1" data-to="4"></div></details>
 
 
 <div class="card tip"><span class="emoji">🎯</span><b>这一章讲什么</b>：编译的最后两步——<b>代码优化</b>（在不改变结果的前提下让目标程序更省空间、跑得更快）和<b>目标代码生成</b>（编译的最终目的）。课件 4 页，句句是考点：开头一段"目标/手段/注意事项"是简答必背，10.1 基本块是名词解释高频，10.2 两个分类维度是选择题高频，10.3 三大优化技术思想是简答高频。</div>
@@ -33,6 +29,8 @@
 <tr><td>第3页</td><td>10.2 优化工作分类（两个维度）</td><td>3</td></tr>
 <tr><td>第4页</td><td>10.3 三大优化技术（思想）</td><td>4</td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P1–4（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch10" data-pages="1,2,3,4"></div></details>
 </div>
 
 <h2 class="section">1. 优化目标、手段与注意事项 <span class="badge hot">🔥 考点</span></h2>
@@ -45,6 +43,8 @@
 <tr><td><b>优化手段（途径）</b></td><td><b>等价变换</b></td><td>变换前后程序<b>结果必须完全一样</b>——优化不是改程序，是换一种更省的等价写法；这是优化的<b>底线</b>，任何优化技术都不能破坏</td></tr>
 <tr><td><b>注意事项</b></td><td>优化工作<b>可在编译的任何阶段进行</b>，但由于优化会<b>延长编译时间</b>，故应<b>有选择地进行</b>优化</td><td>人话：优化不是越多越好——优化本身花时间（Debug 版编译快、Release 版编译慢跑得快，就是这个道理）；要<b>挑收益大的优化做</b></td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P1（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch10" data-pages="1"></div></details>
 </div>
 
 <div class="card tip"><span class="emoji">🧹</span><b>人话版</b>：优化像出门前收拾行李——<b>东西一件不少</b>（等价变换：结果不变），但<b>箱子更小、路上更省力</b>（空间、时间）；收拾本身要花时间，所以只值得为<b>长途旅行</b>收拾（有选择地优化）。</div>
@@ -56,6 +56,8 @@
 <div class="formula">🔥 <b>基本块</b>是指程序中<b>一组顺序执行的程序段</b>，只有<b>一个入口语句</b>和<b>一个出口语句</b>。</div>
 <p>课件注：<b>基于基本块可做各种局部优化工作</b>——基本块是"局部优化"的基本单位（呼应 10.2 的局部优化=基本块内优化）。</p>
 <div class="card tip" style="margin:8px 0"><span class="emoji">🚄</span><b>人话版</b>：基本块 = 一段<b>一口气跑到底、中间不打岔</b>的代码：<b>只能从第一句进（单入口）、从最后一句出（单出口）</b>，中途既没有岔路口（没有别的语句跳进来），也不半路下车（没有跳转跳出去）。像高铁直达区间：一站上车、终点下车、中途不开门。正因为块内"直达"，整个块可以<b>当成一个整体</b>放心地做优化（如调整语句顺序、删无用赋值）。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P2（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch10" data-pages="2"></div></details>
 </div>
 
 <div class="card def">
@@ -64,6 +66,8 @@
 b := a + 20;
 c := a * b;</pre></div>
 <p>【旁注】这三句<b>顺序执行、没有任何转移</b>：入口只能是第一句 <code>a:=20</code>，出口只能是最后一句 <code>c:=a*b</code>——标准的一个基本块。（顺便预演 10.3：块内 a 恒为 20，b=40、c=800 其实都能<b>编译时算掉</b>，这正是"基于基本块做局部优化"的味道。）</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P2（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch10" data-pages="2"></div></details>
 </div>
 
 <div class="card def">
@@ -79,6 +83,8 @@ if k ≥ 10 then x := x + 1
 <tr><td>③</td><td><b>紧跟在转移语句之后</b>的语句</td><td>then 分支 <code>x := x+1</code></td></tr>
 </table>
 <p>按此切分：块1 = <code>k:=1</code> 与 if 条件判断（<b>转移语句是"出口"，属于它所在的块并封口</b>）；块2 = then 分支；块3 = else 分支。<b>口诀：第一句、跳转目标、转移语句的下一句——三者皆入口。</b></p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P2（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch10" data-pages="2"></div></details>
 </div>
 
 <h2 class="section">2.4 手算示范：带 goto 的序列划分基本块（把"入口三来源"用全）</h2>
@@ -117,6 +123,8 @@ if k ≥ 10 then x := x + 1
 <tr><td><b>全局优化</b>（<b>整个源程序范围</b>）</td><td>要跨基本块做数据流分析，开销最大</td></tr>
 </table>
 <div class="notice">📌 答题提醒：问"与机器关系"答（无关/有关）；问"与源程序的关系"答（局部/循环/全局）——<b>别把"循环优化"答到机器维度里去</b>。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P3（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch10" data-pages="3"></div></details>
 </div>
 
 <h2 class="section">4. 10.3 三大优化技术举例 <span class="badge hot">🔥 考点</span></h2>
@@ -127,6 +135,8 @@ if k ≥ 10 then x := x + 1
 <div class="stepbox"><pre>优化前：  i := 2 + 3 * 4          优化后：  i := 14
           r := 2 * 3.14                    r := 6.28</pre></div>
 <p>【旁注】操作数全是常量的运算，<b>没必要留到运行时再算</b>——编译器直接算出结果写死。运行时这两条"运算"彻底消失，省了时间和指令。（人话：能提前算好的账，出门前就算好。）</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P4（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch10" data-pages="4"></div></details>
 </div>
 
 <div class="card def">
@@ -141,6 +151,8 @@ begin                           while i ≤ 100 do
 end;                              s := s + x;  i := i + 1
                                  end;</pre></div>
 <p>【旁注】<code>a*b</code> 里没有循环变量 i，循环 100 次它算 100 次都得到同一个值——<b>白算 99 次</b>。外提到循环前只算一次，循环里直接用 t。注意判断标准：<b>表达式里是否出现循环变量</b>（出现了就变，不能外提）。（人话：不变的行李别每圈搬上搬下。）</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P4（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch10" data-pages="4"></div></details>
 </div>
 
 <div class="card def">
@@ -165,6 +177,8 @@ end;                              i := i + 1;
 <tr><td><b>消减运算强度</b></td><td>强度大的运算改为强度小的</td><td><code>4*i → 上次+4</code>（乘改加）</td><td>循环（归纳变量）</td></tr>
 </table>
 <p>🎮 <a href="level6.html">到第 6 关玩三大优化技术实验室演示器</a>：点一个技术，看优化前后代码并排对比，逐行讲变化。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P4（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch10" data-pages="4"></div></details>
 </div>
 
 <h2 class="section">5. 目标代码生成的定位 <span class="badge">⭐ 了解</span></h2>
@@ -176,6 +190,8 @@ end;                              i := i + 1;
 <li><b>涉及具体的机器硬件知识</b>（⭐展开了解即可）：目标机有多少<b>寄存器</b>、有哪些<b>指令</b>、什么<b>寻址方式</b>，直接决定生成什么样的代码——所以它属于"<b>与机器有关</b>"的范畴（呼应 10.2 分类），也是各机型编译器后端互不相同的原因。</li>
 <li>正因为它与机器强绑定，本章（及本课程）把重点放在<b>与机器无关的代码优化</b>上——也就是前四节的内容。</li>
 </ul>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P1（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch10" data-pages="1"></div></details>
 </div>
 
 <div class="card def">

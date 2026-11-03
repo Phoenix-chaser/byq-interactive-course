@@ -15,11 +15,7 @@
 <div class="hero"><h1>📖 第 9 章 · 运行时存储组织（全书精讲）</h1>
 <div class="sub">课件逐页精讲 ｜ 每个定义、例子、练习都在 ｜ 预计 35 分钟</div></div>
 
-<div class="card">
-<h3>🖼️ 课件原页对照</h3>
-<p style="color:var(--muted);font-size:13.5px;margin:4px 0 0">本章 PPT 每一页原图（共 5 页），与下方精讲一一对应——点缩略图放大，放大后 ← → 翻页、Esc 关闭。复习不用再开 PPT。</p>
-<div class="slidegal" data-dir="ch9" data-from="1" data-to="5"></div>
-</div>
+<details class="fold" style="margin:14px 0"><summary>🗺️ 本章课件原页总览（点击展开缩略图索引）</summary><p style="color:var(--muted);font-size:13.5px;margin:4px 0 0">本章 PPT 每一页原图（共 5 页），与下方精讲一一对应——点缩略图放大，放大后 ← → 翻页、Esc 关闭。复习不用再开 PPT。</p><div class="slidegal" data-dir="ch9" data-from="1" data-to="5"></div></details>
 
 
 <div class="card warn"><span class="emoji">⚠️</span><b>本章特点</b>：课件文字<b>虽短，但每一句都是考点</b>——定义句句可考名词解释/填空，"基本思想"整段可考简答。所以本页采取<b>逐句精讲</b>：先给课件原句，再给"人话版"拆解。四节：9.1 概述、9.2 活动记录、9.3 过程调用、9.4 PL/0 运行时组织。</div>
@@ -34,11 +30,15 @@
 <tr><td>第4页</td><td>9.3 过程调用：传值 / 传地址</td><td>3</td></tr>
 <tr><td>第5页</td><td>9.4 PL/0 运行时组织：基本思想全文 + P244-245 举例</td><td>4</td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P1–5（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch9" data-pages="1,2,3,4,5"></div></details>
 </div>
 
 <h2 class="section">1. 9.1 运行时存储组织概述 <span class="badge hot">🔥 考点</span></h2>
 
-<div class="card tip"><span class="emoji">🏠</span><b>人话版</b>：编译完的程序跑起来，变量、常量总得有地方"住"。编译器就是<b>房产分配员</b>：谁住哪儿、住多大的房、搬进搬出按什么规矩，都是它定的——而且它要在<b>编译时</b>就把这套规矩（分配方案）安排好，运行时照章执行。</div>
+<div class="card tip"><span class="emoji">🏠</span><b>人话版</b>：编译完的程序跑起来，变量、常量总得有地方"住"。编译器就是<b>房产分配员</b>：谁住哪儿、住多大的房、搬进搬出按什么规矩，都是它定的——而且它要在<b>编译时</b>就把这套规矩（分配方案）安排好，运行时照章执行。
+<details class="slidefold"><summary>🖼️ 原页对照：P2（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch9" data-pages="2"></div></details>
+</div>
 
 <div class="card def">
 <h3>1.1 为什么要编译器来分房（课件原句逐句讲）</h3>
@@ -48,6 +48,8 @@
 <li>②"<b>这些量包括：用户定义的常量、变量；参与运算的寄存器等。</b>"——分配对象两类（选择题考列举）：<b>用户定义的常量、变量</b> + <b>参与运算的寄存器</b>等。</li>
 <li>③"<b>本章主要介绍如何为用户定义的量分配存储空间。</b>"——章节范围声明：重点是前者（常量、变量），寄存器分配只提及不展开。</li>
 </ul>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P2（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch9" data-pages="2"></div></details>
 </div>
 
 <div class="card def">
@@ -59,6 +61,8 @@
 <tr><td><b>动态存储分配方案</b></td><td><b>（栈式、堆式）</b></td><td><b>栈式</b>：随过程调用/返回在栈顶分配/释放（PL/0、C 局部变量）；<b>堆式</b>：随时申请、随时归还（malloc/new）</td><td>住酒店：随到随住、走后退房（栈=叠罗汉式退房；堆=自由市场）</td></tr>
 </table>
 <div class="notice">📌 <b>考试抓手</b>：静态方案那两个条件是课件特别强调"<b>缺一不可</b>"的地方——少一个就只能转动态。反过来说：<b>递归/动态数据结构 ⇒ 必须动态分配</b>（这是 9.4 PL/0 选栈式的根本原因）。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P2（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch9" data-pages="2"></div></details>
 </div>
 
 <h2 class="section">2. 9.2 活动记录 <span class="badge hot">🔥 考点</span></h2>
@@ -71,6 +75,8 @@
 <div class="formula">为了管理过程在<b>一次执行中（即过程的活动）</b>所需要的信息，使用一个<b>连续的存储块</b>表示该活动的相关信息，称之为该过程的<b>活动记录</b>（Activation Record）。</div>
 <p>课件补一句：<b>活动记录记录了过程/参数的相关信息</b>。</p>
 <div class="card tip" style="margin:8px 0"><span class="emoji">🏨</span><b>人话版</b>：活动 = 过程"跑一趟"；活动记录 = 这一趟开的<b>一间旅馆房间</b>：房里放这趟要用的<b>参数、局部变量、临时单元</b>和"房卡"——<b>返回地址</b>（记着退房后回哪儿）。<b>每调用一次开一间新房间，退房即腾空</b>。注意定义里"一次执行"三个字：<b>递归 3 次就有 3 个活动、3 张活动记录</b>，各住各的房，互不串门。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P3（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch9" data-pages="3"></div></details>
 </div>
 
 <div class="card def">
@@ -86,6 +92,8 @@
 │ 临时单元（中间计算结果）     │
 └─────────────────────┘ ← 低地址（栈顶方向，下一个活动记录压在这下面）</pre></div>
 <p>要点三条：① 是<b>一整块连续存储</b>（"连续的存储块"）；② 内容 = <b>过程/参数相关信息</b>（参数、返回地址、链、局部量、临时单元）；③ 它<b>随过程调用而建立、随返回而撤销</b>——天然按<b>栈</b>的方式摞起来。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P3（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch9" data-pages="3"></div></details>
 </div>
 
 <h2 class="section">3. 9.3 过程调用：传值 vs 传地址 <span class="badge hot">🔥 考点</span></h2>
@@ -104,6 +112,8 @@
 <tr><td>函数能否改外面的变量</td><td class="no">不能</td><td class="ok">能</td></tr>
 <tr><td>C 语言对应</td><td>默认方式 <code>f(a)</code></td><td>指针 <code>f(&amp;a)</code>（C 即可）；引用 <code>f(a)</code> 声明 <code>void f(int &amp;a)</code>（仅 C++）</td></tr>
 </table>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P4（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch9" data-pages="4"></div></details>
 </div>
 
 <div class="card def">
@@ -126,6 +136,8 @@ end;
 void f_ref(int *x) { *x = *x + 1; } // 传地址：拿到 a 的地址，改的就是 a 本身
 f_val(a);  // 调用后 a 不变
 f_ref(&amp;a); // 调用后 a 真的 +1</pre></div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P4（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch9" data-pages="4"></div></details>
 </div>
 
 <h2 class="section">4. 9.4 PL/0 编译程序的运行时组织 <span class="badge hot">🔥 考点</span></h2>
@@ -143,6 +155,8 @@ f_ref(&amp;a); // 调用后 a 真的 +1</pre></div>
 <tr><td>⑤</td><td><b>递归调用：按调用深度分别为各次调用先后设置不同的数据区</b></td><td>同一过程被自己调用多次 → <b>多个数据区并存</b>，一层一个，按调用深度先后压入；每层的参数/中间结果互不干扰——<b>这就是 PL/0 支持递归的存储基础</b>（静态分配一份空间就做不到）</td></tr>
 </table>
 <div class="card tip" style="margin:8px 0"><span class="emoji">🧳</span><b>人话版</b>：数据空间栈是<b>一摞行李箱</b>：每调用一个过程，就把"<b>按它的说明定制</b>"的箱子<b>摞在最上面</b>；它一返回，<b>最上面那个箱子先搬走</b>。递归就是同款箱子摞了好几层——每层装的都是<b>当次调用的</b>参数和局部量，所以 f(3) 没算完时 f(2) 的 n=2 绝不会被 f(3) 的 n=3 冲掉。</div>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P5（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch9" data-pages="5"></div></details>
 </div>
 
 <div class="card def">
@@ -158,6 +172,8 @@ f_ref(&amp;a); // 调用后 a 真的 +1</pre></div>
                                                按调用深度先后设置、逐层退栈</pre></div>
 <p>三个看点：① <b>分区的依据</b>——"根据该过程的说明"（编译时即知每个过程的量要占多少单元）；② <b>静态链/控制链</b>把各层数据区串起来，里层过程能引用外层过程的量（PL/0 的三层函数嵌套就靠它）；③ <b>递归多数据区</b>——同一过程名，栈里可以同时有几份，按调用深度区分。这也解释了 9.1 的结论：<b>PL/0 允许递归，所以必须采用动态（栈式）分配，静态方案那份"唯一数据区"装不下递归</b>。</p>
 <p>🎮 想亲眼看递归怎么"一层层压栈、再一层层退栈"？<a href="level6.html">到第 6 关玩活动记录栈动画演示器</a>（调用 P(3) 单步执行，与上面时间线完全对应）。</p>
+
+<details class="slidefold"><summary>🖼️ 原页对照：P5（点开看课件原图）</summary><div class="slidegal mini" data-dir="ch9" data-pages="5"></div></details>
 </div>
 
 <div class="card def">
