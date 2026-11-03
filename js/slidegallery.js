@@ -19,7 +19,7 @@
     var html = '';
     pages.forEach(function (p) {
       html += '<div class="slidethumb" data-p="' + p + '" data-dir="' + dir + '">' +
-        '<img loading="lazy" src="slides/' + dir + '/p' + p + '.png" alt="课件第' + p + '页">' +
+        '<img loading="lazy" src="slides/' + dir + '/p' + p + '.jpg" alt="课件第' + p + '页">' +
         '<span class="slidecap">P' + p + '</span></div>';
     });
     el.innerHTML = html;
