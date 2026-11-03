@@ -368,6 +368,42 @@ text.nodehl { fill: var(--gold) !important; }
 /* 流水线当前站 */
 .pipe-cur { background: rgba(124, 108, 255, .34) !important; box-shadow: 0 0 16px rgba(124, 108, 255, .5); border-color: var(--accent2) !important; }
 
+/* ---------- 课件原页画廊 ---------- */
+.slidegal {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px; margin: 12px 0;
+}
+.slidethumb {
+  position: relative; border: 1px solid var(--line-soft); border-radius: 10px;
+  overflow: hidden; cursor: zoom-in; background: #fff;
+  transition: transform .13s, box-shadow .13s;
+}
+.slidethumb:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(124, 108, 255, .35); z-index: 1; }
+.slidethumb img { display: block; width: 100%; height: auto; }
+.slidethumb .slidecap {
+  position: absolute; right: 6px; bottom: 6px; font-size: 11px; font-weight: 700;
+  background: rgba(11, 14, 34, .78); color: var(--gold); padding: 1px 8px; border-radius: 999px;
+}
+.slidelb {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(5, 7, 18, .92); backdrop-filter: blur(6px);
+  align-items: center; justify-content: center; flex-direction: column;
+}
+.slidelb img { max-width: 94vw; max-height: 86vh; border-radius: 8px; box-shadow: 0 12px 60px rgba(0, 0, 0, .6); background: #fff; }
+.slidelb-cap { color: var(--muted); font-size: 13.5px; margin-top: 12px; }
+.slidelb-x {
+  position: absolute; top: 16px; right: 20px; font-size: 20px; cursor: pointer;
+  background: rgba(124, 108, 255, .2); color: #fff; border: 1px solid var(--accent);
+  border-radius: 999px; width: 40px; height: 40px;
+}
+.slidelb-prev, .slidelb-next {
+  position: absolute; top: 50%; transform: translateY(-50%); font-size: 22px; cursor: pointer;
+  background: rgba(124, 108, 255, .2); color: #fff; border: 1px solid var(--accent);
+  border-radius: 999px; width: 46px; height: 46px;
+}
+.slidelb-prev { left: 18px; } .slidelb-next { right: 18px; }
+.slidelb-x:hover, .slidelb-prev:hover, .slidelb-next:hover { background: rgba(124, 108, 255, .45); }
+
 /* 动效减弱偏好 */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
