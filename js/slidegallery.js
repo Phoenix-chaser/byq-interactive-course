@@ -77,6 +77,24 @@
         if (t) openLB(t);
       });
     });
+    // 顶部"展开全部原页"按钮
+    var folds = document.querySelectorAll('details.slidefold');
+    if (folds.length) {
+      var bar = document.createElement('div');
+      bar.className = 'stepper';
+      bar.innerHTML = '<span style="color:var(--muted);font-size:13.5px">🖼️ 课件原页对照（' + folds.length + ' 处，默认收起）：</span>' +
+        '<button class="btn small" data-a="open">📖 一键展开全部</button>' +
+        '<button class="btn small ghost" data-a="close">收起全部</button>';
+      var ov = document.querySelector('details.fold .slidegal');
+      var anchor = ov ? ov.closest('details') : folds[0];
+      anchor.parentNode.insertBefore(bar, anchor.nextSibling);
+      bar.addEventListener('click', function (e) {
+        var a = e.target.dataset && e.target.dataset.a;
+        if (!a) return;
+        var open = a === 'open';
+        document.querySelectorAll('details.slidefold').forEach(function (d) { d.open = open; });
+      });
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
